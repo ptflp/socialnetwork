@@ -1,0 +1,34 @@
+version: '3.3'
+services:
+  api:
+    container_name: 'infoblogserver'
+    build: '.'
+    ports:
+      - 3000:8955
+    command: bash -c "go run ./cmd/server"
+    restart: always
+    volumes:
+      - ./:/go/src/gitlab.com/ptflp/infoblog-server
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    container_name: 'infoblogdb'
+    ports:
+      - 127.0.0.1:3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_SCHEME}
+    volumes:
+      - ../imakedb:/var/lib/mysqlaaa
+  redis:
+    image: redis
+    restart: always
+    container_name: 'infoblogredis'
+    ports:
+      - 127.0.0.1:6379:6379
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8888:8080
