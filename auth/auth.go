@@ -5,27 +5,54 @@ import (
 	"math/rand"
 	"time"
 
-	"gitlab.com/ptflp/infoblog-server/cache"
+	"go.uber.org/zap"
 
-	"gitlab.com/ptflp/infoblog-server"
+	"gitlab.com/InfoBlogFriends/server/config"
+
+	"gitlab.com/InfoBlogFriends/server/cache"
+
+	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
 type AuthService struct {
 	smsProvider    SmsProvider
 	userRepository infoblog.UserRepository
 	cache          cache.Cache
+	configApp      config.App
+	logger         *zap.Logger
 }
 
-func NewAuthService(userRepository infoblog.UserRepository, cache cache.Cache) *AuthService {
-	return &AuthService{userRepository: userRepository, cache: cache}
+func NewAuthService(userRepository infoblog.UserRepository, cache cache.Cache, logger *zap.Logger) *AuthService {
+	return &AuthService{userRepository: userRepository, cache: cache, logger: logger}
 }
 
-func (a *AuthService) SendCode(ctx context.Context, req *infoblog.PhoneCodeRequest) {
+func (a *AuthService) SendCode(ctx context.Context, req *infoblog.PhoneCodeRequest) bool {
 	code := genCode()
+	a.cache.Set("code:"+req.Phone, &code, 15*time.Minute)
 	err := a.smsProvider.SendCode(ctx, req.Phone, code)
 	if err != nil {
-		return
+		return false
 	}
+
+	return true
+}
+
+func (a *AuthService) CheckCode(ctx context.Context, req *infoblog.CheckCodeRequest) bool {
+	var code int
+	err := a.cache.Get("code:"+req.Phone, &code)
+	if err != nil {
+		return false
+	}
+
+	_, err = a.userRepository.FindByPhone(ctx, req.Phone)
+	if err != nil {
+		err = a.userRepository.CreateUserByPhone(ctx, req.Phone)
+		if err != nil {
+
+		}
+	}
+
+	return true
 }
 
 func genCode() int {

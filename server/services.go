@@ -1,8 +1,8 @@
 package server
 
 import (
-	"gitlab.com/ptflp/infoblog-server"
-	"gitlab.com/ptflp/infoblog-server/respond"
+	infoblog "gitlab.com/InfoBlogFriends/server"
+	"gitlab.com/InfoBlogFriends/server/respond"
 	"go.uber.org/zap"
 )
 

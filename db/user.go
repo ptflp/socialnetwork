@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/ptflp/infoblog-server"
+	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
 const (

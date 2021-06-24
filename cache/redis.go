@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/ptflp/infoblog-server/config"
+	"gitlab.com/InfoBlogFriends/server/config"
 
 	"github.com/go-redis/redis/v8"
 )

@@ -1,4 +1,4 @@
-module gitlab.com/ptflp/infoblog-server
+module gitlab.com/InfoBlogFriends/server
 
 go 1.16
 

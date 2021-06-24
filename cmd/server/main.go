@@ -7,15 +7,15 @@ import (
 	"os"
 	"os/signal"
 
-	"gitlab.com/ptflp/infoblog-server/cache"
+	"gitlab.com/InfoBlogFriends/server/cache"
 
-	"gitlab.com/ptflp/infoblog-server/auth"
-	"gitlab.com/ptflp/infoblog-server/db"
+	"gitlab.com/InfoBlogFriends/server/auth"
+	"gitlab.com/InfoBlogFriends/server/db"
 
-	"gitlab.com/ptflp/infoblog-server/respond"
+	"gitlab.com/InfoBlogFriends/server/respond"
 
-	"gitlab.com/ptflp/infoblog-server/config"
-	"gitlab.com/ptflp/infoblog-server/server"
+	"gitlab.com/InfoBlogFriends/server/config"
+	"gitlab.com/InfoBlogFriends/server/server"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -62,11 +62,17 @@ func main() {
 	}
 
 	c, err := cache.NewRedisCache(conf.Redis)
+	if err != nil {
+		logger.Fatal("redis initialization error", zap.Error(err))
+	}
 
 	database, err := db.NewDB(logger, conf.DB)
+	if err != nil {
+		logger.Fatal("db initialization error", zap.Error(err))
+	}
 
 	userRepository := db.NewUserRepository(database)
-	authService := auth.NewAuthService(userRepository, c)
+	authService := auth.NewAuthService(userRepository, c, logger)
 
 	// router initialization
 	r, err := server.NewRouter(&server.Services{AuthService: authService}, &server.HandlerComponents{

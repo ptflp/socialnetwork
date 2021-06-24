@@ -1,7 +1,10 @@
 package infoblog
 
-import "context"
+import (
+	"context"
+)
 
 type AuthService interface {
-	SendCode(ctx context.Context, req *PhoneCodeRequest)
+	SendCode(ctx context.Context, req *PhoneCodeRequest) bool
+	CheckCode(ctx context.Context, req *CheckCodeRequest) bool
 }

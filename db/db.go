@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/ptflp/infoblog-server/config"
+	"gitlab.com/InfoBlogFriends/server/config"
 	"go.uber.org/zap"
 )
 
