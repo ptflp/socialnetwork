@@ -1,1 +1,128 @@
-{}
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation of infoblog API.",
+    "title": "infoblog.",
+    "version": "1.0.0"
+  },
+  "host": "localhost:8955",
+  "basePath": "/",
+  "paths": {
+    "/auth/checkcode": {
+      "post": {
+        "description": "Проверка смс кода",
+        "tags": [
+          "auth"
+        ],
+        "operationId": "checkCodeRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CheckCodeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/checkCodeResponse"
+          }
+        }
+      }
+    },
+    "/auth/code": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Отправка смс кода.",
+        "operationId": "sendCodeRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PhoneCodeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/sendCodeResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CheckCodeRequest": {
+      "type": "object",
+      "properties": {
+        "Code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Phone": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server"
+    },
+    "PhoneCodeRequest": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "x-go-name": "Phone"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server"
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "Data": {
+          "type": "object"
+        },
+        "Msg": {
+          "type": "string"
+        },
+        "Success": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/server"
+    }
+  },
+  "responses": {
+    "checkCodeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "sendCodeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

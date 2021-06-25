@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	findUserByPhone   = "SELECT id, email FROM users WHERE phone = ?"
+	findUserByPhone   = "SELECT id, email, phone FROM users WHERE phone = ?"
 	createUserByPhone = "INSERT INTO users (phone) VALUES (?)"
 )
 

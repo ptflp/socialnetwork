@@ -1,7 +1,7 @@
 package infoblog
 
 type PhoneCodeRequest struct {
-	Phone string
+	Phone string `json:"phone"`
 }
 
 type CheckCodeRequest struct {
