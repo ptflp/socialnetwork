@@ -1,0 +1,18 @@
+app:
+  dev: false
+
+db:
+  net: "tcp"
+  driver: "mysql"
+  dbname: "infoblog"
+  username: "root"
+  password: "jxtymCkj;ysGfhjkm"
+  host: "infoblogdb"
+  timeout: 10
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+
+server:
+  port: 8955

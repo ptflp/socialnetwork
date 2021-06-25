@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/subosito/gotenv"
+
 	"gitlab.com/InfoBlogFriends/server/cache"
 
 	"gitlab.com/InfoBlogFriends/server/auth"
@@ -25,7 +27,7 @@ const (
 )
 
 func main() {
-	// config initialization
+	// logger initialization
 	zapConf := zap.NewProductionConfig()
 	zapConf.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	zapConf.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
@@ -38,6 +40,10 @@ func main() {
 	}
 
 	logger = logger.Named("infoBlog")
+	err = gotenv.Load()
+	if err != nil {
+		logger.Fatal("env initialization error", zap.Error(err))
+	}
 
 	// shutdown server on signal interrupt
 	sig := make(chan os.Signal, 1)

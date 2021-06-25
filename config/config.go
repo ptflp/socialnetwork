@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -16,7 +17,11 @@ type Config struct {
 func NewConfig() (*Config, error) {
 
 	var config *Config
-	viper.SetConfigName("config")
+	configName := "prod"
+	if os.Getenv("DEV") == "true" {
+		configName = "dev"
+	}
+	viper.SetConfigName(configName)
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
 
