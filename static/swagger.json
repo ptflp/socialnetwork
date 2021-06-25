@@ -14,7 +14,6 @@
     "title": "infoblog.",
     "version": "1.0.0"
   },
-  "host": "localhost:8955",
   "basePath": "/",
   "paths": {
     "/auth/checkcode": {
