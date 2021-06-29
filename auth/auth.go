@@ -3,8 +3,11 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/providers"
 
 	"gitlab.com/InfoBlogFriends/server/session"
 
@@ -18,7 +21,7 @@ import (
 )
 
 type service struct {
-	smsProvider    SmsProvider
+	smsProvider    providers.SMS
 	userRepository infoblog.UserRepository
 	cache          cache.Cache
 	configApp      config.App
@@ -26,8 +29,14 @@ type service struct {
 	JWTKeys        *session.JWTKeys
 }
 
-func NewAuthService(configApp config.App, userRepository infoblog.UserRepository, cache cache.Cache, logger *zap.Logger, keys *session.JWTKeys) *service {
-	return &service{configApp: configApp, userRepository: userRepository, cache: cache, logger: logger, smsProvider: ProviderMock{}, JWTKeys: keys}
+func NewAuthService(
+	configApp config.App,
+	userRepository infoblog.UserRepository,
+	cache cache.Cache,
+	logger *zap.Logger,
+	keys *session.JWTKeys,
+	smsProvider providers.SMS) *service {
+	return &service{configApp: configApp, userRepository: userRepository, cache: cache, logger: logger, smsProvider: smsProvider, JWTKeys: keys}
 }
 
 func (a *service) SendCode(ctx context.Context, req *infoblog.PhoneCodeRequest) bool {
@@ -36,7 +45,10 @@ func (a *service) SendCode(ctx context.Context, req *infoblog.PhoneCodeRequest) 
 		code = 3455
 	}
 	a.cache.Set("code:"+req.Phone, &code, 15*time.Minute)
-	err := a.smsProvider.SendCode(ctx, req.Phone, code)
+	err := a.smsProvider.Send(ctx, req.Phone, fmt.Sprintf("Ваш код: %d", code))
+	if err != nil {
+		a.logger.Error("send sms err", zap.String("phone", req.Phone), zap.Int("code", code))
+	}
 
 	return err == nil
 }
@@ -73,16 +85,4 @@ func genCode() int {
 	code := rand.Intn(8999) + 1000
 
 	return code
-}
-
-type SmsProvider interface {
-	SendCode(ctx context.Context, phone string, code int) error
-}
-
-type ProviderMock struct {
-	APIkey string
-}
-
-func (p ProviderMock) SendCode(ctx context.Context, phone string, code int) error {
-	return nil
 }

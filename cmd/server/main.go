@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 
+	"gitlab.com/InfoBlogFriends/server/providers"
+
 	"gitlab.com/InfoBlogFriends/server/session"
 
 	"gitlab.com/InfoBlogFriends/server/logs"
@@ -70,7 +72,8 @@ func main() {
 	}
 
 	userRepository := db.NewUserRepository(database)
-	authService := auth.NewAuthService(conf.App, userRepository, c, logger, jwt)
+	smsc := providers.NewSMSC(&conf.SMSC)
+	authService := auth.NewAuthService(conf.App, userRepository, c, logger, jwt, smsc)
 
 	// router initialization
 	r, err := server.NewRouter(&server.Services{AuthService: authService}, &server.HandlerComponents{
