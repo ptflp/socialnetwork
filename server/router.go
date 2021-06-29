@@ -1,7 +1,10 @@
 package server
 
 import (
+	"errors"
 	"net/http"
+
+	infoblog "gitlab.com/InfoBlogFriends/server"
 
 	"gitlab.com/InfoBlogFriends/server/middlewares"
 
@@ -30,6 +33,15 @@ func NewRouter(services *Services, components *HandlerComponents) (*chi.Mux, err
 	token := middlewares.NewCheckToken(components.Responder, components.JWTKeys)
 	r.Route("/test", func(r chi.Router) {
 		r.Use(token.Check)
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			u, ok := ctx.Value("user").(*infoblog.User)
+			if !ok {
+				components.Responder.ErrorInternal(w, errors.New("type assertion to user err"))
+				return
+			}
+			components.Responder.SendJSON(w, u)
+		})
 	})
 
 	return r, err
