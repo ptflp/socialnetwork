@@ -1,3 +1,3 @@
 #!/bin/sh
-openssl genrsa -f4 -out private 4096
-openssl rsa -in private -outform PEM -pubout -out public
+openssl genrsa -out private 2048
+openssl rsa -in private -pubout -out public

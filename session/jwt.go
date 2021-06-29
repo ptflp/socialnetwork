@@ -121,7 +121,7 @@ func (j *JWTKeys) ExtractToken(r *http.Request) (*infoblog.User, error) {
 	if token.Valid {
 		c := token.Claims.(jwt.MapClaims)
 		u := &infoblog.User{
-			ID:    c["ID"].(int64),
+			ID:    int64(c["ID"].(float64)),
 			Phone: c["Phone"].(string),
 			Email: c["Email"].(string),
 		}
