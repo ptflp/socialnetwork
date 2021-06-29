@@ -28,7 +28,7 @@ type Respond struct {
 
 func NewResponder(logger *zap.Logger) (Responder, error) {
 	if logger == nil {
-		return nil, errors.New("logger is nil")
+		return nil, errors.New("logs is nil")
 	}
 
 	return &Respond{log: logger}, nil

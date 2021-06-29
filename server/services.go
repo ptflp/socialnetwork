@@ -3,6 +3,7 @@ package server
 import (
 	infoblog "gitlab.com/InfoBlogFriends/server"
 	"gitlab.com/InfoBlogFriends/server/respond"
+	"gitlab.com/InfoBlogFriends/server/session"
 	"go.uber.org/zap"
 )
 
@@ -15,4 +16,5 @@ type HandlerComponents struct {
 	Logger         *zap.Logger
 	Responder      respond.Responder
 	LogLevel       zap.AtomicLevel
+	JWTKeys        *session.JWTKeys
 }

@@ -7,6 +7,10 @@ import (
 	"os"
 	"os/signal"
 
+	"gitlab.com/InfoBlogFriends/server/session"
+
+	"gitlab.com/InfoBlogFriends/server/logs"
+
 	"github.com/subosito/gotenv"
 
 	"gitlab.com/InfoBlogFriends/server/cache"
@@ -19,28 +23,14 @@ import (
 	"gitlab.com/InfoBlogFriends/server/config"
 	"gitlab.com/InfoBlogFriends/server/server"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-)
-
-const (
-	GeneralError = 2
 )
 
 func main() {
-	// logger initialization
-	zapConf := zap.NewProductionConfig()
-	zapConf.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	zapConf.EncoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
-	atom := zap.NewAtomicLevelAt(zapcore.DebugLevel)
-	zapConf.Level = atom
-	logger, err := zapConf.Build()
-	if err != nil {
-		fmt.Printf("logger initialization: %s\n", err)
-		os.Exit(GeneralError)
-	}
+	// logs initialization
+	logger := logs.NewLogger()
 
-	logger = logger.Named("infoBlog")
-	err = gotenv.Load()
+	// environment initialization
+	err := gotenv.Load()
 	if err != nil {
 		logger.Fatal("env initialization error", zap.Error(err))
 	}
@@ -67,6 +57,8 @@ func main() {
 		logger.Fatal("config initialization error", zap.Error(err))
 	}
 
+	jwt, err := session.NewJWTKeys(logger)
+
 	c, err := cache.NewRedisCache(conf.Redis)
 	if err != nil {
 		logger.Fatal("redis initialization error", zap.Error(err))
@@ -78,14 +70,15 @@ func main() {
 	}
 
 	userRepository := db.NewUserRepository(database)
-	authService := auth.NewAuthService(userRepository, c, logger)
+	authService := auth.NewAuthService(conf.App, userRepository, c, logger, jwt)
 
 	// router initialization
 	r, err := server.NewRouter(&server.Services{AuthService: authService}, &server.HandlerComponents{
 		UserRepository: nil,
 		Logger:         logger,
 		Responder:      responder,
-		LogLevel:       zap.AtomicLevel{},
+		LogLevel:       zap.NewAtomicLevel(),
+		JWTKeys:        jwt,
 	})
 	if err != nil {
 		logger.Fatal("router initialization error", zap.Error(err))
