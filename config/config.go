@@ -12,6 +12,7 @@ type Config struct {
 	DB     DB
 	Server Server
 	Redis  Redis
+	SMSC   SMSC
 }
 
 func NewConfig() (*Config, error) {
