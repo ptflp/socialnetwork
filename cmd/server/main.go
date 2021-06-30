@@ -85,7 +85,7 @@ func main() {
 		Responder:      responder,
 		LogLevel:       zap.NewAtomicLevel(),
 		JWTKeys:        jwt,
-	})
+	}, conf)
 	if err != nil {
 		logger.Fatal("router initialization error", zap.Error(err))
 	}

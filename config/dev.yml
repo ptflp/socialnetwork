@@ -1,5 +1,5 @@
 app:
-  dev: false
+  dev: true
 
 db:
   net: "tcp"
@@ -15,7 +15,7 @@ SMSC:
   pwd: "Ff*R#RV1Oxkk"
   cost: "3"
   fmt: "3"
-  dev: false
+  dev: true
 
 redis:
   host: "127.0.0.1"

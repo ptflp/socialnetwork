@@ -142,9 +142,39 @@
           }
         }
       }
+    },
+    "/system/config": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "system"
+        ],
+        "summary": "Получение конфигурации сервера.",
+        "operationId": "systemGetConfig",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/systemGetConfig"
+          }
+        }
+      }
     }
   },
   "definitions": {
+    "App": {
+      "type": "object",
+      "properties": {
+        "Dev": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
+    },
     "CheckCodeRequest": {
       "type": "object",
       "properties": {
@@ -157,6 +187,58 @@
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "Config": {
+      "type": "object",
+      "properties": {
+        "App": {
+          "$ref": "#/definitions/App"
+        },
+        "DB": {
+          "$ref": "#/definitions/DB"
+        },
+        "Redis": {
+          "$ref": "#/definitions/Redis"
+        },
+        "SMSC": {
+          "$ref": "#/definitions/SMSC"
+        },
+        "Server": {
+          "$ref": "#/definitions/Server"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
+    },
+    "DB": {
+      "type": "object",
+      "properties": {
+        "DBName": {
+          "type": "string"
+        },
+        "Driver": {
+          "type": "string"
+        },
+        "Host": {
+          "type": "string"
+        },
+        "Net": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        },
+        "Timeout": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Username": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
     },
     "PhoneCodeRequest": {
       "type": "object",
@@ -190,6 +272,19 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "Redis": {
+      "type": "object",
+      "properties": {
+        "Host": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
+    },
     "Response": {
       "type": "object",
       "properties": {
@@ -204,6 +299,37 @@
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "SMSC": {
+      "type": "object",
+      "properties": {
+        "Cost": {
+          "type": "string"
+        },
+        "Dev": {
+          "type": "boolean"
+        },
+        "Fmt": {
+          "type": "string"
+        },
+        "Login": {
+          "type": "string"
+        },
+        "Pwd": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
+    },
+    "Server": {
+      "type": "object",
+      "properties": {
+        "Port": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
     },
     "SetPasswordReq": {
       "type": "object",
@@ -244,6 +370,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
+      }
+    },
+    "systemGetConfig": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Config"
       }
     }
   },

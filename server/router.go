@@ -3,6 +3,8 @@ package server
 import (
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/config"
+
 	"gitlab.com/InfoBlogFriends/server/handlers"
 
 	"gitlab.com/InfoBlogFriends/server/middlewares"
@@ -11,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(services *Services, components *HandlerComponents) (*chi.Mux, error) {
+func NewRouter(services *Services, components *HandlerComponents, cfg *config.Config) (*chi.Mux, error) {
 	r := chi.NewRouter()
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
@@ -37,6 +39,13 @@ func NewRouter(services *Services, components *HandlerComponents) (*chi.Mux, err
 		r.Get("/get", profileHandler.GetProfile())
 		r.Route("/set", func(r chi.Router) {
 			r.Post("/password", profileHandler.SetPassword())
+		})
+	})
+
+	r.Route("/system", func(r chi.Router) {
+		r.Use(token.Check)
+		r.Get("/config", func(w http.ResponseWriter, r *http.Request) {
+			components.Responder.SendJSON(w, cfg)
 		})
 	})
 

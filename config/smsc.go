@@ -1,8 +1,8 @@
 package config
 
 type SMSC struct {
-	Pwd   string
-	Login string
+	Pwd   string `json:"-"`
+	Login string `json:"-"`
 	Cost  string
 	Fmt   string
 	Dev   bool
