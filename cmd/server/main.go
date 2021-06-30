@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 
+	"gitlab.com/InfoBlogFriends/server/service"
+
 	"gitlab.com/InfoBlogFriends/server/providers"
 
 	"gitlab.com/InfoBlogFriends/server/session"
@@ -59,7 +61,7 @@ func main() {
 		logger.Fatal("config initialization error", zap.Error(err))
 	}
 
-	jwt, err := session.NewJWTKeys(logger)
+	jwt, _ := session.NewJWTKeys(logger)
 
 	c, err := cache.NewRedisCache(conf.Redis)
 	if err != nil {
@@ -73,10 +75,11 @@ func main() {
 
 	userRepository := db.NewUserRepository(database)
 	smsc := providers.NewSMSC(&conf.SMSC)
-	authService := auth.NewAuthService(conf.App, userRepository, c, logger, jwt, smsc)
+	authService := auth.NewAuthService(conf, userRepository, c, logger, jwt, smsc)
+	userService := service.NewUserService(userRepository)
 
 	// router initialization
-	r, err := server.NewRouter(&server.Services{AuthService: authService}, &server.HandlerComponents{
+	r, err := server.NewRouter(&server.Services{AuthService: authService, User: userService}, &server.HandlerComponents{
 		UserRepository: nil,
 		Logger:         logger,
 		Responder:      responder,

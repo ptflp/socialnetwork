@@ -1,4 +1,4 @@
-package server
+package handlers
 
 import (
 	"encoding/json"
@@ -23,9 +23,13 @@ func NewAuthHandler(responder respond.Responder, authService infoblog.AuthServic
 	}, nil
 }
 
+type PhoneCodeRequest struct {
+	Phone string `json:"phone"`
+}
+
 func (a *authHandler) SendCode() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var sendCodeReq infoblog.PhoneCodeRequest
+		var sendCodeReq PhoneCodeRequest
 		err := json.NewDecoder(r.Body).Decode(&sendCodeReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
@@ -47,9 +51,14 @@ func (a *authHandler) SendCode() http.HandlerFunc {
 	}
 }
 
+type CheckCodeRequest struct {
+	Phone string
+	Code  int
+}
+
 func (a *authHandler) CheckCode() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var checkCodeReq infoblog.CheckCodeRequest
+		var checkCodeReq CheckCodeRequest
 		err := json.NewDecoder(r.Body).Decode(&checkCodeReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)

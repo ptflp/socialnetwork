@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/handlers"
+
 	infoblog "gitlab.com/InfoBlogFriends/server"
 
 	"gitlab.com/InfoBlogFriends/server/middlewares"
@@ -18,7 +20,7 @@ func NewRouter(services *Services, components *HandlerComponents) (*chi.Mux, err
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 
-	authHandler, err := NewAuthHandler(components.Responder, services.AuthService, components.Logger)
+	authHandler, err := handlers.NewAuthHandler(components.Responder, services.AuthService, components.Logger)
 
 	r.Get("/swagger", swaggerUI)
 	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {

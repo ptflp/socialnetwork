@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/handlers"
+
 	"gitlab.com/InfoBlogFriends/server/providers"
 
 	"gitlab.com/InfoBlogFriends/server/session"
@@ -24,24 +26,24 @@ type service struct {
 	smsProvider    providers.SMS
 	userRepository infoblog.UserRepository
 	cache          cache.Cache
-	configApp      config.App
+	config         *config.Config
 	logger         *zap.Logger
 	JWTKeys        *session.JWTKeys
 }
 
 func NewAuthService(
-	configApp config.App,
+	config *config.Config,
 	userRepository infoblog.UserRepository,
 	cache cache.Cache,
 	logger *zap.Logger,
 	keys *session.JWTKeys,
 	smsProvider providers.SMS) *service {
-	return &service{configApp: configApp, userRepository: userRepository, cache: cache, logger: logger, smsProvider: smsProvider, JWTKeys: keys}
+	return &service{config: config, userRepository: userRepository, cache: cache, logger: logger, smsProvider: smsProvider, JWTKeys: keys}
 }
 
-func (a *service) SendCode(ctx context.Context, req *infoblog.PhoneCodeRequest) bool {
+func (a *service) SendCode(ctx context.Context, req *handlers.PhoneCodeRequest) bool {
 	code := genCode()
-	if a.configApp.Dev {
+	if a.config.SMSC.Dev {
 		code = 3455
 	}
 	a.cache.Set("code:"+req.Phone, &code, 15*time.Minute)
@@ -53,7 +55,7 @@ func (a *service) SendCode(ctx context.Context, req *infoblog.PhoneCodeRequest) 
 	return err == nil
 }
 
-func (a *service) CheckCode(ctx context.Context, req *infoblog.CheckCodeRequest) (string, error) {
+func (a *service) CheckCode(ctx context.Context, req *handlers.CheckCodeRequest) (string, error) {
 	var code int
 	err := a.cache.Get("code:"+req.Phone, &code)
 	if err != nil {

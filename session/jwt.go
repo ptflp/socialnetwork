@@ -99,8 +99,6 @@ func (j *JWTKeys) CreateToken(u infoblog.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"ExpiresAt": time.Now().UTC().Add(time.Minute * 20).Unix(),
 		"ID":        u.ID,
-		"Email":     u.Email,
-		"Phone":     u.Phone,
 	})
 
 	return token.SignedString(signKey)
@@ -121,9 +119,7 @@ func (j *JWTKeys) ExtractToken(r *http.Request) (*infoblog.User, error) {
 	if token.Valid {
 		c := token.Claims.(jwt.MapClaims)
 		u := &infoblog.User{
-			ID:    int64(c["ID"].(float64)),
-			Phone: c["Phone"].(string),
-			Email: c["Email"].(string),
+			ID: int64(c["ID"].(float64)),
 		}
 
 		return u, nil
