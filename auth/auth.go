@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/validators"
+
 	"gitlab.com/InfoBlogFriends/server/request"
 
 	"gitlab.com/InfoBlogFriends/server/providers"
@@ -61,7 +63,11 @@ func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) b
 
 func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) (string, error) {
 	var code int
-	err := a.cache.Get("code:"+req.Phone, &code)
+	phone, err := validators.CheckPhoneFormat(req.Phone)
+	if err != nil {
+		return "", err
+	}
+	err = a.cache.Get("code:"+phone, &code)
 	if err != nil {
 		return "", err
 	}
@@ -70,13 +76,13 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		return "", errors.New("phone code mismatch")
 	}
 
-	u, err := a.userRepository.FindByPhone(ctx, req.Phone)
+	u, err := a.userRepository.FindByPhone(ctx, phone)
 	if err != nil {
-		err = a.userRepository.CreateUserByPhone(ctx, req.Phone)
+		err = a.userRepository.CreateUserByPhone(ctx, phone)
 		if err != nil {
 			return "", err
 		}
-		u, err = a.userRepository.FindByPhone(ctx, req.Phone)
+		u, err = a.userRepository.FindByPhone(ctx, phone)
 		if err != nil {
 			return "", err
 		}

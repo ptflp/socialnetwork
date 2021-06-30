@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gitlab.com/InfoBlogFriends/server/request"
+	"gitlab.com/InfoBlogFriends/server/validators"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -52,9 +53,16 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 	}
 
 	if profileUpdateReq.Email != nil {
+		if err = validators.CheckEmailFormat(*profileUpdateReq.Email); err != nil {
+			return infoblog.User{}, err
+		}
 		user.Email = *profileUpdateReq.Email
 	}
 	if profileUpdateReq.Phone != nil {
+		*profileUpdateReq.Phone, err = validators.CheckPhoneFormat(*profileUpdateReq.Phone)
+		if err != nil {
+			return infoblog.User{}, err
+		}
 		user.Phone = *profileUpdateReq.Phone
 	}
 	if profileUpdateReq.Name != nil {
