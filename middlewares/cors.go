@@ -2,8 +2,6 @@ package middlewares
 
 import (
 	"net/http"
-
-	"github.com/rs/cors"
 )
 
 type Cors struct {
@@ -14,18 +12,10 @@ func NewCors() *Cors {
 }
 
 func (t *Cors) OpenAllCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Accept-Language"},
-		AllowedMethods:   []string{"GET", "POST", "DELETE"},
-		AllowCredentials: true,
-		Debug:            false,
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		next.ServeHTTP(w, r)
 	})
-
-	return cors.Handler(func() http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r)
-		})
-	}())
 }
