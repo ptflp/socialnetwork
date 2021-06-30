@@ -19,15 +19,13 @@ func NewRouter(services *Services, components *HandlerComponents, cfg *config.Co
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 
+	openAllCors := middlewares.NewCors()
+	r.Use(openAllCors.OpenAllCors)
+
 	authHandler := handlers.NewAuthHandler(components.Responder, services.AuthService, components.Logger)
 
 	r.Get("/swagger", swaggerUI)
 	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
-
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
 		http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))).ServeHTTP(w, r)
 	})
 
