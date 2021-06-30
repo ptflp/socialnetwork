@@ -75,6 +75,7 @@ func (a *profileHandler) GetProfile() http.HandlerFunc {
 		user, err := a.user.GetProfile(ctx, u.ID)
 		if err != nil {
 			a.ErrorInternal(w, err)
+			return
 		}
 
 		a.SendJSON(w, request.Response{
