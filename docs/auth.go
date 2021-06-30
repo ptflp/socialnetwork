@@ -1,7 +1,7 @@
 package docs
 
 import (
-	"gitlab.com/InfoBlogFriends/server/handlers"
+	"gitlab.com/InfoBlogFriends/server/request"
 )
 
 // swagger:route POST /auth/code auth sendCodeRequest
@@ -12,28 +12,28 @@ import (
 // swagger:response sendCodeResponse
 type sendCodeResponse struct {
 	// in:body
-	Body handlers.Response
+	Body request.Response
 }
 
 // swagger:parameters sendCodeRequest
 type sendCodeParams struct {
 	// in:body
-	Body handlers.PhoneCodeRequest
+	Body request.PhoneCodeRequest
 }
 
 // swagger:route POST /auth/checkcode auth checkCodeRequest
-// Проверка смс кода
+// Проверка смс кода.
 // responses:
 //   200: checkCodeResponse
 
 // swagger:response checkCodeResponse
 type checkCodeResponse struct {
 	// in:body
-	Body handlers.Response
+	Body request.Response
 }
 
 // swagger:parameters checkCodeRequest
 type checkCodeParams struct {
 	// in:body
-	Body handlers.CheckCodeRequest
+	Body request.CheckCodeRequest
 }

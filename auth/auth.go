@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	"gitlab.com/InfoBlogFriends/server/handlers"
+	"gitlab.com/InfoBlogFriends/server/request"
 
 	"gitlab.com/InfoBlogFriends/server/providers"
 
@@ -41,12 +41,16 @@ func NewAuthService(
 	return &service{config: config, userRepository: userRepository, cache: cache, logger: logger, smsProvider: smsProvider, JWTKeys: keys}
 }
 
-func (a *service) SendCode(ctx context.Context, req *handlers.PhoneCodeRequest) bool {
+func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) bool {
 	code := genCode()
 	if a.config.SMSC.Dev {
 		code = 3455
 	}
 	a.cache.Set("code:"+req.Phone, &code, 15*time.Minute)
+	if a.config.SMSC.Dev {
+		return true
+	}
+
 	err := a.smsProvider.Send(ctx, req.Phone, fmt.Sprintf("Ваш код: %d", code))
 	if err != nil {
 		a.logger.Error("send sms err", zap.String("phone", req.Phone), zap.Int("code", code))
@@ -55,7 +59,7 @@ func (a *service) SendCode(ctx context.Context, req *handlers.PhoneCodeRequest) 
 	return err == nil
 }
 
-func (a *service) CheckCode(ctx context.Context, req *handlers.CheckCodeRequest) (string, error) {
+func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) (string, error) {
 	var code int
 	err := a.cache.Get("code:"+req.Phone, &code)
 	if err != nil {

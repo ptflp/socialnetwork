@@ -3,10 +3,10 @@ package infoblog
 import (
 	"context"
 
-	"gitlab.com/InfoBlogFriends/server/handlers"
+	"gitlab.com/InfoBlogFriends/server/request"
 )
 
 type AuthService interface {
-	SendCode(ctx context.Context, req *handlers.PhoneCodeRequest) bool
-	CheckCode(ctx context.Context, req *handlers.CheckCodeRequest) (string, error)
+	SendCode(ctx context.Context, req *request.PhoneCodeRequest) bool
+	CheckCode(ctx context.Context, req *request.CheckCodeRequest) (string, error)
 }

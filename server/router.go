@@ -1,12 +1,9 @@
 package server
 
 import (
-	"errors"
 	"net/http"
 
 	"gitlab.com/InfoBlogFriends/server/handlers"
-
-	infoblog "gitlab.com/InfoBlogFriends/server"
 
 	"gitlab.com/InfoBlogFriends/server/middlewares"
 
@@ -20,7 +17,7 @@ func NewRouter(services *Services, components *HandlerComponents) (*chi.Mux, err
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 
-	authHandler, err := handlers.NewAuthHandler(components.Responder, services.AuthService, components.Logger)
+	authHandler := handlers.NewAuthHandler(components.Responder, services.AuthService, components.Logger)
 
 	r.Get("/swagger", swaggerUI)
 	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
@@ -33,18 +30,15 @@ func NewRouter(services *Services, components *HandlerComponents) (*chi.Mux, err
 	})
 
 	token := middlewares.NewCheckToken(components.Responder, components.JWTKeys)
-	r.Route("/test", func(r chi.Router) {
+	profileHandler := handlers.NewProfileHandler(components.Responder, services.User, components.Logger)
+	r.Route("/profile", func(r chi.Router) {
 		r.Use(token.Check)
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			u, ok := ctx.Value("user").(*infoblog.User)
-			if !ok {
-				components.Responder.ErrorInternal(w, errors.New("type assertion to user err"))
-				return
-			}
-			components.Responder.SendJSON(w, u)
+		r.Post("/update", profileHandler.Update())
+		r.Get("/get", profileHandler.GetProfile())
+		r.Route("/set", func(r chi.Router) {
+			r.Post("/password", profileHandler.SetPassword())
 		})
 	})
 
-	return r, err
+	return r, nil
 }

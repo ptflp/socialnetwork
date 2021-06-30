@@ -9,12 +9,15 @@ import (
 )
 
 const (
-	updateUser                = "UPDATE users SET email = ?, phone = ?, name = ?, second_name = ? WHERE id = ?;"
-	setPassword               = "UPDATE users SET password = ? WHERE id = ?"
-	findUserByPhone           = "SELECT id, email, phone FROM users WHERE phone = ?"
-	findUserByEmail           = "SELECT id, email, phone, password FROM users WHERE email = ?"
-	createUserByPhone         = "INSERT INTO users (phone) VALUES (?)"
-	createUserByEmailPassword = "INSERT INTO users (email, password) VALUES (?, ?)"
+	updateUser  = "UPDATE users SET phone = ?, email = ?, name = ?, second_name = ? WHERE id = ?;"
+	setPassword = "UPDATE users SET password = ? WHERE id = ?"
+
+	findUserByID    = "SELECT phone, email, active, name, second_name FROM users WHERE id = ?"
+	findUserByPhone = "SELECT id, email, phone FROM users WHERE phone = ?"
+	findUserByEmail = "SELECT id, email, phone, password FROM users WHERE email = ?"
+
+	createUserByPhone         = "INSERT INTO users (phone, active) VALUES (?, 1)"
+	createUserByEmailPassword = "INSERT INTO users (email, password, active) VALUES (?, ?, 1)"
 )
 
 type userRepository struct {
@@ -76,7 +79,7 @@ func (u *userRepository) CreateUserByEmailPassword(ctx context.Context, email, p
 }
 
 func (u *userRepository) Update(ctx context.Context, user infoblog.User) error {
-	_, err := u.db.MustExecContext(ctx, updateUser, user.Email, user.Phone, user.Name, user.SecondName, user.ID).RowsAffected()
+	_, err := u.db.MustExecContext(ctx, updateUser, user.Phone, user.Email, user.Name, user.SecondName, user.ID).RowsAffected()
 
 	return err
 }
@@ -85,4 +88,29 @@ func (u *userRepository) SetPassword(ctx context.Context, user infoblog.User) er
 	_, err := u.db.MustExecContext(ctx, setPassword, user.Password, user.ID).RowsAffected()
 
 	return err
+}
+
+func (u *userRepository) Find(ctx context.Context, uid int64) (infoblog.User, error) {
+
+	var (
+		phone      sql.NullString
+		email      sql.NullString
+		active     sql.NullInt64
+		name       sql.NullString
+		secondName sql.NullString
+	)
+
+	if err := u.db.QueryRowContext(ctx, findUserByID, uid).Scan(&phone, &email, &active, &name, &secondName); err != nil {
+		return infoblog.User{}, err
+	}
+
+	return infoblog.User{
+		ID:         uid,
+		Phone:      phone.String,
+		Email:      email.String,
+		Password:   "",
+		Active:     active.Int64,
+		Name:       name.String,
+		SecondName: secondName.String,
+	}, nil
 }

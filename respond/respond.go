@@ -5,15 +5,13 @@ import (
 	"errors"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/request"
+
 	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
-var (
-	emptyJSON = []byte("{}")
-)
 
 type Responder interface {
 	SendJSON(w http.ResponseWriter, responseData interface{})
@@ -45,7 +43,11 @@ func (r *Respond) ErrorBadRequest(w http.ResponseWriter, err error) {
 	r.log.Error("http response bad request status code", zap.Error(err))
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusBadRequest)
-	if _, err := w.Write(emptyJSON); err != nil {
+	if err := json.NewEncoder(w).Encode(request.Response{
+		Success: false,
+		Msg:     err.Error(),
+		Data:    nil,
+	}); err != nil {
 		r.log.Error("response writer error on write", zap.Error(err))
 	}
 }
@@ -54,7 +56,11 @@ func (r *Respond) ErrorForbidden(w http.ResponseWriter, err error) {
 	r.log.Warn("http resposne forbidden", zap.Error(err))
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusForbidden)
-	if _, err := w.Write(emptyJSON); err != nil {
+	if err := json.NewEncoder(w).Encode(request.Response{
+		Success: false,
+		Msg:     err.Error(),
+		Data:    nil,
+	}); err != nil {
 		r.log.Error("response writer error on write", zap.Error(err))
 	}
 }
@@ -66,7 +72,11 @@ func (r *Respond) ErrorInternal(w http.ResponseWriter, err error) {
 	r.log.Error("http response internal error", zap.Error(err))
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusInternalServerError)
-	if _, err := w.Write(emptyJSON); err != nil {
+	if err := json.NewEncoder(w).Encode(request.Response{
+		Success: false,
+		Msg:     err.Error(),
+		Data:    nil,
+	}); err != nil {
 		r.log.Error("response writer error on write", zap.Error(err))
 	}
 }

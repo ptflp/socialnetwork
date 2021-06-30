@@ -18,10 +18,10 @@
   "paths": {
     "/auth/checkcode": {
       "post": {
-        "description": "Проверка смс кода",
         "tags": [
           "auth"
         ],
+        "summary": "Проверка смс кода.",
         "operationId": "checkCodeRequest",
         "parameters": [
           {
@@ -61,6 +61,87 @@
           }
         }
       }
+    },
+    "/profile/get": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "profile"
+        ],
+        "summary": "Получение профиля.",
+        "operationId": "getProfileRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/getProfileResponse"
+          }
+        }
+      }
+    },
+    "/profile/set/password": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "profile"
+        ],
+        "summary": "Изменение пароля.",
+        "operationId": "profileSetPassword",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SetPasswordReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/profileSetPasswordResponse"
+          }
+        }
+      }
+    },
+    "/profile/update": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "profile"
+        ],
+        "summary": "Обновление профиля.",
+        "operationId": "profileUpdateRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ProfileUpdateReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/profileUpdateResponse"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -75,7 +156,7 @@
           "type": "string"
         }
       },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server"
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
     "PhoneCodeRequest": {
       "type": "object",
@@ -85,7 +166,29 @@
           "x-go-name": "Phone"
         }
       },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server"
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "ProfileUpdateReq": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "phone": {
+          "type": "string",
+          "x-go-name": "Phone"
+        },
+        "second_name": {
+          "type": "string",
+          "x-go-name": "SecondName"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
     "Response": {
       "type": "object",
@@ -100,11 +203,38 @@
           "type": "boolean"
         }
       },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server/server"
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "SetPasswordReq": {
+      "type": "object",
+      "properties": {
+        "Password": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     }
   },
   "responses": {
     "checkCodeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "getProfileResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "profileSetPasswordResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "profileUpdateResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
