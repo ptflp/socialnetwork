@@ -16,6 +16,8 @@ func (t *Cors) OpenAllCors(next http.Handler) http.Handler {
 
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization")
+
 		next.ServeHTTP(w, r)
 	})
 }
