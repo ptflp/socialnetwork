@@ -76,6 +76,10 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		if err != nil {
 			return "", err
 		}
+		u, err = a.userRepository.FindByPhone(ctx, req.Phone)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	token, err := a.JWTKeys.CreateToken(u)
