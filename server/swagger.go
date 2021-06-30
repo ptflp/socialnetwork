@@ -49,5 +49,5 @@ func swaggerUI(w http.ResponseWriter, r *http.Request) {
 	buf := bytes.NewBuffer([]byte(swaggerTemplate))
 	b := buf.Bytes()
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write(b)
+	_, _ = w.Write(b)
 }

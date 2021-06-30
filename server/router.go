@@ -17,9 +17,9 @@ import (
 
 func NewRouter(services *Services, components *HandlerComponents, cfg *config.Config) (*chi.Mux, error) {
 	r := chi.NewRouter()
+	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
-	r.Use(middleware.Recoverer)
 
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
