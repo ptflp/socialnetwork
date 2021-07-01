@@ -24,6 +24,12 @@ func TestCheckPhoneFormat(t *testing.T) {
 			want:    "79644288083",
 			wantErr: false,
 		},
+		{
+			name:    "check short number",
+			args:    args{phone: "+7964428808"},
+			want:    "7964428808",
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

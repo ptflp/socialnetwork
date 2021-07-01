@@ -44,18 +44,22 @@ func NewAuthService(
 }
 
 func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) bool {
+	phone, err := validators.CheckPhoneFormat(req.Phone)
+	if err != nil {
+		return false
+	}
 	code := genCode()
 	if a.config.SMSC.Dev {
 		code = 3455
 	}
-	a.cache.Set("code:"+req.Phone, &code, 15*time.Minute)
+	a.cache.Set("code:"+phone, &code, 15*time.Minute)
 	if a.config.SMSC.Dev {
 		return true
 	}
 
-	err := a.smsProvider.Send(ctx, req.Phone, fmt.Sprintf("Ваш код: %d", code))
+	err = a.smsProvider.Send(ctx, phone, fmt.Sprintf("Ваш код: %d", code))
 	if err != nil {
-		a.logger.Error("send sms err", zap.String("phone", req.Phone), zap.Int("code", code))
+		a.logger.Error("send sms err", zap.String("phone", phone), zap.Int("code", code))
 	}
 
 	return err == nil
