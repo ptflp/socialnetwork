@@ -2,6 +2,7 @@ package server
 
 import (
 	infoblog "gitlab.com/InfoBlogFriends/server"
+	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/respond"
 	"gitlab.com/InfoBlogFriends/server/service"
 	"gitlab.com/InfoBlogFriends/server/session"
@@ -13,10 +14,11 @@ type Services struct {
 	User        *service.User
 }
 
-type HandlerComponents struct {
+type Components struct {
 	UserRepository infoblog.UserRepository
 	Logger         *zap.Logger
 	Responder      respond.Responder
 	LogLevel       zap.AtomicLevel
 	JWTKeys        *session.JWTKeys
+	Email          *email.Client
 }

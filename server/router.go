@@ -1,7 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"net/http"
+
+	"gitlab.com/InfoBlogFriends/server/email"
+	"gitlab.com/InfoBlogFriends/server/request"
 
 	"github.com/go-chi/cors"
 
@@ -15,7 +19,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(services *Services, components *HandlerComponents, cfg *config.Config) (*chi.Mux, error) {
+func NewRouter(services *Services, components *Components, cfg *config.Config) (*chi.Mux, error) {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
@@ -35,6 +39,22 @@ func NewRouter(services *Services, components *HandlerComponents, cfg *config.Co
 	}))
 
 	authHandler := handlers.NewAuthHandler(components.Responder, services.AuthService, components.Logger)
+
+	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+		msg := email.NewMessage()
+		var b bytes.Buffer
+		b.Write([]byte("test"))
+
+		msg.SetBody(b)
+		msg.SetReceiver("globallinkliberty@gmail.com")
+		msg.SetSubject("test")
+		err := components.Email.Send(msg)
+		components.Responder.SendJSON(w, request.Response{
+			Success: err == nil,
+			Msg:     "test",
+			Data:    err,
+		})
+	})
 
 	r.Get("/swagger", swaggerUI)
 	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {

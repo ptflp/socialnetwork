@@ -13,10 +13,10 @@ import (
 type Client struct {
 	smtpc  *smtp.Client
 	logger *zap.Logger
-	cfg    config.Email
+	cfg    *config.Email
 }
 
-func NewClient(cfg config.Email, logger *zap.Logger) (*Client, error) {
+func NewClient(cfg *config.Email, logger *zap.Logger) (*Client, error) {
 	c := &Client{
 		logger: logger,
 		cfg:    cfg,
@@ -27,13 +27,20 @@ func NewClient(cfg config.Email, logger *zap.Logger) (*Client, error) {
 }
 
 func (c *Client) Send(msg Messager) error {
+	msg.SetFrom(c.cfg.From)
 	err := msg.Validate()
 	if err != nil {
 		return err
 	}
+	err = c.connect()
+	if err != nil {
+		return err
+	}
 	rclient := c.smtpc
+
 	if err = rclient.Rcpt(msg.GetReceiver()); err != nil {
 		c.logger.Error("set email receiver", zap.String("To:", msg.GetReceiver()), zap.Error(err))
+		return err
 	}
 	writer, err := rclient.Data()
 	if err != nil {

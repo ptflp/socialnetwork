@@ -18,6 +18,9 @@ const (
 )
 
 type Message struct {
+	typeRaw     string
+	fromRaw     string
+	toRaw       string
 	from        string
 	to          string
 	cc          string
@@ -30,6 +33,7 @@ type Message struct {
 
 func NewMessage() *Message {
 	return &Message{
+		typeRaw:     MessagePlain,
 		mimeVersion: "MIME-Version: 1.0\r\n",
 		contentType: fmt.Sprintf("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", Delimiter),
 		delimiter:   fmt.Sprintf("\r\n--%s\r\n", Delimiter),
@@ -89,19 +93,22 @@ func (f *file) String() string {
 }
 
 func (m *Message) SetFrom(from string) {
+	m.fromRaw = from
 	m.from = fmt.Sprintf("From: %s\r\n", from)
 }
 
 func (m *Message) SetReceiver(rcpt string) {
+	m.toRaw = rcpt
 	m.to = fmt.Sprintf("To: %s\r\n", rcpt)
-	m.to = fmt.Sprintf("Cc: %s\r\n", rcpt)
+	m.cc = fmt.Sprintf("Cc: %s\r\n", rcpt)
 }
 
 func (m *Message) GetReceiver() string {
-	return m.to
+	return m.toRaw
 }
 
 func (m *Message) SetType(t string) {
+	m.typeRaw = t
 	m.body.contentType = fmt.Sprintf("Content-Type: %s; charset=\"utf-8\"\r\n", t)
 }
 
@@ -116,19 +123,19 @@ func (m *Message) AttachFile(src bytes.Buffer, fileName string) {
 }
 
 func (m *Message) Validate() error {
-	err := validators.CheckEmailFormat(m.from)
+	err := validators.CheckEmailFormat(m.fromRaw)
 	if err != nil {
 		return err
 	}
-	err = validators.CheckEmailFormat(m.to)
+	err = validators.CheckEmailFormat(m.toRaw)
 	if err != nil {
 		return err
 	}
 	if m.body.body == "" {
 		return errors.New("body not set")
 	}
-	if m.body.contentType != MessagePlain && m.body.contentType != MessageHtml {
-		return errors.New(fmt.Sprintf("wrong email body content-type %s", m.body.contentType))
+	if m.typeRaw != MessagePlain && m.typeRaw != MessageHtml {
+		return fmt.Errorf("wrong email body content-type %s", m.typeRaw)
 	}
 
 	return nil
