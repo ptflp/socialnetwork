@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"gitlab.com/InfoBlogFriends/server/validators"
@@ -159,6 +160,26 @@ func (m *Message) Bytes() []byte {
 
 func (m *Message) SetBody(msg bytes.Buffer) {
 	m.body.body = msg.String()
+}
+
+func (m *Message) OpenFile(path string) error {
+	fl, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("path: %s error: %s", func() string { s, _ := os.Getwd(); return s }(), err)
+	}
+	defer fl.Close()
+	fileInfo, err := fl.Stat()
+	if err != nil {
+		return fmt.Errorf("path: %s error: %s", func() string { s, _ := os.Getwd(); return s }(), err)
+	}
+
+	fb := make([]byte, fileInfo.Size())
+	_, err = fl.Read(fb)
+	b := bytes.NewBuffer(fb)
+
+	m.AttachFile(*b, fl.Name())
+
+	return err
 }
 
 func (m *Message) ImplementsMessager() {

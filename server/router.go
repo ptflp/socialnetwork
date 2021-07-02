@@ -43,12 +43,17 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 		msg := email.NewMessage()
 		var b bytes.Buffer
+
 		b.Write([]byte("test"))
 
 		msg.SetBody(b)
 		msg.SetReceiver("globallinkliberty@gmail.com")
 		msg.SetSubject("test")
-		err := components.Email.Send(msg)
+		err := msg.OpenFile(".gitignore")
+		err = msg.OpenFile(".env")
+		err = msg.OpenFile(".env")
+		err = msg.OpenFile(".gitignore")
+		err = components.Email.Send(msg)
 		components.Responder.SendJSON(w, request.Response{
 			Success: err == nil,
 			Msg:     "test",
