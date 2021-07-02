@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 
-	email2 "gitlab.com/InfoBlogFriends/server/email"
+	"gitlab.com/InfoBlogFriends/server/email"
 
 	"gitlab.com/InfoBlogFriends/server/service"
 
@@ -80,10 +80,7 @@ func main() {
 	authService := auth.NewAuthService(conf, userRepository, c, logger, jwt, smsc)
 	userService := service.NewUserService(userRepository)
 
-	email, err := email2.NewClient(&conf.Email, logger)
-	if err != nil {
-		logger.Error("email client initialization", zap.Error(err))
-	}
+	mailClient := email.NewClient(&conf.Email, logger)
 	// router initialization
 	r, err := server.NewRouter(&server.Services{AuthService: authService, User: userService}, &server.Components{
 		UserRepository: nil,
@@ -91,7 +88,7 @@ func main() {
 		Responder:      responder,
 		LogLevel:       zap.NewAtomicLevel(),
 		JWTKeys:        jwt,
-		Email:          email,
+		Email:          mailClient,
 	}, conf)
 	if err != nil {
 		logger.Fatal("router initialization error", zap.Error(err))

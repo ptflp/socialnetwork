@@ -16,14 +16,13 @@ type Client struct {
 	cfg    *config.Email
 }
 
-func NewClient(cfg *config.Email, logger *zap.Logger) (*Client, error) {
+func NewClient(cfg *config.Email, logger *zap.Logger) *Client {
 	c := &Client{
 		logger: logger,
 		cfg:    cfg,
 	}
-	err := c.connect()
 
-	return c, err
+	return c
 }
 
 func (c *Client) Send(msg Messager) error {
