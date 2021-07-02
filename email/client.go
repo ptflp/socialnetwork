@@ -1,49 +1,91 @@
 package email
 
 import (
-	"errors"
-	"log"
+	"crypto/tls"
+	"fmt"
 	"net/smtp"
+
+	"gitlab.com/InfoBlogFriends/server/config"
+
+	"go.uber.org/zap"
 )
 
-type loginAuth struct {
-	username, password string
+type Client struct {
+	smtpc  *smtp.Client
+	logger *zap.Logger
+	cfg    config.Email
 }
 
-func LoginAuth(username, password string) smtp.Auth {
-	return &loginAuth{username, password}
-}
-
-func (a *loginAuth) Start(server *smtp.ServerInfo) (string, []byte, error) {
-	return "LOGIN", []byte{}, nil
-}
-
-func (a *loginAuth) Next(fromServer []byte, more bool) ([]byte, error) {
-	if more {
-		switch string(fromServer) {
-		case "Username:":
-			return []byte(a.username), nil
-		case "Password:":
-			return []byte(a.password), nil
-		default:
-			return nil, errors.New("Unkown fromServer")
-		}
+func NewClient(cfg config.Email, logger *zap.Logger) (*Client, error) {
+	c := &Client{
+		logger: logger,
+		cfg:    cfg,
 	}
-	return nil, nil
+	err := c.connect()
+
+	return c, err
 }
 
-func Send() {
-	// Choose auth method and set it up
-	auth := LoginAuth("user", "pass")
-
-	// Here we do it all: connect to our server, set up a message and send it
-	to := []string{"to@example.com"}
-	msg := []byte("To: to@example.com\r\n" +
-		"Subject: New Hack\r\n" +
-		"\r\n" +
-		"Wonderful solution\r\n")
-	err := smtp.SendMail("smtp.gmail.com:587", auth, "from@example.com", to, msg)
+func (c *Client) Send(msg Messager) error {
+	err := msg.Validate()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	rclient := c.smtpc
+	if err = rclient.Rcpt(msg.GetReceiver()); err != nil {
+		c.logger.Error("set email receiver", zap.String("To:", msg.GetReceiver()), zap.Error(err))
+	}
+	writer, err := rclient.Data()
+	if err != nil {
+		c.logger.Error("smpt client Data()", zap.Error(err))
+		return err
+	}
+
+	//write into email client stream writter
+	if _, err = writer.Write(msg.Bytes()); err != nil {
+		c.logger.Error("write content into client writter I/O", zap.Error(err))
+		return err
+	}
+
+	if err = writer.Close(); err != nil {
+		c.logger.Error("smtp writer close", zap.Error(err))
+	}
+
+	return err
+}
+
+func (c *Client) connect() error {
+	tlsConfig := tls.Config{
+		ServerName:         c.cfg.ServerAddress,
+		InsecureSkipVerify: true,
+	}
+
+	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%s", c.cfg.ServerAddress, c.cfg.Port), &tlsConfig)
+	if err != nil {
+		c.logger.Error("TLS connection", zap.Error(err))
+		return err
+	}
+
+	rclient, err := smtp.NewClient(conn, c.cfg.ServerAddress)
+
+	if err != nil {
+		c.logger.Error("smtp client creation", zap.Error(err))
+		return err
+	}
+
+	auth := smtp.PlainAuth("", c.cfg.Login, c.cfg.Password, c.cfg.ServerAddress)
+
+	if err = rclient.Auth(auth); err != nil {
+		c.logger.Error("smtp auth", zap.Error(err))
+		return err
+	}
+
+	if err = rclient.Mail(c.cfg.Login); err != nil {
+		c.logger.Error("start mail transaction", zap.Error(err))
+		return err
+	}
+
+	c.smtpc = rclient
+
+	return nil
 }
