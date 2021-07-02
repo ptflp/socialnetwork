@@ -25,6 +25,4 @@ type Messager interface {
 	Bytes() []byte
 
 	Validate() error
-
-	ImplementsMessager()
 }

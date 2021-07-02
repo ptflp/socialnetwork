@@ -181,7 +181,3 @@ func (m *Message) OpenFile(path string) error {
 
 	return err
 }
-
-func (m *Message) ImplementsMessager() {
-	panic("implement me")
-}
