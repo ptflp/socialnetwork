@@ -70,7 +70,7 @@ func (a *authHandler) CheckCode() http.HandlerFunc {
 			Success: true,
 			Msg:     "",
 			Data: struct {
-				Token string
+				Token string `json:"token"`
 			}{
 				Token: token,
 			},
