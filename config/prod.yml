@@ -10,6 +10,13 @@ db:
   host: "infoblogdb"
   timeout: 10
 
+Email:
+  ServerAddress: "smtp.mail.ru"
+  Port: "465"
+  From: "friends@22byte.com"
+  Login: "friends@22byte.com"
+  Password: "ygTta2O)1pTH"
+
 SMSC:
   login: "friends_club"
   pwd: "Ff*R#RV1Oxkk"

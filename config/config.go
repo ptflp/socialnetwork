@@ -13,21 +13,44 @@ type Config struct {
 	Server Server
 	Redis  Redis
 	SMSC   SMSC
+	Email  Email
 }
+
+const (
+	ProductionConfigName = "prod"
+	DevConfigName        = "dev"
+	Type                 = "yaml"
+	Path                 = "./config"
+
+	CheckEnvKey = "DEV"
+)
 
 func NewConfig() (*Config, error) {
 
 	var config *Config
-	configName := "prod"
-	if os.Getenv("DEV") == "true" {
-		configName = "dev"
+
+	viper.SetConfigName(ProductionConfigName)
+	viper.SetConfigType(Type)
+	viper.AddConfigPath(Path)
+
+	v := viper.New()
+	if os.Getenv(CheckEnvKey) == "true" {
+		v.SetConfigName(DevConfigName)
+		v.SetConfigType(Type)
+		v.AddConfigPath(Path)
+		if err := v.ReadInConfig(); err != nil {
+			return nil, fmt.Errorf("error reading config file, %s\n", err)
+		}
 	}
-	viper.SetConfigName(configName)
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./config")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("error reading config file, %s\n", err)
+	}
+
+	if os.Getenv(CheckEnvKey) == "true" {
+		if err := viper.MergeConfigMap(v.AllSettings()); err != nil {
+			return nil, fmt.Errorf("error merge dev config file, %s\n", err)
+		}
 	}
 
 	err := viper.Unmarshal(&config)

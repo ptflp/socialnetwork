@@ -10,13 +10,6 @@ db:
   host: "127.0.0.1"
   timeout: 10
 
-SMSC:
-  login: "friends_club"
-  pwd: "Ff*R#RV1Oxkk"
-  cost: "3"
-  fmt: "3"
-  dev: true
-
 redis:
   host: "127.0.0.1"
   port: 6379
