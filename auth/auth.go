@@ -65,7 +65,7 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 		return errors.New("user with specified email already exist")
 	}
 
-	activationUrl, hash, err := a.generateActivationUrl(req.Email)
+	activationUrl, activationID, err := a.generateActivationUrl(req.Email)
 	if err != nil {
 		return err
 	}
@@ -91,9 +91,34 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 	data.Password = hashPass
 
 	// 2. Set email code to cache
-	a.cache.Set(fmt.Sprintf(EmailVerificationKey, hash), data, 3*24*time.Hour)
+	a.cache.Set(fmt.Sprintf(EmailVerificationKey, activationID), data, 3*24*time.Hour)
 
 	return nil
+}
+
+func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (string, error) {
+	var u infoblog.User
+	err := a.cache.Get(fmt.Sprintf(EmailVerificationKey, req.ActivationID), &u)
+	if err != nil {
+		return "", err
+	}
+
+	err = a.userRepository.CreateUserByEmailPassword(ctx, u.Email, u.Password)
+	if err != nil {
+		return "", err
+	}
+
+	u, err = a.userRepository.FindByEmail(ctx, u.Email)
+	if err != nil || u.ID > 0 {
+		return "", err
+	}
+
+	token, err := a.JWTKeys.CreateToken(u)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (a *service) generateActivationUrl(email string) (string, string, error) {

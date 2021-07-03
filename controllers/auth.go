@@ -50,6 +50,37 @@ func (a *authController) EmailActivation() http.HandlerFunc {
 	}
 }
 
+func (a *authController) EmailVerification() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var emailVerificationReq request.EmailVerificationRequest
+		err := json.NewDecoder(r.Body).Decode(&emailVerificationReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		token, err := a.authService.EmailVerification(r.Context(), &emailVerificationReq)
+		if err != nil {
+			a.SendJSON(w, request.AuthTokenResponse{
+				Success: false,
+				Msg:     fmt.Sprintf("email verification err: %s", err),
+				Data: request.AuthTokenData{
+					Token: "",
+				},
+			})
+			return
+		}
+
+		a.SendJSON(w, request.AuthTokenResponse{
+			Success: true,
+			Msg:     "Ваша почта успешно активирована",
+			Data: request.AuthTokenData{
+				Token: token,
+			},
+		})
+	}
+}
+
 func (a *authController) SendCode() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var sendCodeReq request.PhoneCodeRequest
@@ -91,12 +122,10 @@ func (a *authController) CheckCode() http.HandlerFunc {
 			})
 			return
 		}
-		a.SendJSON(w, request.Response{
+		a.SendJSON(w, request.AuthTokenResponse{
 			Success: true,
 			Msg:     "",
-			Data: struct {
-				Token string `json:"token"`
-			}{
+			Data: request.AuthTokenData{
 				Token: token,
 			},
 		})

@@ -29,7 +29,7 @@ type sendCodeParams struct {
 // swagger:response checkCodeResponse
 type checkCodeResponse struct {
 	// in:body
-	Body request.Response
+	Body request.AuthTokenData
 }
 
 // swagger:parameters checkCodeRequest
@@ -53,4 +53,21 @@ type emailRegistrationResponse struct {
 type emailActivationParams struct {
 	// in:body
 	Body request.EmailActivationRequest
+}
+
+// swagger:route POST /auth/email/verification auth EmailVerificationRequest
+// Подтверждение почты, авторизация
+// responses:
+//   200: EmailVerificationResponse
+
+// swagger:response EmailVerificationResponse
+type emailVerificationResponse struct {
+	// in:body
+	Body request.AuthTokenData
+}
+
+// swagger:parameters EmailVerificationRequest
+type emailVerificationParams struct {
+	// in:body
+	Body request.EmailVerificationRequest
 }

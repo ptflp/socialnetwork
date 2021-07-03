@@ -66,6 +66,7 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
+		r.Post("/email/verification", authController.EmailVerification())
 		r.Post("/checkemail", authController.CheckCode())
 		r.Post("/code", authController.SendCode())
 		r.Post("/checkcode", authController.CheckCode())

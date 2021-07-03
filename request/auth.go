@@ -5,11 +5,15 @@ type PhoneCodeRequest struct {
 }
 
 type CheckCodeRequest struct {
-	Phone string
+	Phone string `json:"phone"`
 	Code  int
 }
 
 type EmailActivationRequest struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type EmailVerificationRequest struct {
+	ActivationID string `json:"activation_id"`
 }
