@@ -1,5 +1,6 @@
 app:
-  dev: false
+  dev: true
+  FrontEnd: "http://localhost:3000"
 
 db:
   net: "tcp"
