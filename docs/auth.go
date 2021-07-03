@@ -37,3 +37,20 @@ type checkCodeParams struct {
 	// in:body
 	Body request.CheckCodeRequest
 }
+
+// swagger:route POST /auth/email/registration auth EmailActivationRequest
+// Отправка ссылки активации на почту.
+// responses:
+//   200: emailRegistrationResponse
+
+// swagger:response emailRegistrationResponse
+type emailRegistrationResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters EmailActivationRequest
+type emailActivationParams struct {
+	// in:body
+	Body request.EmailActivationRequest
+}

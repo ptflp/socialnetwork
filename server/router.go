@@ -11,7 +11,7 @@ import (
 
 	"gitlab.com/InfoBlogFriends/server/config"
 
-	"gitlab.com/InfoBlogFriends/server/handlers"
+	"gitlab.com/InfoBlogFriends/server/controllers"
 
 	"gitlab.com/InfoBlogFriends/server/middlewares"
 
@@ -38,7 +38,7 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	authHandler := handlers.NewAuthHandler(components.Responder, services.AuthService, components.Logger)
+	authController := controllers.NewAuth(components.Responder, services.AuthService, components.Logger)
 
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 		msg := email.NewMessage()
@@ -65,12 +65,14 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 	})
 
 	r.Route("/auth", func(r chi.Router) {
-		r.Post("/code", authHandler.SendCode())
-		r.Post("/checkcode", authHandler.CheckCode())
+		r.Post("/email/registration", authController.EmailActivation())
+		r.Post("/checkemail", authController.CheckCode())
+		r.Post("/code", authController.SendCode())
+		r.Post("/checkcode", authController.CheckCode())
 	})
 
 	token := middlewares.NewCheckToken(components.Responder, components.JWTKeys)
-	profileHandler := handlers.NewProfileHandler(components.Responder, services.User, components.Logger)
+	profileHandler := controllers.NewProfileHandler(components.Responder, services.User, components.Logger)
 	r.Route("/profile", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/update", profileHandler.Update())

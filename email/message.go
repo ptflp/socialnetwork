@@ -117,7 +117,7 @@ func (m *Message) SetSubject(sub string) {
 	m.subject = fmt.Sprintf("Subject: %s\r\n", sub)
 }
 
-func (m *Message) AttachFile(src bytes.Buffer, fileName string) {
+func (m *Message) Attach(src bytes.Buffer, fileName string) {
 	f := newFile(fileName)
 	f.src.Write(src.Bytes())
 	m.body.files = append(m.body.files, *f)
@@ -177,7 +177,7 @@ func (m *Message) OpenFile(path string) error {
 	_, err = fl.Read(fb)
 	b := bytes.NewBuffer(fb)
 
-	m.AttachFile(*b, fl.Name())
+	m.Attach(*b, fl.Name())
 
 	return err
 }

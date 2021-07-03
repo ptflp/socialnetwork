@@ -1,5 +1,6 @@
 package config
 
 type App struct {
-	Dev bool
+	Dev      bool
+	FrontEnd string
 }

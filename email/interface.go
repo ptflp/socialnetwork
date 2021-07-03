@@ -21,7 +21,7 @@ type Messager interface {
 	SetBody(msg bytes.Buffer)
 
 	OpenFile(path string) error
-	AttachFile(src bytes.Buffer, fileName string)
+	Attach(src bytes.Buffer, fileName string)
 	Bytes() []byte
 
 	Validate() error

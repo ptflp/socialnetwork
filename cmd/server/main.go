@@ -75,12 +75,13 @@ func main() {
 		logger.Fatal("db initialization error", zap.Error(err))
 	}
 
+	mailClient := email.NewClient(&conf.Email, logger)
+
 	userRepository := db.NewUserRepository(database)
 	smsc := providers.NewSMSC(&conf.SMSC)
-	authService := auth.NewAuthService(conf, userRepository, c, logger, jwt, smsc)
+	authService := auth.NewAuthService(conf, userRepository, c, logger, jwt, smsc, mailClient)
 	userService := service.NewUserService(userRepository)
 
-	mailClient := email.NewClient(&conf.Email, logger)
 	// router initialization
 	r, err := server.NewRouter(&server.Services{AuthService: authService, User: userService}, &server.Components{
 		UserRepository: nil,

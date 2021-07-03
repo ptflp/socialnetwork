@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
+	"gitlab.com/InfoBlogFriends/server/hasher"
+
 	"gitlab.com/InfoBlogFriends/server/request"
 	"gitlab.com/InfoBlogFriends/server/validators"
-
-	"golang.org/x/crypto/bcrypt"
 
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
@@ -25,11 +25,11 @@ func (u *User) CheckEmailPass(ctx context.Context, email, password string) bool 
 		return false
 	}
 
-	return checkPasswordHash(password, user.Password)
+	return hasher.CheckPasswordHash(password, user.Password)
 }
 
 func (u *User) CreateByEmailPassword(ctx context.Context, email, password string) error {
-	passHash, err := hashPassword(password)
+	passHash, err := hasher.HashPassword(password)
 	if err != nil {
 		return err
 	}
@@ -76,23 +76,11 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 }
 
 func (u *User) SetPassword(ctx context.Context, user infoblog.User) error {
-	passHash, err := hashPassword(user.Password)
+	passHash, err := hasher.HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
 	user.Password = passHash
 
 	return u.repository.SetPassword(ctx, user)
-}
-
-func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-
-	return string(bytes), err
-}
-
-func checkPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-
-	return err == nil
 }

@@ -1,4 +1,4 @@
-package handlers
+package controllers
 
 import (
 	"encoding/json"
@@ -15,21 +15,21 @@ import (
 	"go.uber.org/zap"
 )
 
-type profileHandler struct {
+type profileController struct {
 	respond.Responder
 	user   *service.User
 	logger *zap.Logger
 }
 
-func NewProfileHandler(responder respond.Responder, user *service.User, logger *zap.Logger) *profileHandler {
-	return &profileHandler{
+func NewProfileHandler(responder respond.Responder, user *service.User, logger *zap.Logger) *profileController {
+	return &profileController{
 		Responder: responder,
 		user:      user,
 		logger:    logger,
 	}
 }
 
-func (a *profileHandler) Update() http.HandlerFunc {
+func (a *profileController) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		u, ok := ctx.Value("user").(*infoblog.User)
@@ -64,7 +64,7 @@ func (a *profileHandler) Update() http.HandlerFunc {
 	}
 }
 
-func (a *profileHandler) GetProfile() http.HandlerFunc {
+func (a *profileController) GetProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		u, ok := ctx.Value("user").(*infoblog.User)
@@ -90,7 +90,7 @@ func (a *profileHandler) GetProfile() http.HandlerFunc {
 	}
 }
 
-func (a *profileHandler) SetPassword() http.HandlerFunc {
+func (a *profileController) SetPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		u, ok := ctx.Value("user").(*infoblog.User)

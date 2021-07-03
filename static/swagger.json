@@ -62,6 +62,29 @@
         }
       }
     },
+    "/auth/email/registration": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Проверка смс кода.",
+        "operationId": "EmailActivationRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/EmailActivationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/emailRegistrationResponse"
+          }
+        }
+      }
+    },
     "/profile/get": {
       "get": {
         "security": [
@@ -171,6 +194,9 @@
       "properties": {
         "Dev": {
           "type": "boolean"
+        },
+        "FrontEnd": {
+          "type": "string"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
@@ -196,6 +222,9 @@
         },
         "DB": {
           "$ref": "#/definitions/DB"
+        },
+        "Email": {
+          "$ref": "#/definitions/Email"
         },
         "Redis": {
           "$ref": "#/definitions/Redis"
@@ -224,21 +253,48 @@
         "Net": {
           "type": "string"
         },
-        "Password": {
-          "type": "string"
-        },
         "Port": {
           "type": "string"
         },
         "Timeout": {
           "type": "integer",
           "format": "int64"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
+    },
+    "Email": {
+      "type": "object",
+      "properties": {
+        "From": {
+          "type": "string"
         },
-        "Username": {
+        "Login": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "Port": {
+          "type": "string"
+        },
+        "ServerAddress": {
           "type": "string"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
+    },
+    "EmailActivationRequest": {
+      "type": "object",
+      "properties": {
+        "Email": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
     "PhoneCodeRequest": {
       "type": "object",
@@ -311,12 +367,6 @@
         },
         "Fmt": {
           "type": "string"
-        },
-        "Login": {
-          "type": "string"
-        },
-        "Pwd": {
-          "type": "string"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
@@ -343,6 +393,12 @@
   },
   "responses": {
     "checkCodeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "emailRegistrationResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
