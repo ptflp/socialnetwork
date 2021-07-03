@@ -67,7 +67,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Проверка смс кода.",
+        "summary": "Отправка ссылки активации на почту.",
         "operationId": "EmailActivationRequest",
         "parameters": [
           {
@@ -81,6 +81,29 @@
         "responses": {
           "200": {
             "$ref": "#/responses/emailRegistrationResponse"
+          }
+        }
+      }
+    },
+    "/auth/email/verification": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Подтверждение почты, авторизация.",
+        "operationId": "EmailVerificationRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/EmailVerificationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/EmailVerificationResponse"
           }
         }
       }
@@ -201,6 +224,33 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
     },
+    "AuthTokenData": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-go-name": "Token"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "AuthTokenResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/AuthTokenData"
+        },
+        "msg": {
+          "type": "string",
+          "x-go-name": "Msg"
+        },
+        "success": {
+          "type": "boolean",
+          "x-go-name": "Success"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "CheckCodeRequest": {
       "type": "object",
       "properties": {
@@ -208,8 +258,9 @@
           "type": "integer",
           "format": "int64"
         },
-        "Phone": {
-          "type": "string"
+        "phone": {
+          "type": "string",
+          "x-go-name": "Phone"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -287,11 +338,23 @@
     "EmailActivationRequest": {
       "type": "object",
       "properties": {
-        "Email": {
-          "type": "string"
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
         },
-        "Password": {
-          "type": "string"
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "EmailVerificationRequest": {
+      "type": "object",
+      "properties": {
+        "activation_id": {
+          "type": "string",
+          "x-go-name": "ActivationID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -344,14 +407,17 @@
     "Response": {
       "type": "object",
       "properties": {
-        "Data": {
-          "type": "object"
+        "data": {
+          "type": "object",
+          "x-go-name": "Data"
         },
-        "Msg": {
-          "type": "string"
+        "msg": {
+          "type": "string",
+          "x-go-name": "Msg"
         },
-        "Success": {
-          "type": "boolean"
+        "success": {
+          "type": "boolean",
+          "x-go-name": "Success"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -392,10 +458,16 @@
     }
   },
   "responses": {
+    "EmailVerificationResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/AuthTokenResponse"
+      }
+    },
     "checkCodeResponse": {
       "description": "",
       "schema": {
-        "$ref": "#/definitions/Response"
+        "$ref": "#/definitions/AuthTokenData"
       }
     },
     "emailRegistrationResponse": {

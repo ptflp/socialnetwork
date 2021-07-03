@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"math/rand"
 	"net/url"
+	"strings"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -105,12 +106,32 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 
 	err = a.userRepository.CreateUserByEmailPassword(ctx, u.Email, u.Password)
 	if err != nil {
-		return "", err
+		if strings.Contains(err.Error(), "Duplicate entry") {
+			u, err = a.userRepository.FindByEmail(ctx, u.Email)
+			if err != nil {
+				return "", err
+			}
+			if u.EmailVerified == 1 {
+				return "", errors.New(fmt.Sprintf("user with email %s already verified", u.Email))
+			}
+			if u.EmailVerified == 0 {
+				u.EmailVerified = 1
+				err = a.userRepository.Update(ctx, u)
+				if err != nil {
+					return "", err
+				}
+			}
+		} else {
+			return "", err
+		}
 	}
 
 	u, err = a.userRepository.FindByEmail(ctx, u.Email)
-	if err != nil || u.ID > 0 {
+	if err != nil {
 		return "", err
+	}
+	if u.ID == 0 {
+		return "", errors.New("email verification wrong user.ID")
 	}
 
 	token, err := a.JWTKeys.CreateToken(u)

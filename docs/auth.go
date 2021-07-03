@@ -56,14 +56,14 @@ type emailActivationParams struct {
 }
 
 // swagger:route POST /auth/email/verification auth EmailVerificationRequest
-// Подтверждение почты, авторизация
+// Подтверждение почты, авторизация.
 // responses:
 //   200: EmailVerificationResponse
 
 // swagger:response EmailVerificationResponse
 type emailVerificationResponse struct {
 	// in:body
-	Body request.AuthTokenData
+	Body request.AuthTokenResponse
 }
 
 // swagger:parameters EmailVerificationRequest
