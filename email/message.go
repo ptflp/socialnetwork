@@ -14,8 +14,8 @@ import (
 const (
 	Delimiter = "**=myohmy689407924327"
 
-	MessageHtml  = "text/html"
-	MessagePlain = "text/plain"
+	TypeHtml  = "text/html"
+	TypePlain = "text/plain"
 )
 
 type Message struct {
@@ -24,7 +24,6 @@ type Message struct {
 	toRaw       string
 	from        string
 	to          string
-	cc          string
 	subject     string
 	mimeVersion string
 	contentType string
@@ -34,12 +33,12 @@ type Message struct {
 
 func NewMessage() *Message {
 	return &Message{
-		typeRaw:     MessagePlain,
+		typeRaw:     TypePlain,
 		mimeVersion: "MIME-Version: 1.0\r\n",
 		contentType: fmt.Sprintf("Content-Type: multipart/mixed; boundary=\"%s\"\r\n", Delimiter),
 		delimiter:   fmt.Sprintf("\r\n--%s\r\n", Delimiter),
 		body: body{
-			contentType:             fmt.Sprintf("Content-Type: %s; charset=\"utf-8\"\r\n", MessagePlain),
+			contentType:             fmt.Sprintf("Content-Type: %s; charset=\"utf-8\"\r\n", TypePlain),
 			contentTransferEncoding: "Content-Transfer-Encoding: 7bit\r\n",
 		},
 	}
@@ -53,7 +52,11 @@ type body struct {
 }
 
 func (b *body) String() string {
-	return concat(b.contentType, b.contentTransferEncoding, b.body, "\r\n", b.files.String())
+	filesString := ""
+	if b.files != nil {
+		filesString = b.files.String()
+	}
+	return concat(b.contentType, b.contentTransferEncoding, b.body, "\r\n", filesString)
 }
 
 func concat(args ...string) string {
@@ -101,7 +104,6 @@ func (m *Message) SetFrom(from string) {
 func (m *Message) SetReceiver(rcpt string) {
 	m.toRaw = rcpt
 	m.to = fmt.Sprintf("To: %s\r\n", rcpt)
-	m.cc = fmt.Sprintf("Cc: %s\r\n", rcpt)
 }
 
 func (m *Message) GetReceiver() string {
@@ -135,7 +137,7 @@ func (m *Message) Validate() error {
 	if m.body.body == "" {
 		return errors.New("body not set")
 	}
-	if m.typeRaw != MessagePlain && m.typeRaw != MessageHtml {
+	if m.typeRaw != TypePlain && m.typeRaw != TypeHtml {
 		return fmt.Errorf("wrong email body content-type %s", m.typeRaw)
 	}
 
@@ -146,7 +148,6 @@ func (m *Message) String() string {
 	return concat(
 		m.from,
 		m.to,
-		m.cc,
 		m.subject,
 		m.mimeVersion,
 		m.contentType,

@@ -78,7 +78,7 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 
 	msg := email.NewMessage()
 	msg.SetSubject("Активация учетной записи")
-	msg.SetType(email.MessageHtml)
+	msg.SetType(email.TypeHtml)
 	msg.SetReceiver(req.Email)
 	msg.SetBody(body)
 
@@ -89,6 +89,9 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 
 	data := req
 	hashPass, err := hasher.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
 	data.Password = hashPass
 
 	// 2. Set email code to cache
@@ -112,7 +115,7 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 				return "", err
 			}
 			if u.EmailVerified == 1 {
-				return "", errors.New(fmt.Sprintf("user with email %s already verified", u.Email))
+				return "", fmt.Errorf("user with email %s already verified", u.Email)
 			}
 			if u.EmailVerified == 0 {
 				u.EmailVerified = 1
