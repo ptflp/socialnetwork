@@ -71,3 +71,20 @@ type emailVerificationParams struct {
 	// in:body
 	Body request.EmailVerificationRequest
 }
+
+// swagger:route POST /auth/email/login auth EmailLoginRequest
+// Авторизация пользователя по емейл + пароль.
+// responses:
+//   200: EmailLoginResponse
+
+// swagger:response EmailLoginResponse
+type emailLoginResponse struct {
+	// in:body
+	Body request.AuthTokenResponse
+}
+
+// swagger:parameters EmailLoginRequest
+type emailLoginParams struct {
+	// in:body
+	Body request.EmailLoginRequest
+}

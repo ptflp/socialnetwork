@@ -11,4 +11,5 @@ type AuthService interface {
 	CheckCode(ctx context.Context, req *request.CheckCodeRequest) (string, error)
 	EmailActivation(ctx context.Context, req *request.EmailActivationRequest) error
 	EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (string, error)
+	EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (string, error)
 }

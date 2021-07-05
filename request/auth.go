@@ -17,3 +17,8 @@ type EmailActivationRequest struct {
 type EmailVerificationRequest struct {
 	ActivationID string `json:"activation_id"`
 }
+
+type EmailLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

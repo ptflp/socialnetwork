@@ -81,6 +81,37 @@ func (a *authController) EmailVerification() http.HandlerFunc {
 	}
 }
 
+func (a *authController) EmailLogin() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var emailLoginReq request.EmailLoginRequest
+		err := json.NewDecoder(r.Body).Decode(&emailLoginReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		token, err := a.authService.EmailLogin(r.Context(), &emailLoginReq)
+		if err != nil {
+			a.SendJSON(w, request.AuthTokenResponse{
+				Success: false,
+				Msg:     fmt.Sprintf("email login err: %s", err),
+				Data: request.AuthTokenData{
+					Token: "",
+				},
+			})
+			return
+		}
+
+		a.SendJSON(w, request.AuthTokenResponse{
+			Success: true,
+			Msg:     "",
+			Data: request.AuthTokenData{
+				Token: token,
+			},
+		})
+	}
+}
+
 func (a *authController) SendCode() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var sendCodeReq request.PhoneCodeRequest

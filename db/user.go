@@ -47,6 +47,7 @@ func (u *userRepository) FindByEmail(ctx context.Context, email string) (infoblo
 		Email:         email,
 		Phone:         phone.String,
 		EmailVerified: emailVerified.Int64,
+		Password:      password.String,
 	}, nil
 
 }

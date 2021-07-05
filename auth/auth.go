@@ -145,6 +145,29 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 	return token, nil
 }
 
+func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (string, error) {
+	var u infoblog.User
+
+	u, err := a.userRepository.FindByEmail(ctx, req.Email)
+	if err != nil {
+		return "", err
+	}
+	if u.ID == 0 {
+		return "", errors.New("wrong user.ID")
+	}
+
+	if !hasher.CheckPasswordHash(req.Password, u.Password) {
+		return "", errors.New("wrong email password")
+	}
+
+	token, err := a.JWTKeys.CreateToken(u)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 func (a *service) generateActivationUrl(email string) (string, string, error) {
 	uid := uuid.NewV4()
 	dh := uid.Bytes()
