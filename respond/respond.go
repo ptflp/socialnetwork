@@ -15,6 +15,8 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Responder interface {
 	SendJSON(w http.ResponseWriter, responseData interface{})
+
+	ErrorUnauthorized(w http.ResponseWriter, err error)
 	ErrorBadRequest(w http.ResponseWriter, err error)
 	ErrorForbidden(w http.ResponseWriter, err error)
 	ErrorInternal(w http.ResponseWriter, err error)
@@ -56,6 +58,19 @@ func (r *Respond) ErrorForbidden(w http.ResponseWriter, err error) {
 	r.log.Warn("http resposne forbidden", zap.Error(err))
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(http.StatusForbidden)
+	if err := json.NewEncoder(w).Encode(request.Response{
+		Success: false,
+		Msg:     err.Error(),
+		Data:    nil,
+	}); err != nil {
+		r.log.Error("response writer error on write", zap.Error(err))
+	}
+}
+
+func (r *Respond) ErrorUnauthorized(w http.ResponseWriter, err error) {
+	r.log.Warn("http resposne Unauthorized", zap.Error(err))
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.WriteHeader(http.StatusUnauthorized)
 	if err := json.NewEncoder(w).Encode(request.Response{
 		Success: false,
 		Msg:     err.Error(),
