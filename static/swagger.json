@@ -136,7 +136,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Авторизация.",
+        "summary": "Обновление токена.",
         "operationId": "RefreshTokenRequest",
         "parameters": [
           {
