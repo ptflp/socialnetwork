@@ -133,7 +133,7 @@ func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, erro
 
 func (j *JWTKeys) CreateAccessToken(u infoblog.User) (string, error) {
 	token, err := j.GenerateToken(jwt.MapClaims{
-		"exp": time.Now().UTC().Add(time.Minute * 1).Unix(),
+		"exp": time.Now().UTC().Add(time.Minute * 20).Unix(),
 		"uid": u.ID,
 	})
 
