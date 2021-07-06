@@ -97,8 +97,8 @@ func (j *JWTKeys) CreateToken(u infoblog.User) (string, error) {
 		return "", err
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"ExpiresAt": time.Now().UTC().Add(time.Minute * 20).Unix(),
-		"ID":        u.ID,
+		"exp": time.Now().UTC().Add(time.Minute * 20).Unix(),
+		"id":  u.ID,
 	})
 
 	return token.SignedString(signKey)
@@ -116,15 +116,35 @@ func (j *JWTKeys) ExtractToken(r *http.Request) (*infoblog.User, error) {
 		return nil, err
 	}
 
-	if token.Valid {
-		c := token.Claims.(jwt.MapClaims)
-		u := &infoblog.User{
-			ID: int64(c["ID"].(float64)),
-		}
-
-		return u, nil
+	if !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
-	return nil, errors.New("invalid token")
+	c := token.Claims.(jwt.MapClaims)
+	var uid, exp int64
+
+	if v, ok := c["ExpiresAt"]; ok {
+		exp = int64(v.(float64))
+	}
+	if v, ok := c["exp"]; ok {
+		exp = int64(v.(float64))
+	}
+
+	now := time.Now().Unix()
+	if now > exp {
+		return nil, errors.New("token expired")
+	}
+
+	if v, ok := c["ID"]; ok {
+		uid = int64(v.(float64))
+	}
+	if v, ok := c["id"]; ok {
+		uid = int64(v.(float64))
+	}
+	u := &infoblog.User{
+		ID: uid,
+	}
+
+	return u, nil
 
 }
