@@ -36,11 +36,7 @@ func (a *authController) RefreshToken() http.HandlerFunc {
 		}
 		token, err := a.authService.RefreshToken(r.Context(), &refreshTokenReq)
 		if err != nil {
-			a.SendJSON(w, request.Response{
-				Success: false,
-				Msg:     fmt.Sprintf("refresh token err: %s", err),
-				Data:    nil,
-			})
+			a.ErrorForbidden(w, err)
 			return
 		}
 		a.SendJSON(w, request.AuthTokenResponse{
