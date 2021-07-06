@@ -63,11 +63,14 @@ func main() {
 		logger.Fatal("config initialization error", zap.Error(err))
 	}
 
-	jwt, _ := session.NewJWTKeys(logger)
-
 	c, err := cache.NewRedisCache(conf.Redis)
 	if err != nil {
 		logger.Fatal("redis initialization error", zap.Error(err))
+	}
+
+	jwt, err := session.NewJWTKeys(logger, c)
+	if err != nil {
+		logger.Fatal("jwt initialization error", zap.Error(err))
 	}
 
 	database, err := db.NewDB(logger, conf.DB)

@@ -12,4 +12,5 @@ var (
 type Cache interface {
 	Get(key string, ptrValue interface{}) error
 	Set(key string, ptrValue interface{}, expires time.Duration)
+	Del(key string) error
 }

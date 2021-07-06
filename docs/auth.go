@@ -88,3 +88,20 @@ type emailLoginParams struct {
 	// in:body
 	Body request.EmailLoginRequest
 }
+
+// swagger:route POST /auth/token/refresh auth RefreshTokenRequest
+// Авторизация.
+// responses:
+//   200: RefreshResponse
+
+// swagger:response RefreshResponse
+type refTokenResponse struct {
+	// in:body
+	Body request.AuthTokenResponse
+}
+
+// swagger:parameters RefreshTokenRequest
+type refTokenParams struct {
+	// in:body
+	Body request.RefreshTokenRequest
+}

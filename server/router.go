@@ -64,11 +64,17 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))).ServeHTTP(w, r)
 	})
 
+	r.Route("/token", func(r chi.Router) {
+	})
+
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
 		r.Post("/email/verification", authController.EmailVerification())
 		r.Post("/email/login", authController.EmailLogin())
 		r.Post("/checkemail", authController.CheckCode())
+
+		r.Post("/token/refresh", authController.RefreshToken())
+
 		r.Post("/code", authController.SendCode())
 		r.Post("/checkcode", authController.CheckCode())
 	})

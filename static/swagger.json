@@ -131,6 +131,29 @@
         }
       }
     },
+    "/auth/token/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Авторизация.",
+        "operationId": "RefreshTokenRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/RefreshTokenRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/RefreshResponse"
+          }
+        }
+      }
+    },
     "/profile/get": {
       "get": {
         "security": [
@@ -250,9 +273,13 @@
     "AuthTokenData": {
       "type": "object",
       "properties": {
-        "token": {
+        "access_token": {
           "type": "string",
-          "x-go-name": "Token"
+          "x-go-name": "AccessToken"
+        },
+        "refresh_token": {
+          "type": "string",
+          "x-go-name": "RefreshToken"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -441,6 +468,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
     },
+    "RefreshTokenRequest": {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "type": "string",
+          "x-go-name": "RefreshToken"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "Response": {
       "type": "object",
       "properties": {
@@ -502,6 +539,12 @@
       }
     },
     "EmailVerificationResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/AuthTokenResponse"
+      }
+    },
+    "RefreshResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/AuthTokenResponse"

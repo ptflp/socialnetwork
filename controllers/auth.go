@@ -26,6 +26,31 @@ func NewAuth(responder respond.Responder, authService infoblog.AuthService, logg
 	}
 }
 
+func (a *authController) RefreshToken() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var refreshTokenReq request.RefreshTokenRequest
+		err := json.NewDecoder(r.Body).Decode(&refreshTokenReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+		token, err := a.authService.RefreshToken(r.Context(), &refreshTokenReq)
+		if err != nil {
+			a.SendJSON(w, request.Response{
+				Success: false,
+				Msg:     fmt.Sprintf("refresh token err: %s", err),
+				Data:    nil,
+			})
+			return
+		}
+		a.SendJSON(w, request.AuthTokenResponse{
+			Success: false,
+			Msg:     "",
+			Data:    *token,
+		})
+	}
+}
+
 func (a *authController) EmailActivation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var emailActivationReq request.EmailActivationRequest
@@ -61,12 +86,10 @@ func (a *authController) EmailVerification() http.HandlerFunc {
 
 		token, err := a.authService.EmailVerification(r.Context(), &emailVerificationReq)
 		if err != nil {
-			a.SendJSON(w, request.AuthTokenResponse{
+			a.SendJSON(w, request.Response{
 				Success: false,
 				Msg:     fmt.Sprintf("email verification err: %s", err),
-				Data: request.AuthTokenData{
-					Token: "",
-				},
+				Data:    nil,
 			})
 			return
 		}
@@ -74,9 +97,7 @@ func (a *authController) EmailVerification() http.HandlerFunc {
 		a.SendJSON(w, request.AuthTokenResponse{
 			Success: true,
 			Msg:     "Ваша почта успешно активирована",
-			Data: request.AuthTokenData{
-				Token: token,
-			},
+			Data:    *token,
 		})
 	}
 }
@@ -92,12 +113,10 @@ func (a *authController) EmailLogin() http.HandlerFunc {
 
 		token, err := a.authService.EmailLogin(r.Context(), &emailLoginReq)
 		if err != nil {
-			a.SendJSON(w, request.AuthTokenResponse{
+			a.SendJSON(w, request.Response{
 				Success: false,
 				Msg:     fmt.Sprintf("email login err: %s", err),
-				Data: request.AuthTokenData{
-					Token: "",
-				},
+				Data:    nil,
 			})
 			return
 		}
@@ -105,9 +124,7 @@ func (a *authController) EmailLogin() http.HandlerFunc {
 		a.SendJSON(w, request.AuthTokenResponse{
 			Success: true,
 			Msg:     "",
-			Data: request.AuthTokenData{
-				Token: token,
-			},
+			Data:    *token,
 		})
 	}
 }
@@ -156,9 +173,7 @@ func (a *authController) CheckCode() http.HandlerFunc {
 		a.SendJSON(w, request.AuthTokenResponse{
 			Success: true,
 			Msg:     "",
-			Data: request.AuthTokenData{
-				Token: token,
-			},
+			Data:    *token,
 		})
 	}
 }

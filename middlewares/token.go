@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"gitlab.com/InfoBlogFriends/server/session"
@@ -23,9 +24,9 @@ func NewCheckToken(responder respond.Responder, jwt *session.JWTKeys) *Token {
 
 func (t *Token) Check(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u, err := t.jwt.ExtractToken(r)
-		if err != nil && err.Error() == "token expired" {
-			t.ErrorUnauthorized(w, err)
+		u, err := t.jwt.ExtractAccessToken(r)
+		if err != nil && (err.Error() == "token expired" || err.Error() == "Token is expired") {
+			t.ErrorUnauthorized(w, errors.New("token expired"))
 			return
 		}
 		if err != nil {

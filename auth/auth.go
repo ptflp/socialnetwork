@@ -3,12 +3,12 @@ package auth
 import (
 	"bytes"
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"html/template"
 	"math/rand"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -100,11 +100,11 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 	return nil
 }
 
-func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (string, error) {
+func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
 	err := a.cache.Get(fmt.Sprintf(EmailVerificationKey, req.ActivationID), &u)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	err = a.userRepository.CreateUserByEmailPassword(ctx, u.Email, u.Password)
@@ -112,57 +112,86 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			u, err = a.userRepository.FindByEmail(ctx, u.Email)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
 			if u.EmailVerified == 1 {
-				return "", fmt.Errorf("user with email %s already verified", u.Email)
+				return nil, fmt.Errorf("user with email %s already verified", u.Email)
 			}
 			if u.EmailVerified == 0 {
 				u.EmailVerified = 1
 				err = a.userRepository.Update(ctx, u)
 				if err != nil {
-					return "", err
+					return nil, err
 				}
 			}
 		} else {
-			return "", err
+			return nil, err
 		}
 	}
 
 	u, err = a.userRepository.FindByEmail(ctx, u.Email)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if u.ID == 0 {
-		return "", errors.New("email verification wrong user.ID")
+		return nil, errors.New("email verification wrong user.ID")
 	}
 
-	token, err := a.JWTKeys.CreateToken(u)
+	authTokens, err := a.JWTKeys.GenerateAuthTokens(&u)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return authTokens, nil
 }
 
-func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (string, error) {
+func (a *service) RefreshToken(ctx context.Context, req *request.RefreshTokenRequest) (*request.AuthTokenData, error) {
+	var u infoblog.User
+	refreshToken, err := a.JWTKeys.ExtractRefreshToken(req.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	key := strings.Join([]string{session.RefreshTokenKey, strconv.Itoa(int(refreshToken.UID)), refreshToken.Token}, ":")
+	err = a.cache.Get(key, &u)
+	if err != nil {
+		return nil, err
+	}
+	err = a.cache.Del(key)
+	if err != nil {
+		a.logger.Error("cache refresh_token del", zap.Error(err))
+	}
+	u, err = a.userRepository.Find(ctx, u.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	authTokens, err := a.JWTKeys.GenerateAuthTokens(&u)
+	if err != nil {
+		return nil, err
+	}
+
+	return authTokens, nil
+}
+
+func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
 
 	u, err := a.userRepository.FindByEmail(ctx, req.Email)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if u.ID == 0 {
-		return "", errors.New("wrong user.ID")
+		return nil, errors.New("wrong user.ID")
 	}
 
 	if !hasher.CheckPasswordHash(req.Password, u.Password) {
-		return "", errors.New("wrong email password")
+		return nil, errors.New("wrong email password")
 	}
 
-	token, err := a.JWTKeys.CreateToken(u)
+	token, err := a.JWTKeys.GenerateAuthTokens(&u)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return token, nil
@@ -172,7 +201,7 @@ func (a *service) generateActivationUrl(email string) (string, string, error) {
 	uid := uuid.NewV4()
 	dh := uid.Bytes()
 	dh = append(dh, []byte(email)...)
-	hash := hex.EncodeToString(hasher.NewSHA256(dh))
+	hash := hasher.NewSHA256(dh)
 
 	u, err := url.Parse(a.config.App.FrontEnd)
 	if err != nil {
@@ -222,36 +251,36 @@ func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) b
 	return err == nil
 }
 
-func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) (string, error) {
+func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) (*request.AuthTokenData, error) {
 	var code int
 	phone, err := validators.CheckPhoneFormat(req.Phone)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	err = a.cache.Get("code:"+phone, &code)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if code != req.Code {
-		return "", errors.New("phone code mismatch")
+		return nil, errors.New("phone code mismatch")
 	}
 
 	u, err := a.userRepository.FindByPhone(ctx, phone)
 	if err != nil {
 		err = a.userRepository.CreateUserByPhone(ctx, phone)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		u, err = a.userRepository.FindByPhone(ctx, phone)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 
-	token, err := a.JWTKeys.CreateToken(u)
+	token, err := a.JWTKeys.GenerateAuthTokens(&u)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return token, err

@@ -5,11 +5,18 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/cache"
+
+	"gitlab.com/InfoBlogFriends/server/hasher"
 
 	"github.com/dgrijalva/jwt-go/request"
 
 	infoblog "gitlab.com/InfoBlogFriends/server"
+	req "gitlab.com/InfoBlogFriends/server/request"
 
 	"github.com/dgrijalva/jwt-go"
 	"go.uber.org/zap"
@@ -18,6 +25,11 @@ import (
 const (
 	privKeyPath = "./keys/private"
 	pubKeyPath  = "./keys/public"
+
+	Month = 30 * Day
+	Day   = 24 * time.Hour
+
+	RefreshTokenKey = "refresh_token"
 )
 
 type JWTKeys struct {
@@ -26,11 +38,13 @@ type JWTKeys struct {
 	signBytes   []byte
 	verifyBytes []byte
 	logger      *zap.Logger
+	cache       cache.Cache
 }
 
-func NewJWTKeys(logger *zap.Logger) (*JWTKeys, error) {
+func NewJWTKeys(logger *zap.Logger, cache cache.Cache) (*JWTKeys, error) {
 	j := &JWTKeys{
 		logger: logger,
+		cache:  cache,
 	}
 	err := j.ReadKeys()
 	if err != nil {
@@ -91,20 +105,109 @@ func (j *JWTKeys) GetVerifyKey() (*rsa.PublicKey, error) {
 	return j.verifyKey, nil
 }
 
-func (j *JWTKeys) CreateToken(u infoblog.User) (string, error) {
+type JWTAuth struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshToken struct {
+	Token string `json:"token"`
+	UID   int64  `json:"uid"`
+}
+
+func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, error) {
+	access, err := j.CreateAccessToken(*u)
+	if err != nil {
+		return nil, err
+	}
+	refresh, err := j.CreateRefreshToken(access, u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &req.AuthTokenData{
+		AccessToken:  access,
+		RefreshToken: refresh,
+	}, err
+}
+
+func (j *JWTKeys) CreateAccessToken(u infoblog.User) (string, error) {
+	token, err := j.GenerateToken(jwt.MapClaims{
+		"exp": time.Now().UTC().Add(time.Minute * 1).Unix(),
+		"uid": u.ID,
+	})
+
+	return token, err
+}
+
+func (j *JWTKeys) CreateRefreshToken(accessToken string, u *infoblog.User) (string, error) {
+	refreshToken := hasher.NewSHA256([]byte(accessToken))
+
+	key := strings.Join([]string{RefreshTokenKey, strconv.Itoa(int(u.ID)), refreshToken}, ":")
+	j.cache.Set(key, u, 2*Month)
+
+	return j.GenerateToken(jwt.MapClaims{
+		"refresh_token": refreshToken,
+		"exp":           time.Now().UTC().Add(2 * Month).Unix(),
+		"uid":           u.ID,
+	})
+}
+
+func (j *JWTKeys) GenerateToken(m jwt.MapClaims) (string, error) {
 	signKey, err := j.GetSignKey()
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, m)
 	if err != nil {
 		return "", err
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"exp": time.Now().UTC().Add(time.Minute * 20).Unix(),
-		"id":  u.ID,
-	})
 
 	return token.SignedString(signKey)
 }
 
-func (j *JWTKeys) ExtractToken(r *http.Request) (*infoblog.User, error) {
+func (j *JWTKeys) ExtractRefreshToken(rawToken string) (*RefreshToken, error) {
+	verifyKey, err := j.GetVerifyKey()
+	if err != nil {
+		return nil, err
+	}
+	token, err := jwt.Parse(rawToken, func(token *jwt.Token) (interface{}, error) {
+		return verifyKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	c := token.Claims.(jwt.MapClaims)
+
+	v, ok := c["exp"]
+	if !ok {
+		return nil, errors.New("jwt map claims err: exp")
+	}
+
+	exp := int64(v.(float64))
+	now := time.Now().Unix()
+	if now > exp {
+		return nil, errors.New("refresh token expired")
+	}
+
+	refreshToken, ok := c["refresh_token"]
+	if !ok {
+		return nil, errors.New("jwt map claims err: refresh_token")
+	}
+
+	uid, ok := c["uid"]
+	if !ok {
+		return nil, errors.New("jwt map claims err: uid")
+	}
+
+	return &RefreshToken{
+		Token: refreshToken.(string),
+		UID:   int64(uid.(float64)),
+	}, nil
+}
+
+func (j *JWTKeys) ExtractAccessToken(r *http.Request) (*infoblog.User, error) {
 	verifyKey, err := j.GetVerifyKey()
 	if err != nil {
 		return nil, err
@@ -138,7 +241,7 @@ func (j *JWTKeys) ExtractToken(r *http.Request) (*infoblog.User, error) {
 	if v, ok := c["ID"]; ok {
 		uid = int64(v.(float64))
 	}
-	if v, ok := c["id"]; ok {
+	if v, ok := c["uid"]; ok {
 		uid = int64(v.(float64))
 	}
 	u := &infoblog.User{
