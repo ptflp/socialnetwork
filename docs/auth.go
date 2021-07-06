@@ -90,7 +90,7 @@ type emailLoginParams struct {
 }
 
 // swagger:route POST /auth/token/refresh auth RefreshTokenRequest
-// Авторизация.
+// Обновление токена.
 // responses:
 //   200: RefreshResponse
 
