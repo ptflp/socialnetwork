@@ -21,7 +21,7 @@ type profileController struct {
 	logger *zap.Logger
 }
 
-func NewProfileHandler(responder respond.Responder, user *service.User, logger *zap.Logger) *profileController {
+func NewProfileController(responder respond.Responder, user *service.User, logger *zap.Logger) *profileController {
 	return &profileController{
 		Responder: responder,
 		user:      user,
