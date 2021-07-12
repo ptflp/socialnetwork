@@ -7,8 +7,8 @@ db:
   driver: "mysql"
   dbname: "infoblog"
   username: "root"
-  password: "root"
-  host: "127.0.0.1"
+  password: "jxtymCkj;ysGfhjkm"
+  host: "157.245.249.1"
   timeout: 10
 
 redis:
