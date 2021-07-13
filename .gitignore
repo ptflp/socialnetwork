@@ -1,3 +1,4 @@
 keys/private
 keys/public
 .env
+public/

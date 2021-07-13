@@ -12,6 +12,8 @@ import (
 type Services struct {
 	AuthService infoblog.AuthService
 	User        *service.User
+	Post        *service.Post
+	File        *service.File
 }
 
 type Components struct {

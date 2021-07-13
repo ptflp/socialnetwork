@@ -64,9 +64,6 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))).ServeHTTP(w, r)
 	})
 
-	r.Route("/token", func(r chi.Router) {
-	})
-
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
 		r.Post("/email/verification", authController.EmailVerification())
@@ -80,14 +77,23 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 	})
 
 	token := middlewares.NewCheckToken(components.Responder, components.JWTKeys)
-	profileHandler := controllers.NewProfileHandler(components.Responder, services.User, components.Logger)
+	profileController := controllers.NewProfileController(components.Responder, services.User, components.Logger)
 	r.Route("/profile", func(r chi.Router) {
 		r.Use(token.Check)
-		r.Post("/update", profileHandler.Update())
-		r.Get("/get", profileHandler.GetProfile())
+		r.Post("/update", profileController.Update())
+		r.Get("/get", profileController.GetProfile())
 		r.Route("/set", func(r chi.Router) {
-			r.Post("/password", profileHandler.SetPassword())
+			r.Post("/password", profileController.SetPassword())
 		})
+	})
+
+	posts := controllers.NewPostsController(components.Responder, services.User, components.Logger)
+	r.Route("/posts", func(r chi.Router) {
+		r.Use(token.Check)
+		r.Post("/add", posts.Add())
+		r.Post("/update/{ID}", profileController.Update())
+		r.Post("/delete/{ID}", profileController.Update())
+		r.Post("/get/list", profileController.Update())
 	})
 
 	r.Route("/system", func(r chi.Router) {
