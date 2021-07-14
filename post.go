@@ -12,6 +12,8 @@ type Post struct {
 	UserID    int64     `json:"user_id"`
 	Active    int64     `json:"active" db:"active"`
 	Type      int64     `json:"type" db:"type""`
+	UUID      string    `json:"uuid" db:"uuid"`
+	FileUUID  string    `json:"file_uuid" db:"file_uuid"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

@@ -3,7 +3,7 @@ package docs
 import "gitlab.com/InfoBlogFriends/server/request"
 
 // swagger:route POST /posts/create posts postsCreateRequest
-// Обновление профиля.
+// Создание поста с файлом.
 // security:
 //   - Bearer: []
 // responses:
@@ -16,6 +16,7 @@ type postsCreateResponse struct {
 }
 
 // swagger:parameters postsCreateRequest
+// Здесь все поля multipart/form-data, go-swagger не поддерживает формы, можно отправить запрос Postman
 type postsCreateParams struct {
 	// in:body
 	FormData request.PostCreateReq

@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
@@ -31,7 +30,7 @@ func NewFileService(fileRep infoblog.FileRepository) *File {
 	return &File{fileRep: fileRep}
 }
 
-func (f *File) SaveFileSystem(formFile FormFile, uid int64) (infoblog.File, error) {
+func (f *File) SaveFileSystem(formFile FormFile, uid int64, fileUUID string) (infoblog.File, error) {
 	if _, err := os.Stat(UploadDirectory); os.IsNotExist(err) {
 		err = os.Mkdir(UploadDirectory, 0755)
 		if err != nil {
@@ -47,20 +46,13 @@ func (f *File) SaveFileSystem(formFile FormFile, uid int64) (infoblog.File, erro
 		}
 	}
 
-	fileUUID, err := uuid.NewUUID()
-	if err != nil {
-		return infoblog.File{}, err
-	}
-
 	if !strings.Contains(formFile.FileHeader.Filename, ".") {
 		return infoblog.File{}, fmt.Errorf("filename without extension %s", formFile.FileHeader.Filename)
 	}
 
 	s := strings.Split(formFile.FileHeader.Filename, ".")
-	tlen := len(fileUUID.String())
 
-	_ = tlen
-	fileName := strings.Join([]string{fileUUID.String(), s[len(s)-1]}, ".")
+	fileName := strings.Join([]string{fileUUID, s[len(s)-1]}, ".")
 	filePath := path.Join(dir, fileName)
 
 	out, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0755)

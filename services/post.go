@@ -2,7 +2,13 @@ package services
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"path"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/request"
 
@@ -20,16 +26,34 @@ func NewPostService(reps infoblog.Repositories, file *File) *Post {
 
 func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostCreateReq, u *infoblog.User) (request.PostDataResponse, error) {
 	// 1. save file to filesystem
-	file, err := p.file.SaveFileSystem(formFile, u.ID)
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Intn(89) + 10
+
+	fUUID, err := uuid.NewUUID()
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	fileUUID := strings.Join([]string{fUUID.String(), fmt.Sprintf("-f%d", id)}, "")
+
+	file, err := p.file.SaveFileSystem(formFile, u.ID, fileUUID)
 	if err != nil {
 		return request.PostDataResponse{}, err
 	}
 
 	// 2. save post to db
+
+	pUUID, err := uuid.NewUUID()
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+	postUUID := strings.Join([]string{pUUID.String(), fmt.Sprintf("-p%d", id)}, "")
+
 	post := infoblog.Post{
 		Body:   req.Body,
 		UserID: u.ID,
 		Type:   1,
+		UUID:   postUUID,
 	}
 	err = p.savePostDB(ctx, &post)
 	if err != nil {
@@ -41,6 +65,7 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 	file.Active = 1
 	file.Type = 1
 	file.UserID = u.ID
+	file.ForeignUUID = postUUID
 
 	err = p.file.SaveDB(ctx, &file)
 	if err != nil {
