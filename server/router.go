@@ -66,6 +66,9 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 	r.Get("/static/*", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))).ServeHTTP(w, r)
 	})
+	r.Get("/public/*", func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/public/", http.FileServer(http.Dir("./public"))).ServeHTTP(w, r)
+	})
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
@@ -93,7 +96,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 	posts := controllers.NewPostsController(cmps.Responder(), services.User, services.File, services.Post, cmps.Logger())
 	r.Route("/posts", func(r chi.Router) {
 		r.Use(token.Check)
-		r.Post("/add", posts.Add())
+		r.Post("/create", posts.Create())
 		r.Post("/update/{ID}", profileController.Update())
 		r.Post("/delete/{ID}", profileController.Update())
 		r.Post("/get/list", profileController.Update())

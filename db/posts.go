@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	createPost = "INSERT INTO posts (body, file_id, active, type) VALUES (?, ?, 1, 1)"
+	createPost = "INSERT INTO posts (body, file_id, user_id, type) VALUES (?, ?, ?, 1)"
 
 	updatePost = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
 	deletePost = "UPDATE posts SET active = ? WHERE id = ?"
@@ -25,7 +25,7 @@ type postsRepository struct {
 }
 
 func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, error) {
-	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID)
+	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID, p.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -72,6 +72,7 @@ func (pr *postsRepository) Find(ctx context.Context, id int64) (infoblog.Post, e
 
 	return infoblog.Post{
 		ID:        id,
+		Type:      typeID.Int64,
 		Body:      body.String,
 		FileID:    fileID.Int64,
 		UserID:    userID.Int64,

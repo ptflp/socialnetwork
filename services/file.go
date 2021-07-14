@@ -40,6 +40,12 @@ func (f *File) SaveFileSystem(formFile FormFile, uid int64) (infoblog.File, erro
 	}
 
 	dir := path.Join(UploadDirectory, strconv.Itoa(int(uid)))
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.Mkdir(dir, 0755)
+		if err != nil {
+			return infoblog.File{}, err
+		}
+	}
 
 	fileUUID, err := uuid.NewUUID()
 	if err != nil {

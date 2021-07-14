@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"path"
 
 	"gitlab.com/InfoBlogFriends/server/request"
 
@@ -17,11 +18,11 @@ func NewPostService(reps infoblog.Repositories, file *File) *Post {
 	return &Post{post: reps.Posts, file: file}
 }
 
-func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostAddReq, u *infoblog.User) (infoblog.Post, error) {
+func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostAddReq, u *infoblog.User) (request.PostDataResponse, error) {
 	// 1. save file to filesystem
 	file, err := p.file.SaveFileSystem(formFile, u.ID)
 	if err != nil {
-		return infoblog.Post{}, err
+		return request.PostDataResponse{}, err
 	}
 
 	// 2. save post to db
@@ -32,16 +33,18 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 	}
 	err = p.savePostDB(ctx, &post)
 	if err != nil {
-		return infoblog.Post{}, err
+		return request.PostDataResponse{}, err
 	}
 
 	// 3. update file info, save to db
 	file.ForeignID = post.ID
 	file.Active = 1
 	file.Type = 1
+	file.UserID = u.ID
+
 	err = p.file.SaveDB(ctx, &file)
 	if err != nil {
-		return infoblog.Post{}, err
+		return request.PostDataResponse{}, err
 	}
 
 	// 4. update post and activate
@@ -49,10 +52,23 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 	post.Active = 1
 	err = p.post.Update(ctx, post)
 	if err != nil {
-		return infoblog.Post{}, err
+		return request.PostDataResponse{}, err
 	}
 
-	return post, nil
+	return request.PostDataResponse{
+		ID:    post.ID,
+		Body:  post.Body,
+		Files: []string{"/" + path.Join(file.Dir, file.Name)},
+		User: request.UserData{
+			ID:         u.ID,
+			Name:       "",
+			SecondName: "",
+		},
+		Counts: request.PostCountData{
+			Likes:    0,
+			Comments: 0,
+		},
+	}, nil
 }
 
 func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
@@ -65,7 +81,7 @@ func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
 	if err != nil {
 		return err
 	}
-	pst = &post
+	*pst = post
 
 	return err
 }

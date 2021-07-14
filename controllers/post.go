@@ -32,7 +32,7 @@ func NewPostsController(responder respond.Responder, user *services.User, file *
 	}
 }
 
-func (a *postsController) Add() http.HandlerFunc {
+func (a *postsController) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		u, err := extractUser(r)
 		if err != nil {
@@ -75,7 +75,6 @@ func (a *postsController) Add() http.HandlerFunc {
 
 		a.SendJSON(w, request.Response{
 			Success: true,
-			Msg:     "Данные профиля обновлены",
 			Data:    post,
 		})
 	}
