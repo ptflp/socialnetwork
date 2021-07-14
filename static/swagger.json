@@ -167,7 +167,7 @@
         "tags": [
           "posts"
         ],
-        "summary": "Обновление профиля.",
+        "summary": "Создание поста с файлом.",
         "operationId": "postsCreateRequest",
         "parameters": [
           {
