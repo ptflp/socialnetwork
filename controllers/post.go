@@ -51,7 +51,7 @@ func (a *postsController) Create() http.HandlerFunc {
 		}
 		defer file.Close()
 
-		var postAddReq request.PostAddReq
+		var postAddReq request.PostCreateReq
 
 		// r.PostForm is a map of our POST form values
 		err = decoder.Decode(&postAddReq, r.PostForm)

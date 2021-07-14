@@ -1,6 +1,7 @@
 {
   "consumes": [
-    "application/json"
+    "application/json",
+    "multipart/form-data"
   ],
   "produces": [
     "application/json"
@@ -150,6 +151,42 @@
         "responses": {
           "200": {
             "$ref": "#/responses/RefreshResponse"
+          }
+        }
+      }
+    },
+    "/posts/create": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Обновление профиля.",
+        "operationId": "postsCreateRequest",
+        "parameters": [
+          {
+            "name": "FormData",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostCreateReq"
+            }
+          },
+          {
+            "type": "file",
+            "x-go-name": "File",
+            "name": "file",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postsCreateResponse"
           }
         }
       }
@@ -433,6 +470,60 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "PostCountData": {
+      "type": "object",
+      "properties": {
+        "comments": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Comments"
+        },
+        "likes": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Likes"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PostCreateReq": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-go-name": "Body"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PostDataResponse": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-go-name": "Body"
+        },
+        "counts": {
+          "$ref": "#/definitions/PostCountData"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Files"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "user": {
+          "$ref": "#/definitions/UserData"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "ProfileUpdateReq": {
       "type": "object",
       "properties": {
@@ -479,6 +570,7 @@
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
     "Response": {
+      "description": "go:generate easytags $GOFILE",
       "type": "object",
       "properties": {
         "data": {
@@ -529,6 +621,25 @@
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "UserData": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "second_name": {
+          "type": "string",
+          "x-go-name": "SecondName"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     }
   },
   "responses": {
@@ -566,6 +677,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
+      }
+    },
+    "postsCreateResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostDataResponse"
       }
     },
     "profileSetPasswordResponse": {

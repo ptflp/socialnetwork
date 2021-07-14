@@ -18,7 +18,7 @@ func NewPostService(reps infoblog.Repositories, file *File) *Post {
 	return &Post{post: reps.Posts, file: file}
 }
 
-func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostAddReq, u *infoblog.User) (request.PostDataResponse, error) {
+func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostCreateReq, u *infoblog.User) (request.PostDataResponse, error) {
 	// 1. save file to filesystem
 	file, err := p.file.SaveFileSystem(formFile, u.ID)
 	if err != nil {
