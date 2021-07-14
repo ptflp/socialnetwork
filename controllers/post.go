@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/schema"
 	"gitlab.com/InfoBlogFriends/server/request"
 
-	"gitlab.com/InfoBlogFriends/server/service"
+	"gitlab.com/InfoBlogFriends/server/services"
 
 	"gitlab.com/InfoBlogFriends/server/respond"
 	"go.uber.org/zap"
@@ -16,13 +16,13 @@ var decoder = schema.NewDecoder()
 
 type postsController struct {
 	respond.Responder
-	user   *service.User
-	file   *service.File
-	post   *service.Post
+	user   *services.User
+	file   *services.File
+	post   *services.Post
 	logger *zap.Logger
 }
 
-func NewPostsController(responder respond.Responder, user *service.User, file *service.File, post *service.Post, logger *zap.Logger) *postsController {
+func NewPostsController(responder respond.Responder, user *services.User, file *services.File, post *services.Post, logger *zap.Logger) *postsController {
 	return &postsController{
 		Responder: responder,
 		user:      user,
@@ -61,12 +61,12 @@ func (a *postsController) Add() http.HandlerFunc {
 			return
 		}
 
-		formFile := service.FormFile{
+		formFile := services.FormFile{
 			File:       file,
 			FileHeader: fHeader,
 		}
 
-		_, err = a.post.SavePost(r.Context(), formFile, postAddReq, &u)
+		post, err := a.post.SavePost(r.Context(), formFile, postAddReq, &u)
 
 		if err != nil {
 			a.ErrorBadRequest(w, err)
@@ -76,7 +76,7 @@ func (a *postsController) Add() http.HandlerFunc {
 		a.SendJSON(w, request.Response{
 			Success: true,
 			Msg:     "Данные профиля обновлены",
-			Data:    postAddReq,
+			Data:    post,
 		})
 	}
 }

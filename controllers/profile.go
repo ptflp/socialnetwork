@@ -9,7 +9,7 @@ import (
 
 	infoblog "gitlab.com/InfoBlogFriends/server"
 
-	"gitlab.com/InfoBlogFriends/server/service"
+	"gitlab.com/InfoBlogFriends/server/services"
 
 	"gitlab.com/InfoBlogFriends/server/respond"
 	"go.uber.org/zap"
@@ -17,11 +17,11 @@ import (
 
 type profileController struct {
 	respond.Responder
-	user   *service.User
+	user   *services.User
 	logger *zap.Logger
 }
 
-func NewProfileController(responder respond.Responder, user *service.User, logger *zap.Logger) *profileController {
+func NewProfileController(responder respond.Responder, user *services.User, logger *zap.Logger) *profileController {
 	return &profileController{
 		Responder: responder,
 		user:      user,

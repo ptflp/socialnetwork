@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/components"
+
+	"gitlab.com/InfoBlogFriends/server/services"
+
 	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/request"
 
 	"github.com/go-chi/cors"
-
-	"gitlab.com/InfoBlogFriends/server/config"
 
 	"gitlab.com/InfoBlogFriends/server/controllers"
 
@@ -19,7 +21,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(services *Services, components *Components, cfg *config.Config) (*chi.Mux, error) {
+func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
@@ -38,7 +40,7 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	authController := controllers.NewAuth(components.Responder, services.AuthService, components.Logger)
+	authController := controllers.NewAuth(cmps.Responder(), services.AuthService, cmps.Logger())
 
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 		msg := email.NewMessage()
@@ -51,8 +53,9 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		msg.SetSubject("test")
 		msg.OpenFile(".gitignore")
 		msg.OpenFile(".env")
-		err := components.Email.Send(msg)
-		components.Responder.SendJSON(w, request.Response{
+		err := cmps.Email().Send(msg)
+
+		cmps.Responder().SendJSON(w, request.Response{
 			Success: err == nil,
 			Msg:     "test",
 			Data:    err,
@@ -76,8 +79,8 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		r.Post("/checkcode", authController.CheckCode())
 	})
 
-	token := middlewares.NewCheckToken(components.Responder, components.JWTKeys)
-	profileController := controllers.NewProfileController(components.Responder, services.User, components.Logger)
+	token := middlewares.NewCheckToken(cmps.Responder(), cmps.JWTKeys())
+	profileController := controllers.NewProfileController(cmps.Responder(), services.User, cmps.Logger())
 	r.Route("/profile", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/update", profileController.Update())
@@ -87,7 +90,7 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 		})
 	})
 
-	posts := controllers.NewPostsController(components.Responder, services.User, components.Logger)
+	posts := controllers.NewPostsController(cmps.Responder(), services.User, services.File, services.Post, cmps.Logger())
 	r.Route("/posts", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/add", posts.Add())
@@ -99,7 +102,7 @@ func NewRouter(services *Services, components *Components, cfg *config.Config) (
 	r.Route("/system", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Get("/config", func(w http.ResponseWriter, r *http.Request) {
-			components.Responder.SendJSON(w, cfg)
+			cmps.Responder().SendJSON(w, cmps.Config)
 		})
 	})
 

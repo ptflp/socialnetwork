@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"context"
@@ -9,11 +9,11 @@ import (
 )
 
 type Post struct {
-	file File
+	file *File
 	post infoblog.PostRepository
 }
 
-func NewPostService(reps *infoblog.Repositories, file File) *Post {
+func NewPostService(reps infoblog.Repositories, file *File) *Post {
 	return &Post{post: reps.Posts, file: file}
 }
 
@@ -52,7 +52,7 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 		return infoblog.Post{}, err
 	}
 
-	return infoblog.Post{}, nil
+	return post, nil
 }
 
 func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {

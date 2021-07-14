@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func (f *File) SaveFileSystem(formFile FormFile, uid int64) (infoblog.File, erro
 
 	dir := path.Join(UploadDirectory, strconv.Itoa(int(uid)))
 
-	uuid, err := uuid.NewUUID()
+	fileUUID, err := uuid.NewUUID()
 	if err != nil {
 		return infoblog.File{}, err
 	}
@@ -51,8 +51,10 @@ func (f *File) SaveFileSystem(formFile FormFile, uid int64) (infoblog.File, erro
 	}
 
 	s := strings.Split(formFile.FileHeader.Filename, ".")
+	tlen := len(fileUUID.String())
 
-	fileName := strings.Join([]string{uuid.String(), s[len(s)-1]}, ".")
+	_ = tlen
+	fileName := strings.Join([]string{fileUUID.String(), s[len(s)-1]}, ".")
 	filePath := path.Join(dir, fileName)
 
 	out, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0755)

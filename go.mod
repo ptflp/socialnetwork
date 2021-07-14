@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/cors v1.2.0
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/schema v1.2.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/json-iterator/go v1.1.11

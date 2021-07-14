@@ -7,26 +7,16 @@ import (
 	"os"
 	"os/signal"
 
-	"gitlab.com/InfoBlogFriends/server/email"
+	"gitlab.com/InfoBlogFriends/server/components"
 
-	"gitlab.com/InfoBlogFriends/server/service"
-
-	"gitlab.com/InfoBlogFriends/server/providers"
-
-	"gitlab.com/InfoBlogFriends/server/session"
+	"gitlab.com/InfoBlogFriends/server/services"
 
 	"gitlab.com/InfoBlogFriends/server/logs"
 
 	"github.com/subosito/gotenv"
 
-	"gitlab.com/InfoBlogFriends/server/cache"
-
-	"gitlab.com/InfoBlogFriends/server/auth"
 	"gitlab.com/InfoBlogFriends/server/db"
 
-	"gitlab.com/InfoBlogFriends/server/respond"
-
-	"gitlab.com/InfoBlogFriends/server/config"
 	"gitlab.com/InfoBlogFriends/server/server"
 	"go.uber.org/zap"
 )
@@ -52,55 +42,22 @@ func main() {
 		cancel()
 	}()
 
-	responder, err := respond.NewResponder(logger)
-	if err != nil {
-		logger.Fatal("responder initialization error", zap.Error(err))
-	}
+	cmps := components.NewComponents(logger)
 
-	// config initialization
-	conf, err := config.NewConfig()
-	if err != nil {
-		logger.Fatal("config initialization error", zap.Error(err))
-	}
+	repositories := db.NewRepositories(cmps)
 
-	c, err := cache.NewRedisCache(conf.Redis)
-	if err != nil {
-		logger.Fatal("redis initialization error", zap.Error(err))
-	}
-
-	jwt, err := session.NewJWTKeys(logger, c)
-	if err != nil {
-		logger.Fatal("jwt initialization error", zap.Error(err))
-	}
-
-	database, err := db.NewDB(logger, conf.DB)
-	if err != nil {
-		logger.Fatal("db initialization error", zap.Error(err))
-	}
-
-	mailClient := email.NewClient(&conf.Email, logger)
-
-	userRepository := db.NewUserRepository(database)
-	smsc := providers.NewSMSC(&conf.SMSC)
-	authService := auth.NewAuthService(conf, userRepository, c, logger, jwt, smsc, mailClient)
-	userService := service.NewUserService(userRepository)
+	service := services.NewServices(cmps, repositories)
 
 	// router initialization
-	r, err := server.NewRouter(&server.Services{AuthService: authService, User: userService}, &server.Components{
-		UserRepository: nil,
-		Logger:         logger,
-		Responder:      responder,
-		LogLevel:       zap.NewAtomicLevel(),
-		JWTKeys:        jwt,
-		Email:          mailClient,
-	}, conf)
+	r, err := server.NewRouter(service, cmps)
+
 	if err != nil {
 		logger.Fatal("router initialization error", zap.Error(err))
 	}
 
 	// server initialization
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", conf.Server.Port),
+		Addr:    fmt.Sprintf(":%d", cmps.Config().Server.Port),
 		Handler: r,
 	}
 
@@ -110,7 +67,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("server started", zap.Int("port", conf.Server.Port))
+	logger.Info("server started", zap.Int("port", cmps.Config().Server.Port))
 
 	<-ctx.Done()
 

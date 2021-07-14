@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/components"
+
 	uuid "github.com/satori/go.uuid"
 
 	"gitlab.com/InfoBlogFriends/server/email"
@@ -27,10 +29,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"gitlab.com/InfoBlogFriends/server/config"
-
-	"gitlab.com/InfoBlogFriends/server/cache"
-
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
@@ -41,22 +39,14 @@ const (
 type service struct {
 	smsProvider    providers.SMS
 	userRepository infoblog.UserRepository
-	cache          cache.Cache
-	config         *config.Config
-	logger         *zap.Logger
-	JWTKeys        *session.JWTKeys
-	EmailClient    *email.Client
+	components.Componenter
 }
 
 func NewAuthService(
-	config *config.Config,
-	userRepository infoblog.UserRepository,
-	cache cache.Cache,
-	logger *zap.Logger,
-	keys *session.JWTKeys,
-	smsProvider providers.SMS,
-	emailClient *email.Client) *service {
-	return &service{config: config, userRepository: userRepository, cache: cache, logger: logger, smsProvider: smsProvider, JWTKeys: keys, EmailClient: emailClient}
+	repositories infoblog.Repositories,
+	cmps components.Componenter,
+) *service {
+	return &service{Componenter: cmps, userRepository: repositories.Users, smsProvider: cmps.SMS()}
 }
 
 func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivationRequest) error {
@@ -82,7 +72,7 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 	msg.SetReceiver(req.Email)
 	msg.SetBody(body)
 
-	err = a.EmailClient.Send(msg)
+	err = a.Email().Send(msg)
 	if err != nil {
 		return err
 	}
@@ -95,14 +85,14 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 	data.Password = hashPass
 
 	// 2. Set email code to cache
-	a.cache.Set(fmt.Sprintf(EmailVerificationKey, activationID), data, 3*24*time.Hour)
+	a.Cache().Set(fmt.Sprintf(EmailVerificationKey, activationID), data, 3*24*time.Hour)
 
 	return nil
 }
 
 func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
-	err := a.cache.Get(fmt.Sprintf(EmailVerificationKey, req.ActivationID), &u)
+	err := a.Cache().Get(fmt.Sprintf(EmailVerificationKey, req.ActivationID), &u)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +127,7 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 		return nil, errors.New("email verification wrong user.ID")
 	}
 
-	authTokens, err := a.JWTKeys.GenerateAuthTokens(&u)
+	authTokens, err := a.JWTKeys().GenerateAuthTokens(&u)
 	if err != nil {
 		return nil, err
 	}
@@ -147,26 +137,26 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 
 func (a *service) RefreshToken(ctx context.Context, req *request.RefreshTokenRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
-	refreshToken, err := a.JWTKeys.ExtractRefreshToken(req.RefreshToken)
+	refreshToken, err := a.JWTKeys().ExtractRefreshToken(req.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
 
 	key := strings.Join([]string{session.RefreshTokenKey, strconv.Itoa(int(refreshToken.UID)), refreshToken.Token}, ":")
-	err = a.cache.Get(key, &u)
+	err = a.Cache().Get(key, &u)
 	if err != nil {
 		return nil, err
 	}
-	err = a.cache.Del(key)
+	err = a.Cache().Del(key)
 	if err != nil {
-		a.logger.Error("cache refresh_token del", zap.Error(err))
+		a.Logger().Error("cache refresh_token del", zap.Error(err))
 	}
 	u, err = a.userRepository.Find(ctx, u.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	authTokens, err := a.JWTKeys.GenerateAuthTokens(&u)
+	authTokens, err := a.JWTKeys().GenerateAuthTokens(&u)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +179,7 @@ func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest
 		return nil, errors.New("wrong email password")
 	}
 
-	token, err := a.JWTKeys.GenerateAuthTokens(&u)
+	token, err := a.JWTKeys().GenerateAuthTokens(&u)
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +193,7 @@ func (a *service) generateActivationUrl(email string) (string, string, error) {
 	dh = append(dh, []byte(email)...)
 	hash := hasher.NewSHA256(dh)
 
-	u, err := url.Parse(a.config.App.FrontEnd)
+	u, err := url.Parse(a.Config().App.FrontEnd)
 	if err != nil {
 		return "", "", err
 	}
@@ -215,7 +205,7 @@ func (a *service) generateActivationUrl(email string) (string, string, error) {
 func (a *service) prepareEmailTemplate(activationUrl string) (bytes.Buffer, error) {
 	tmpl, err := template.ParseFiles("./templates/email.html")
 	if err != nil {
-		a.logger.Error("email template parse", zap.Error(err))
+		a.Logger().Error("email template parse", zap.Error(err))
 		return bytes.Buffer{}, err
 	}
 	type EmailActivation struct {
@@ -235,17 +225,17 @@ func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) b
 		return false
 	}
 	code := genCode()
-	if a.config.SMSC.Dev {
+	if a.Config().SMSC.Dev {
 		code = 3455
 	}
-	a.cache.Set("code:"+phone, &code, 15*time.Minute)
-	if a.config.SMSC.Dev {
+	a.Cache().Set("code:"+phone, &code, 15*time.Minute)
+	if a.Config().SMSC.Dev {
 		return true
 	}
 
 	err = a.smsProvider.Send(ctx, phone, fmt.Sprintf("Ваш код: %d", code))
 	if err != nil {
-		a.logger.Error("send sms err", zap.String("phone", phone), zap.Int("code", code))
+		a.Logger().Error("send sms err", zap.String("phone", phone), zap.Int("code", code))
 	}
 
 	return err == nil
@@ -257,7 +247,7 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 	if err != nil {
 		return nil, err
 	}
-	err = a.cache.Get("code:"+phone, &code)
+	err = a.Cache().Get("code:"+phone, &code)
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +268,7 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		}
 	}
 
-	token, err := a.JWTKeys.GenerateAuthTokens(&u)
+	token, err := a.JWTKeys().GenerateAuthTokens(&u)
 	if err != nil {
 		return nil, err
 	}
