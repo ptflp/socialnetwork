@@ -203,7 +203,7 @@
         "tags": [
           "posts"
         ],
-        "summary": "Создание поста с файлом.",
+        "summary": "Получение ленты последних постов.",
         "operationId": "postsListRequest",
         "parameters": [
           {
@@ -560,6 +560,11 @@
         "link": {
           "type": "string",
           "x-go-name": "Link"
+        },
+        "post_id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "PostID"
         },
         "uuid": {
           "type": "string",
