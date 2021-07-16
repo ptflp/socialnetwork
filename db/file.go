@@ -13,8 +13,9 @@ const (
 	updateFile = "UPDATE files SET type = ?, foreign_id = ?, dir = ?, name = ?, user_id = ? WHERE id = ?"
 	activeFile = "UPDATE files SET active = ? WHERE id = ?"
 
-	selectFile  = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE id = ?"
-	findAllFile = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE type = ? AND foreign_id = ?"
+	selectFile     = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE active = 1 AND id = ?"
+	findAllFile    = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE active = 1 AND type = ? AND foreign_id = ?"
+	findByPostsIDs = "SELECT id, type, foreign_id, dir, name, active, user_id, uuid, created_at, updated_at FROM files WHERE active = 1 AND type = 1 AND foreign_id IN (?)"
 )
 
 type filesRepository struct {
@@ -75,6 +76,33 @@ func (f *filesRepository) FindByTypeFID(ctx context.Context, typeID int64, forei
 	for rows.Next() {
 		file := infoblog.File{}
 		err = rows.Scan(&file.ID, file.Type, file.ForeignID, file.Dir, file.Name, file.Active, file.UserID, file.CreatedAt, file.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, file)
+	}
+
+	return files, nil
+}
+
+func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []int) ([]infoblog.File, error) {
+	if len(postsIDs) < 1 {
+		return nil, nil
+	}
+	query, args, err := sqlx.In(findByPostsIDs, postsIDs)
+
+	// sqlx.In returns queries with the `?` bindvar, we can rebind it for our backend
+	query = f.db.Rebind(query)
+	rows, err := f.db.Query(query, args...)
+
+	defer rows.Close()
+
+	files := make([]infoblog.File, 0)
+
+	for rows.Next() {
+		file := infoblog.File{}
+		err = rows.Scan(&file.ID, &file.Type, &file.ForeignID, &file.Dir, &file.Name, &file.Active, &file.UserID, &file.UUID, &file.CreatedAt, &file.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

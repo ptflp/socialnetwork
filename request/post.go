@@ -5,3 +5,8 @@ package request
 type PostCreateReq struct {
 	Body string `json:"body"`
 }
+
+type PostsFeedReq struct {
+	Limit  int64 `json:"limit"`
+	Offset int64 `json:"offset"`
+}

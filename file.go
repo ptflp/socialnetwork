@@ -27,4 +27,5 @@ type FileRepository interface {
 	Find(ctx context.Context, id int64) (File, error)
 	FindAll(ctx context.Context, postID int64) ([]File, error)
 	FindByTypeFID(ctx context.Context, typeID int64, foreignID int64) ([]File, error)
+	FindByPostsIDs(ctx context.Context, postsIDs []int) ([]File, error)
 }

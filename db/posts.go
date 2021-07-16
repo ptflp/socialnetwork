@@ -12,12 +12,15 @@ import (
 const (
 	createPost = "INSERT INTO posts (body, file_id, user_id, uuid, file_uuid, type) VALUES (?, ?, ?, ?, ?, 1)"
 
+	countActivePosts = "SELECT COUNT(id) as count From posts WHERE active = 1"
+
 	updatePost = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
 	deletePost = "UPDATE posts SET active = ? WHERE id = ?"
 
-	findPost      = "SELECT type, body, user_id, active, file_id, created_at, updated_at FROM posts WHERE id = ? AND type = 1"
-	findAllPost   = "SELECT id, type, body, active, file_id, created_at, updated_at FROM posts WHERE user_id = ?"
-	findAllRecent = "SELECT id, type, body, active, file_id, user_id, created_at, updated_at FROM posts LIMIT ? OFFSET ? ORDER BY created_at"
+	findPost       = "SELECT type, body, user_id, active, file_id, created_at, updated_at FROM posts WHERE id = ? AND type = 1"
+	findAllPost    = "SELECT id, type, body, active, file_id, created_at, updated_at FROM posts WHERE user_id = ? AND active = 1"
+	findAllRecent  = "SELECT p.id, p.type, body, p.active, p.created_at, p.updated_at, u.id as uid, u.name, u.second_name, u.email, u.phone FROM posts p LEFT JOIN users u on p.user_id = u.id WHERE p.active = 1 AND p.type = 1 ORDER BY p.created_at LIMIT ? OFFSET ?"
+	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1 AND p.type = 1"
 )
 
 type postsRepository struct {
@@ -71,14 +74,16 @@ func (pr *postsRepository) Find(ctx context.Context, id int64) (infoblog.Post, e
 	}
 
 	return infoblog.Post{
-		ID:        id,
-		Type:      typeID.Int64,
-		Body:      body.String,
-		FileID:    fileID.Int64,
-		UserID:    userID.Int64,
-		Active:    active.Int64,
-		CreatedAt: createdAt.Time,
-		UpdatedAt: updatedAt.Time,
+		PostEntity: infoblog.PostEntity{
+			ID:        id,
+			Type:      typeID.Int64,
+			Body:      body.String,
+			FileID:    fileID.Int64,
+			UserID:    userID.Int64,
+			Active:    active.Int64,
+			CreatedAt: createdAt.Time,
+			UpdatedAt: updatedAt.Time,
+		},
 	}, nil
 }
 
@@ -111,27 +116,39 @@ func (pr *postsRepository) FindAll(ctx context.Context, uid int64) ([]infoblog.P
 	return posts, nil
 }
 
-func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, error) {
+func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {
 	rows, err := pr.db.QueryContext(ctx, findAllRecent, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	defer rows.Close()
 
-	posts := make([]infoblog.Post, 0)
+	postDataRes := make([]infoblog.Post, 0, limit)
+	postIdIndexMap := make(map[int64]int)
+	postsIDs := make([]int, 0, limit)
 
 	for rows.Next() {
 		post := infoblog.Post{}
-		err = rows.Scan(&post.ID, &post.Type, &post.Body, &post.Active, &post.FileID, &post.UserID, &post.CreatedAt, &post.UpdatedAt)
+		err = rows.Scan(&post.ID, &post.Type, &post.Body, &post.Active, &post.CreatedAt, &post.UpdatedAt, &post.User.ID, &post.User.Name, &post.User.SecondName, &post.User.Email, &post.User.Phone)
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 
-		posts = append(posts, post)
+		postsIDs = append(postsIDs, int(post.ID))
+		postDataRes = append(postDataRes, post)
+		postIdIndexMap[post.ID] = len(postDataRes) - 1
 	}
 
-	return posts, nil
+	return postDataRes, postIdIndexMap, postsIDs, nil
+}
+
+func (pr *postsRepository) CountRecent(ctx context.Context) (int64, error) {
+
+	var count sql.NullInt64
+	err := pr.db.QueryRowContext(ctx, countAllRecent).Scan(&count)
+
+	return count.Int64, err
 }
 
 func NewPostsRepository(db *sqlx.DB) infoblog.PostRepository {

@@ -97,9 +97,16 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 	r.Route("/posts", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/create", posts.Create())
-		r.Post("/update/{ID}", profileController.Update())
-		r.Post("/delete/{ID}", profileController.Update())
-		r.Post("/get/list", profileController.Update())
+		r.Post("/update/{UUID}", posts.Create())
+		r.Post("/delete/{UUID}", posts.Create())
+		r.Get("/get/uuid/{UUID}", posts.Create())
+
+		r.Route("/feed", func(r chi.Router) {
+			r.Get("/my", posts.Create())
+			r.Post("/recent", posts.FeedRecent())
+			r.Get("/subscribed", posts.FeedRecent())
+			r.Get("/user/{UserID}", posts.FeedRecent())
+		})
 	})
 
 	r.Route("/system", func(r chi.Router) {

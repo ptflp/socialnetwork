@@ -24,3 +24,22 @@ type postsCreateParams struct {
 	// swagger:file
 	File interface{} `json:"file"`
 }
+
+// swagger:route POST /posts/feed/recent posts postsListRequest
+// Получение ленты последних постов.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postsListResponse
+
+// swagger:response postsListResponse
+type postsListResponse struct {
+	// in:body
+	Body request.PostsFeedResponse
+}
+
+// swagger:parameters postsListRequest
+type postsListParams struct {
+	// in:body
+	FormData request.PostsFeedReq
+}

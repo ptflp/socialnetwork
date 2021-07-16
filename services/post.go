@@ -50,11 +50,14 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 	postUUID := strings.Join([]string{pUUID.String(), fmt.Sprintf("-p%d", id)}, "")
 
 	post := infoblog.Post{
-		Body:   req.Body,
-		UserID: u.ID,
-		Type:   1,
-		UUID:   postUUID,
+		PostEntity: infoblog.PostEntity{
+			Body:   req.Body,
+			UserID: u.ID,
+			Type:   1,
+			UUID:   postUUID,
+		},
 	}
+
 	err = p.savePostDB(ctx, &post)
 	if err != nil {
 		return request.PostDataResponse{}, err
@@ -81,9 +84,14 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 	}
 
 	return request.PostDataResponse{
-		ID:    post.ID,
-		Body:  post.Body,
-		Files: []string{"/" + path.Join(file.Dir, file.Name)},
+		ID:   post.ID,
+		Body: post.Body,
+		Files: []request.PostFileData{
+			{
+				Link: "/" + path.Join(file.Dir, file.Name),
+				UUID: file.UUID,
+			},
+		},
 		User: request.UserData{
 			ID:         u.ID,
 			Name:       "",
@@ -93,6 +101,62 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 			Likes:    0,
 			Comments: 0,
 		},
+	}, nil
+}
+
+func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (request.PostsFeedData, error) {
+	posts, postIDIndexMap, postsIDs, err := p.post.FindAllRecent(ctx, req.Limit, req.Offset)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+	if len(posts) < 1 {
+		return request.PostsFeedData{}, nil
+	}
+	files, err := p.file.GetFilesPostsIDs(ctx, postsIDs)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+	count, err := p.post.CountRecent(ctx)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	for i := range files {
+		id := postIDIndexMap[files[i].ForeignID]
+		posts[id].Files = append(posts[id].Files, files[i])
+	}
+
+	postDataRes := make([]request.PostDataResponse, 0, req.Limit)
+
+	for i := range posts {
+		postsFileData := make([]request.PostFileData, 0, req.Limit)
+		for j := range posts[i].Files {
+			postsFileData = append(postsFileData, request.PostFileData{
+				Link:   "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
+				UUID:   posts[i].Files[j].UUID,
+				PostID: posts[i].Files[j].ForeignID,
+			})
+		}
+
+		postDataRes = append(postDataRes, request.PostDataResponse{
+			ID:    posts[i].ID,
+			Body:  posts[i].Body,
+			Files: postsFileData,
+			User: request.UserData{
+				ID:         posts[i].User.ID,
+				Name:       posts[i].User.Name,
+				SecondName: posts[i].User.SecondName,
+			},
+			Counts: request.PostCountData{
+				Likes:    0,
+				Comments: 0,
+			},
+		})
+	}
+
+	return request.PostsFeedData{
+		Count: count,
+		Posts: postDataRes,
 	}, nil
 }
 

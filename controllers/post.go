@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/schema"
@@ -76,6 +77,35 @@ func (a *postsController) Create() http.HandlerFunc {
 		a.SendJSON(w, request.Response{
 			Success: true,
 			Data:    post,
+		})
+	}
+}
+
+func (a *postsController) FeedRecent() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, err := extractUser(r)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		var postsListReq request.PostsFeedReq
+		err = json.NewDecoder(r.Body).Decode(&postsListReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		feed, err := a.post.FeedRecent(r.Context(), postsListReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.PostsFeedResponse{
+			Success: true,
+			Msg:     "",
+			Data:    feed,
 		})
 	}
 }

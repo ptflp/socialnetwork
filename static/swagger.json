@@ -191,6 +191,36 @@
         }
       }
     },
+    "/posts/feed/recent": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Создание поста с файлом.",
+        "operationId": "postsListRequest",
+        "parameters": [
+          {
+            "name": "FormData",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostsFeedReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postsListResponse"
+          }
+        }
+      }
+    },
     "/profile/get": {
       "get": {
         "security": [
@@ -509,7 +539,7 @@
         "files": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/PostFileData"
           },
           "x-go-name": "Files"
         },
@@ -520,6 +550,71 @@
         },
         "user": {
           "$ref": "#/definitions/UserData"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PostFileData": {
+      "type": "object",
+      "properties": {
+        "link": {
+          "type": "string",
+          "x-go-name": "Link"
+        },
+        "uuid": {
+          "type": "string",
+          "x-go-name": "UUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PostsFeedData": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Count"
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostDataResponse"
+          },
+          "x-go-name": "Posts"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PostsFeedReq": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Offset"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PostsFeedResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/PostsFeedData"
+        },
+        "msg": {
+          "type": "string",
+          "x-go-name": "Msg"
+        },
+        "success": {
+          "type": "boolean",
+          "x-go-name": "Success"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -683,6 +778,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/PostDataResponse"
+      }
+    },
+    "postsListResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostsFeedResponse"
       }
     },
     "profileSetPasswordResponse": {

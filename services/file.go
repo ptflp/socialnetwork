@@ -70,6 +70,7 @@ func (f *File) SaveFileSystem(formFile FormFile, uid int64, fileUUID string) (in
 	return infoblog.File{
 		Dir:  dir,
 		Name: fileName,
+		UUID: fileUUID,
 	}, nil
 }
 
@@ -80,14 +81,6 @@ func (f *File) SaveDB(ctx context.Context, file *infoblog.File) error {
 	return err
 }
 
-func (f *File) InitPostFile(ctx context.Context, file *infoblog.File) error {
-	fileEntity, err := f.fileRep.Find(ctx, file.ID)
-	if err != nil {
-		return err
-	}
-
-	fileEntity.Active = 1
-	fileEntity.Type = 1
-
-	return f.fileRep.Update(ctx, *file)
+func (f *File) GetFilesPostsIDs(ctx context.Context, postsIDs []int) ([]infoblog.File, error) {
+	return f.fileRep.FindByPostsIDs(ctx, postsIDs)
 }
