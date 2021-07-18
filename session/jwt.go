@@ -113,6 +113,7 @@ type JWTAuth struct {
 type RefreshToken struct {
 	Token string `json:"token"`
 	UID   int64  `json:"uid"`
+	UUID  string `json:"uuid"`
 }
 
 func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, error) {
@@ -133,8 +134,9 @@ func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, erro
 
 func (j *JWTKeys) CreateAccessToken(u infoblog.User) (string, error) {
 	token, err := j.GenerateToken(jwt.MapClaims{
-		"exp": time.Now().UTC().Add(time.Hour * 50).Unix(),
-		"uid": u.ID,
+		"exp":  time.Now().UTC().Add(time.Hour * 50).Unix(),
+		"uid":  u.ID,
+		"uuid": u.UUID,
 	})
 
 	return token, err
@@ -150,6 +152,7 @@ func (j *JWTKeys) CreateRefreshToken(accessToken string, u *infoblog.User) (stri
 		"refresh_token": refreshToken,
 		"exp":           time.Now().UTC().Add(2 * Month).Unix(),
 		"uid":           u.ID,
+		"uuid":          u.UUID,
 	})
 }
 
@@ -201,9 +204,15 @@ func (j *JWTKeys) ExtractRefreshToken(rawToken string) (*RefreshToken, error) {
 		return nil, errors.New("jwt map claims err: uid")
 	}
 
+	uuid, ok := c["uuid"]
+	if !ok {
+		return nil, errors.New("jwt map claims err: uuid")
+	}
+
 	return &RefreshToken{
 		Token: refreshToken.(string),
 		UID:   int64(uid.(float64)),
+		UUID:  uuid.(string),
 	}, nil
 }
 
@@ -241,11 +250,17 @@ func (j *JWTKeys) ExtractAccessToken(r *http.Request) (*infoblog.User, error) {
 	if v, ok := c["ID"]; ok {
 		uid = int64(v.(float64))
 	}
+	var uuid string
+	if v, ok := c["uuid"]; ok {
+		uuid = v.(string)
+	}
+
 	if v, ok := c["uid"]; ok {
 		uid = int64(v.(float64))
 	}
 	u := &infoblog.User{
-		ID: uid,
+		ID:   uid,
+		UUID: uuid,
 	}
 
 	return u, nil

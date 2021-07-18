@@ -33,7 +33,7 @@ type PostRepository interface {
 	Delete(ctx context.Context, p Post) error
 
 	Find(ctx context.Context, id int64) (Post, error)
-	FindAll(ctx context.Context, uid int64) ([]Post, error)
+	FindAll(ctx context.Context, uid int64) ([]Post, map[int64]int, []int, error)
 	FindAllRecent(ctx context.Context, limit, offset int64) ([]Post, map[int64]int, []int, error)
 	CountRecent(ctx context.Context) (int64, error)
 }

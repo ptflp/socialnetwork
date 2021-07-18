@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"gitlab.com/InfoBlogFriends/server/hasher"
 
@@ -12,33 +13,35 @@ import (
 )
 
 type User struct {
-	repository infoblog.UserRepository
+	userRepository infoblog.UserRepository
+	subsRepository infoblog.SubscribesRepository
 }
 
-func NewUserService(repository infoblog.UserRepository) *User {
-	return &User{repository: repository}
+func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscribesRepository) *User {
+	return &User{userRepository: repository, subsRepository: subs}
 }
 
-func (u *User) CheckEmailPass(ctx context.Context, email, password string) bool {
-	user, err := u.repository.FindByEmail(ctx, email)
+func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
+	uDB, err := u.userRepository.FindByEmail(ctx, user)
 	if err != nil {
 		return false
 	}
 
-	return hasher.CheckPasswordHash(password, user.Password)
+	return hasher.CheckPasswordHash(user.Password.String, uDB.Password.String)
 }
 
-func (u *User) CreateByEmailPassword(ctx context.Context, email, password string) error {
-	passHash, err := hasher.HashPassword(password)
+func (u *User) CreateByEmailPassword(ctx context.Context, user infoblog.User) error {
+	passHash, err := hasher.HashPassword(user.Password.String)
 	if err != nil {
 		return err
 	}
 
-	return u.repository.CreateUserByEmailPassword(ctx, email, passHash)
+	user.Password = infoblog.NewNullString(passHash)
+	return u.userRepository.CreateUserByEmailPassword(ctx, user)
 }
 
-func (u *User) GetProfile(ctx context.Context, uid int64) (infoblog.User, error) {
-	user, err := u.repository.Find(ctx, uid)
+func (u *User) GetProfile(ctx context.Context, user infoblog.User) (infoblog.User, error) {
+	user, err := u.userRepository.Find(ctx, user)
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -46,8 +49,8 @@ func (u *User) GetProfile(ctx context.Context, uid int64) (infoblog.User, error)
 	return user, nil
 }
 
-func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.ProfileUpdateReq, uid int64) (infoblog.User, error) {
-	user, err := u.repository.Find(ctx, uid)
+func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.ProfileUpdateReq, user infoblog.User) (infoblog.User, error) {
+	user, err := u.userRepository.Find(ctx, user)
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -56,31 +59,45 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 		if err = validators.CheckEmailFormat(*profileUpdateReq.Email); err != nil {
 			return infoblog.User{}, err
 		}
-		user.Email = *profileUpdateReq.Email
+		user.Email = infoblog.NewNullString(*profileUpdateReq.Email)
 	}
 	if profileUpdateReq.Phone != nil {
 		*profileUpdateReq.Phone, err = validators.CheckPhoneFormat(*profileUpdateReq.Phone)
 		if err != nil {
 			return infoblog.User{}, err
 		}
-		user.Phone = *profileUpdateReq.Phone
+		user.Phone = infoblog.NewNullString(*profileUpdateReq.Phone)
 	}
 	if profileUpdateReq.Name != nil {
-		user.Name = *profileUpdateReq.Name
+		user.Name = infoblog.NewNullString(*profileUpdateReq.Name)
 	}
 	if profileUpdateReq.SecondName != nil {
-		user.SecondName = *profileUpdateReq.SecondName
+		user.SecondName = infoblog.NewNullString(*profileUpdateReq.SecondName)
 	}
 
-	return user, u.repository.Update(ctx, user)
+	return user, u.userRepository.Update(ctx, user)
 }
 
 func (u *User) SetPassword(ctx context.Context, user infoblog.User) error {
-	passHash, err := hasher.HashPassword(user.Password)
+	passHash, err := hasher.HashPassword(user.Password.String)
 	if err != nil {
 		return err
 	}
-	user.Password = passHash
+	user.Password = infoblog.NewNullString(passHash)
 
-	return u.repository.SetPassword(ctx, user)
+	return u.userRepository.SetPassword(ctx, user)
+}
+
+func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscribeRequest) error {
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
+	if err != nil {
+		return err
+	}
+	if sub.ID < 1 {
+		return errors.New("user with specified id not found")
+	}
+
+	_, err = u.subsRepository.Create(ctx, user.ID, sub.ID)
+
+	return err
 }

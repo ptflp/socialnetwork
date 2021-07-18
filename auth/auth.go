@@ -14,7 +14,7 @@ import (
 
 	"gitlab.com/InfoBlogFriends/server/components"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/hasher"
@@ -51,7 +51,10 @@ func NewAuthService(
 
 func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivationRequest) error {
 	// 1. Check user existance
-	u, err := a.userRepository.FindByEmail(ctx, req.Email)
+	u := infoblog.User{
+		Email: infoblog.NewNullString(req.Email),
+	}
+	u, err := a.userRepository.FindByEmail(ctx, u)
 	if err == nil && u.ID > 0 {
 		return errors.New("user with specified email already exist")
 	}
@@ -96,19 +99,28 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 	if err != nil {
 		return nil, err
 	}
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Intn(89) + 10
 
-	err = a.userRepository.CreateUserByEmailPassword(ctx, u.Email, u.Password)
+	uUUID, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+
+	u.UUID = strings.Join([]string{uUUID.String(), fmt.Sprintf("-u%d", id)}, "")
+
+	err = a.userRepository.CreateUserByEmailPassword(ctx, u)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
-			u, err = a.userRepository.FindByEmail(ctx, u.Email)
+			u, err = a.userRepository.FindByEmail(ctx, u)
 			if err != nil {
 				return nil, err
 			}
-			if u.EmailVerified == 1 {
+			if u.EmailVerified.Bool == true {
 				return nil, fmt.Errorf("user with email %s already verified", u.Email)
 			}
-			if u.EmailVerified == 0 {
-				u.EmailVerified = 1
+			if u.EmailVerified.Bool == false {
+				u.EmailVerified = infoblog.NewNullBool(true)
 				err = a.userRepository.Update(ctx, u)
 				if err != nil {
 					return nil, err
@@ -119,7 +131,7 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 		}
 	}
 
-	u, err = a.userRepository.FindByEmail(ctx, u.Email)
+	u, err = a.userRepository.FindByEmail(ctx, u)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +163,7 @@ func (a *service) RefreshToken(ctx context.Context, req *request.RefreshTokenReq
 	if err != nil {
 		a.Logger().Error("cache refresh_token del", zap.Error(err))
 	}
-	u, err = a.userRepository.Find(ctx, u.ID)
+	u, err = a.userRepository.Find(ctx, u)
 	if err != nil {
 		return nil, err
 	}
@@ -166,16 +178,20 @@ func (a *service) RefreshToken(ctx context.Context, req *request.RefreshTokenReq
 
 func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
+	u.Email = infoblog.NewNullString(req.Email)
 
-	u, err := a.userRepository.FindByEmail(ctx, req.Email)
+	u, err := a.userRepository.FindByEmail(ctx, u)
 	if err != nil {
 		return nil, err
 	}
 	if u.ID == 0 {
 		return nil, errors.New("wrong user.ID")
 	}
+	if !u.Password.Valid {
+		return nil, errors.New("user password not set")
+	}
 
-	if !hasher.CheckPasswordHash(req.Password, u.Password) {
+	if !hasher.CheckPasswordHash(req.Password, u.Password.String) {
 		return nil, errors.New("wrong email password")
 	}
 
@@ -188,8 +204,12 @@ func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest
 }
 
 func (a *service) generateActivationUrl(email string) (string, string, error) {
-	uid := uuid.NewV4()
-	dh := uid.Bytes()
+	uid := uuid.New()
+	dh, err := uid.MarshalBinary()
+	if err != nil {
+		return "", "", err
+	}
+
 	dh = append(dh, []byte(email)...)
 	hash := hasher.NewSHA256(dh)
 
@@ -256,13 +276,27 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		return nil, errors.New("phone code mismatch")
 	}
 
-	u, err := a.userRepository.FindByPhone(ctx, phone)
+	u := infoblog.User{
+		Phone: infoblog.NewNullString(phone),
+	}
+	u, err = a.userRepository.FindByPhone(ctx, u)
 	if err != nil {
-		err = a.userRepository.CreateUserByPhone(ctx, phone)
+
+		rand.Seed(time.Now().UnixNano())
+		id := rand.Intn(89) + 10
+
+		uUUID, err := uuid.NewUUID()
 		if err != nil {
 			return nil, err
 		}
-		u, err = a.userRepository.FindByPhone(ctx, phone)
+
+		u.UUID = strings.Join([]string{uUUID.String(), fmt.Sprintf("-u%d", id)}, "")
+
+		err = a.userRepository.CreateUserByPhone(ctx, u)
+		if err != nil {
+			return nil, err
+		}
+		u, err = a.userRepository.Find(ctx, u)
 		if err != nil {
 			return nil, err
 		}

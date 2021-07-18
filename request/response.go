@@ -4,7 +4,7 @@ package request
 type Response struct {
 	Success bool        `json:"success"`
 	Msg     string      `json:"msg,omitempty"`
-	Data    interface{} `json:"data"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 type AuthTokenResponse struct {
@@ -19,13 +19,13 @@ type AuthTokenData struct {
 }
 
 type UserData struct {
-	ID         int64  `json:"id"`
+	UUID       string `json:"uuid"`
 	Name       string `json:"name"`
 	SecondName string `json:"second_name"`
 }
 
 type PostDataResponse struct {
-	ID     int64          `json:"id"`
+	UUID   string         `json:"uuid"`
 	Body   string         `json:"body"`
 	Files  []PostFileData `json:"files"`
 	User   UserData       `json:"user"`

@@ -3,13 +3,13 @@ module gitlab.com/InfoBlogFriends/server
 go 1.16
 
 require (
-	github.com/betacraft/easytags v1.0.2 // indirect
+	github.com/Masterminds/squirrel v1.5.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-chi/cors v1.2.0
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/schema v1.2.0
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/json-iterator/go v1.1.11

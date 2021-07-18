@@ -17,9 +17,10 @@ const (
 	updatePost = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
 	deletePost = "UPDATE posts SET active = ? WHERE id = ?"
 
-	findPost       = "SELECT type, body, user_id, active, file_id, created_at, updated_at FROM posts WHERE id = ? AND type = 1"
-	findAllPost    = "SELECT id, type, body, active, file_id, created_at, updated_at FROM posts WHERE user_id = ? AND active = 1"
-	findAllRecent  = "SELECT p.id, p.type, body, p.active, p.created_at, p.updated_at, u.id as uid, u.name, u.second_name, u.email, u.phone FROM posts p LEFT JOIN users u on p.user_id = u.id WHERE p.active = 1 AND p.type = 1 ORDER BY p.created_at LIMIT ? OFFSET ?"
+	findPost      = "SELECT type, body, user_id, active, file_id, created_at, updated_at FROM posts WHERE id = ? AND type = 1"
+	findAllPost   = "SELECT id, type, body, active, file_id, created_at, updated_at FROM posts WHERE user_id = ? AND active = 1"
+	findAllRecent = "SELECT p.id, p.type, body, p.active, p.created_at, p.updated_at, u.id as uid, u.name, u.second_name, u.email, u.phone FROM posts p LEFT JOIN users u on p.user_id = u.id WHERE p.active = 1 AND p.type = 1 ORDER BY p.created_at LIMIT ? OFFSET ?"
+
 	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1 AND p.type = 1"
 )
 
@@ -87,14 +88,14 @@ func (pr *postsRepository) Find(ctx context.Context, id int64) (infoblog.Post, e
 	}, nil
 }
 
-func (pr *postsRepository) FindAll(ctx context.Context, uid int64) ([]infoblog.Post, error) {
+func (pr *postsRepository) FindAll(ctx context.Context, uid int64) ([]infoblog.Post, map[int64]int, []int, error) {
 	if uid < 1 {
-		return nil, errors.New("repository wrong post id")
+		return nil, nil, nil, errors.New("repository wrong post id")
 	}
 
 	rows, err := pr.db.QueryContext(ctx, findAllRecent, uid)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	defer rows.Close()
@@ -107,13 +108,13 @@ func (pr *postsRepository) FindAll(ctx context.Context, uid int64) ([]infoblog.P
 		post.UserID = uid
 
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 
 		posts = append(posts, post)
 	}
 
-	return posts, nil
+	return posts, nil, nil, nil
 }
 
 func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {

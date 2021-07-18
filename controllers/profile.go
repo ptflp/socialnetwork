@@ -45,7 +45,7 @@ func (a *profileController) Update() http.HandlerFunc {
 			return
 		}
 
-		*u, err = a.user.UpdateProfile(ctx, profileUpdateReq, u.ID)
+		*u, err = a.user.UpdateProfile(ctx, profileUpdateReq, *u)
 		if err != nil {
 			a.logger.Error("user service update profile", zap.Error(err))
 			a.ErrorInternal(w, err)
@@ -72,7 +72,7 @@ func (a *profileController) GetProfile() http.HandlerFunc {
 			a.ErrorInternal(w, errors.New("type assertion to user err"))
 			return
 		}
-		user, err := a.user.GetProfile(ctx, u.ID)
+		user, err := a.user.GetProfile(ctx, *u)
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return

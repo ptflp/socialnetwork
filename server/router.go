@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"net/http"
+	"time"
 
 	"gitlab.com/InfoBlogFriends/server/components"
 
@@ -23,6 +24,7 @@ import (
 
 func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
+	r.Use(middleware.Timeout(200 * time.Millisecond))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
@@ -102,11 +104,17 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Get("/get/uuid/{UUID}", posts.Create())
 
 		r.Route("/feed", func(r chi.Router) {
-			r.Get("/my", posts.Create())
+			r.Get("/my", posts.FeedRecent())
 			r.Post("/recent", posts.FeedRecent())
 			r.Get("/subscribed", posts.FeedRecent())
 			r.Get("/user/{UserID}", posts.FeedRecent())
 		})
+	})
+
+	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
+	r.Route("/user", func(r chi.Router) {
+		r.Use(token.Check)
+		r.Post("/subscribe", users.Subscribe())
 	})
 
 	r.Route("/system", func(r chi.Router) {

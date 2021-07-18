@@ -90,7 +90,7 @@ func (a *postsController) FeedRecent() http.HandlerFunc {
 		}
 
 		var postsListReq request.PostsFeedReq
-		err = json.NewDecoder(r.Body).Decode(&postsListReq)
+		err = Decode(r, &postsListReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
 			return
@@ -108,4 +108,14 @@ func (a *postsController) FeedRecent() http.HandlerFunc {
 			Data:    feed,
 		})
 	}
+}
+
+func Decode(r *http.Request, val interface{}) error {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(val); err != nil {
+		return err
+	}
+
+	return nil
 }
