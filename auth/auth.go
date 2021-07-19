@@ -117,10 +117,10 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 			if err != nil {
 				return nil, err
 			}
-			if u.EmailVerified.Bool == true {
+			if u.EmailVerified.Bool {
 				return nil, fmt.Errorf("user with email %s already verified", u.Email.String)
 			}
-			if u.EmailVerified.Bool == false {
+			if !u.EmailVerified.Bool {
 				u.EmailVerified = infoblog.NewNullBool(true)
 				err = a.userRepository.Update(ctx, u)
 				if err != nil {
@@ -302,6 +302,9 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		if err != nil {
 			return nil, err
 		}
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	token, err := a.JWTKeys().GenerateAuthTokens(&u)
