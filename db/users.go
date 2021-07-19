@@ -54,7 +54,7 @@ func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (i
 
 	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"phone": user.Phone}).ToSql()
 
-	if err := u.db.QueryRowContext(ctx, query, args...).Scan(&user); err != nil {
+	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
 		return infoblog.User{}, err
 	}
 

@@ -17,3 +17,7 @@ redis:
 
 server:
   port: 8955
+
+
+SMSC:
+  dev: true

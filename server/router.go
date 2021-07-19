@@ -87,6 +87,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 	r.Route("/profile", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/update", profileController.Update())
+		r.Patch("/update", profileController.Update())
 		r.Get("/get", profileController.GetProfile())
 		r.Route("/set", func(r chi.Router) {
 			r.Post("/password", profileController.SetPassword())

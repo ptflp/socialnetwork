@@ -15,6 +15,9 @@ type User struct {
 	Name          NullString `json:"name" db:"name"`
 	SecondName    NullString `json:"second_name" db:"second_name"`
 	EmailVerified NullBool   `json:"email_verified" db:"email_verified"`
+	Description   NullString `json:"description" db:"description"`
+	NickName      NullString `json:"nickname" db:"nickname"`
+	ShowSubs      NullString `json:"show_subs" db:"show_subs"`
 	CreatedAt     time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at" db:"updated_at"`
 }

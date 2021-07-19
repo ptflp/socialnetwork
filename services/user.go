@@ -71,9 +71,6 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 	if profileUpdateReq.Name != nil {
 		user.Name = infoblog.NewNullString(*profileUpdateReq.Name)
 	}
-	if profileUpdateReq.SecondName != nil {
-		user.SecondName = infoblog.NewNullString(*profileUpdateReq.SecondName)
-	}
 
 	return user, u.userRepository.Update(ctx, user)
 }

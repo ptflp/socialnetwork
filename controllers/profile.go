@@ -82,7 +82,7 @@ func (a *profileController) GetProfile() http.HandlerFunc {
 			Success: true,
 			Msg:     "",
 			Data: struct {
-				User infoblog.User
+				User infoblog.User `json:"user"`
 			}{
 				user,
 			},
