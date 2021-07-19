@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	createFile = "INSERT INTO files (type, foreign_id, dir, name, user_id, uuid, foreign_uuid) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	createFile = "INSERT INTO files (type, foreign_id, dir, name, user_id, user_uuid, uuid, foreign_uuid) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	updateFile = "UPDATE files SET type = ?, foreign_id = ?, dir = ?, name = ?, user_id = ? WHERE id = ?"
 	activeFile = "UPDATE files SET active = ? WHERE id = ?"
 
@@ -27,7 +27,7 @@ func NewFilesRepository(db *sqlx.DB) infoblog.FileRepository {
 }
 
 func (f *filesRepository) Create(ctx context.Context, p *infoblog.File) (int64, error) {
-	res, err := f.db.ExecContext(ctx, createFile, p.Type, p.ForeignID, p.Dir, p.Name, p.UserID, p.UUID, p.ForeignUUID)
+	res, err := f.db.ExecContext(ctx, createFile, p.Type, p.ForeignID, p.Dir, p.Name, p.UserID, p.UserUUID, p.UUID, p.ForeignUUID)
 	if err != nil {
 		return 0, err
 	}
