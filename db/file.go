@@ -92,10 +92,15 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []int) ([]
 	}
 	query, args, err := sqlx.In(findByPostsIDs, postsIDs)
 
+	if err != nil {
+		return nil, err
+	}
 	// sqlx.In returns queries with the `?` bindvar, we can rebind it for our backend
 	query = f.db.Rebind(query)
 	rows, err := f.db.Query(query, args...)
-
+	if err != nil {
+		return nil, err
+	}
 	defer rows.Close()
 
 	files := make([]infoblog.File, 0)

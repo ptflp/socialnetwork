@@ -6,7 +6,7 @@ import (
 )
 
 type PostEntity struct {
-	ID        int64     `json:"id" db:"id"`
+	ID        int64     `json:"-" db:"id"`
 	Type      int64     `json:"type" db:"type"`
 	UUID      string    `json:"post_id" db:"uuid"`
 	Body      string    `json:"body" db:"body"`

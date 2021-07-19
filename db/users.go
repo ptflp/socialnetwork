@@ -37,6 +37,9 @@ func (u *userRepository) FindByEmail(ctx context.Context, user infoblog.User) (i
 	}
 
 	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"email": user.Email}).ToSql()
+	if err != nil {
+		return infoblog.User{}, err
+	}
 
 	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
 		return infoblog.User{}, err
@@ -53,8 +56,11 @@ func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (i
 	}
 
 	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"phone": user.Phone}).ToSql()
+	if err != nil {
+		return infoblog.User{}, err
+	}
 
-	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
+	if err = u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
 		return infoblog.User{}, err
 	}
 
@@ -77,10 +83,29 @@ func (u *userRepository) CreateUserByEmailPassword(ctx context.Context, user inf
 }
 
 func (u *userRepository) Update(ctx context.Context, user infoblog.User) error {
-	if user.ID == 0 {
-		return errors.New("wrong user.ID on update")
+	if len(user.UUID) != 40 {
+		return errors.New("wrong user uuid on update")
 	}
-	_, err := u.db.MustExecContext(ctx, updateUser, user.Phone, user.Email, user.Name, user.SecondName, user.EmailVerified, user.UUID).RowsAffected()
+	updateFields, err := infoblog.GetUpdateFields("users")
+	if err != nil {
+		return err
+	}
+	updateFieldsPointers := infoblog.GetFieldsPointers(&user, "update")
+
+	queryRaw := sq.Update("users").Where(sq.Eq{"uuid": user.UUID})
+	for i := range updateFields {
+		queryRaw = queryRaw.Set(updateFields[i], updateFieldsPointers[i])
+	}
+
+	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return err
+	}
+	res, err := u.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	_, err = res.RowsAffected()
 
 	return err
 }

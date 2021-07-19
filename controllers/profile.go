@@ -56,7 +56,7 @@ func (a *profileController) Update() http.HandlerFunc {
 			Success: true,
 			Msg:     "Данные профиля обновлены",
 			Data: struct {
-				User infoblog.User
+				User infoblog.User `json:"user"`
 			}{
 				*u,
 			},

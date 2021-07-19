@@ -3,9 +3,11 @@ package infoblog
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 var entityFields = map[string][]string{}
+var entityUpdateFields = map[string][]string{}
 
 func init() {
 
@@ -21,7 +23,8 @@ func init() {
 	for name, entity := range entities {
 		t := reflect.TypeOf(entity)
 
-		var fields []string
+		var allFields []string
+		var updateFields []string
 
 		for i := 0; i < t.NumField(); i++ {
 			// Get the field, returns https://golang.org/pkg/reflect/#StructField
@@ -32,17 +35,28 @@ func init() {
 			if tag == "" || tag == "-" {
 				continue
 			}
-			if fields == nil {
-				fields = make([]string, 0, t.NumField())
+
+			tagsString := field.Tag.Get("ops")
+			tags := strings.Split(tagsString, ",")
+			for i := range tags {
+				switch tags[i] {
+				case "update":
+					updateFields = append(updateFields, tag)
+				}
 			}
-			fields = append(fields, tag)
+			if allFields == nil {
+				allFields = make([]string, 0, t.NumField())
+			}
+			allFields = append(allFields, tag)
 		}
 
-		entityFields[name] = fields
+		entityUpdateFields[name] = updateFields
+
+		entityFields[name] = allFields
 	}
 }
 
-func GetFields(tableName string) ([]string, error) {
+func GetFields(tableName string, args ...string) ([]string, error) {
 	v, ok := entityFields[tableName]
 	if !ok {
 		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
@@ -54,13 +68,30 @@ func GetFields(tableName string) ([]string, error) {
 	return b, nil
 }
 
-func GetFieldsPointers(u interface{}) []interface{} {
+func GetUpdateFields(tableName string) ([]string, error) {
+	v, ok := entityUpdateFields[tableName]
+	if !ok {
+		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
+	}
+
+	b := make([]string, len(v))
+	copy(b, v)
+
+	return b, nil
+}
+
+func GetFieldsPointers(u interface{}, args ...string) []interface{} {
 	val := reflect.ValueOf(u).Elem()
-	v := make([]interface{}, val.NumField())
+	v := make([]interface{}, 0, val.NumField())
 
 	for i := 0; i < val.NumField(); i++ {
+		if len(args) != 0 {
+			if val.Type().Field(i).Tag.Get("ops") != args[0] {
+				continue
+			}
+		}
 		valueField := val.Field(i)
-		v[i] = valueField.Addr().Interface()
+		v = append(v, valueField.Addr().Interface())
 	}
 	return v
 }

@@ -4,21 +4,22 @@ import (
 	"context"
 	"errors"
 
+	"gitlab.com/InfoBlogFriends/server/decoder"
+
 	"gitlab.com/InfoBlogFriends/server/hasher"
 
-	"gitlab.com/InfoBlogFriends/server/request"
-	"gitlab.com/InfoBlogFriends/server/validators"
-
 	infoblog "gitlab.com/InfoBlogFriends/server"
+	"gitlab.com/InfoBlogFriends/server/request"
 )
 
 type User struct {
+	*decoder.Decoder
 	userRepository infoblog.UserRepository
 	subsRepository infoblog.SubscriberRepository
 }
 
 func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscriberRepository) *User {
-	return &User{userRepository: repository, subsRepository: subs}
+	return &User{userRepository: repository, subsRepository: subs, Decoder: decoder.NewDecoder()}
 }
 
 func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
@@ -55,21 +56,9 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 		return infoblog.User{}, err
 	}
 
-	if profileUpdateReq.Email != nil {
-		if err = validators.CheckEmailFormat(*profileUpdateReq.Email); err != nil {
-			return infoblog.User{}, err
-		}
-		user.Email = infoblog.NewNullString(*profileUpdateReq.Email)
-	}
-	if profileUpdateReq.Phone != nil {
-		*profileUpdateReq.Phone, err = validators.CheckPhoneFormat(*profileUpdateReq.Phone)
-		if err != nil {
-			return infoblog.User{}, err
-		}
-		user.Phone = infoblog.NewNullString(*profileUpdateReq.Phone)
-	}
-	if profileUpdateReq.Name != nil {
-		user.Name = infoblog.NewNullString(*profileUpdateReq.Name)
+	err = u.MapStructs(&user, &profileUpdateReq)
+	if err != nil {
+		return infoblog.User{}, err
 	}
 
 	return user, u.userRepository.Update(ctx, user)

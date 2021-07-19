@@ -10,7 +10,6 @@ import (
 
 //NullString is a wrapper around sql.NullString
 type NullString struct {
-	*decoder.Decoder
 	sql.NullString
 }
 
@@ -24,7 +23,7 @@ func (x *NullString) MarshalJSON() ([]byte, error) {
 }
 
 func (x *NullString) UnmarshalJSON(data []byte) error {
-	err := x.Decode(bytes.NewBuffer(data), &x.String)
+	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.String)
 	if err != nil {
 		return err
 	}
@@ -34,7 +33,6 @@ func (x *NullString) UnmarshalJSON(data []byte) error {
 }
 
 type NullBool struct {
-	*decoder.Decoder
 	sql.NullBool
 }
 
@@ -48,7 +46,7 @@ func (x *NullBool) MarshalJSON() ([]byte, error) {
 }
 
 func (x *NullBool) UnmarshalJSON(data []byte) error {
-	err := x.Decode(bytes.NewBuffer(data), &x.Bool)
+	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.Bool)
 	if err != nil {
 		return err
 	}
@@ -58,7 +56,6 @@ func (x *NullBool) UnmarshalJSON(data []byte) error {
 }
 
 type NullInt64 struct {
-	*decoder.Decoder
 	sql.NullInt64
 }
 
@@ -72,7 +69,7 @@ func (x *NullInt64) MarshalJSON() ([]byte, error) {
 }
 
 func (x *NullInt64) UnmarshalJSON(data []byte) error {
-	err := x.Decode(bytes.NewBuffer(data), &x.Int64)
+	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.Int64)
 	if err != nil {
 		return err
 	}
@@ -82,7 +79,6 @@ func (x *NullInt64) UnmarshalJSON(data []byte) error {
 }
 
 type NullTime struct {
-	*decoder.Decoder
 	sql.NullTime
 }
 
@@ -96,7 +92,30 @@ func (x *NullTime) MarshalJSON() ([]byte, error) {
 }
 
 func (x *NullTime) UnmarshalJSON(data []byte) error {
-	err := x.Decode(bytes.NewBuffer(data), &x.Time)
+	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.Time)
+	if err != nil {
+		return err
+	}
+	x.Valid = true
+
+	return nil
+}
+
+type NullFloat64 struct {
+	sql.NullFloat64
+}
+
+//MarshalJSON method is called by json.Marshal,
+//whenever it is of type NullString
+func (x *NullFloat64) MarshalJSON() ([]byte, error) {
+	if !x.Valid {
+		return []byte("null"), nil
+	}
+	return json.Marshal(x.Float64)
+}
+
+func (x *NullFloat64) UnmarshalJSON(data []byte) error {
+	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.Float64)
 	if err != nil {
 		return err
 	}

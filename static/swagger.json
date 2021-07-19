@@ -711,13 +711,43 @@
     "ProfileUpdateReq": {
       "type": "object",
       "properties": {
+        "cost": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Cost"
+        },
+        "description": {
+          "type": "string",
+          "x-go-name": "Description"
+        },
         "email": {
           "type": "string",
           "x-go-name": "Email"
         },
+        "language": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Language"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
+        },
+        "nickname": {
+          "type": "string",
+          "x-go-name": "NickName"
+        },
+        "notify_email": {
+          "type": "boolean",
+          "x-go-name": "NotifyEmail"
+        },
+        "notify_push": {
+          "type": "boolean",
+          "x-go-name": "NotifyPush"
+        },
+        "notify_telegram": {
+          "type": "boolean",
+          "x-go-name": "NotifyTelegram"
         },
         "phone": {
           "type": "string",
@@ -726,6 +756,14 @@
         "second_name": {
           "type": "string",
           "x-go-name": "SecondName"
+        },
+        "show_subs": {
+          "type": "boolean",
+          "x-go-name": "ShowSubs"
+        },
+        "trial": {
+          "type": "boolean",
+          "x-go-name": "Trial"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
