@@ -3,6 +3,7 @@ package components
 import (
 	"gitlab.com/InfoBlogFriends/server/cache"
 	"gitlab.com/InfoBlogFriends/server/config"
+	"gitlab.com/InfoBlogFriends/server/decoder"
 	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/providers"
 	"gitlab.com/InfoBlogFriends/server/respond"
@@ -19,6 +20,7 @@ type Componenter interface {
 	Config() *config.Config
 	Cache() cache.Cache
 	SMS() providers.SMS
+	Decoder() *decoder.Decoder
 }
 
 type Components struct {
@@ -30,6 +32,7 @@ type Components struct {
 	config    *config.Config
 	cache     cache.Cache
 	sms       providers.SMS
+	decoder   *decoder.Decoder
 }
 
 func (c *Components) Logger() *zap.Logger {
@@ -62,6 +65,10 @@ func (c *Components) Cache() cache.Cache {
 
 func (c *Components) SMS() providers.SMS {
 	return c.sms
+}
+
+func (c *Components) Decoder() *decoder.Decoder {
+	return c.decoder
 }
 
 func NewComponents(logger *zap.Logger) *Components {
@@ -98,5 +105,6 @@ func NewComponents(logger *zap.Logger) *Components {
 		config:    conf,
 		cache:     c,
 		sms:       smsc,
+		decoder:   decoder.NewDecoder(),
 	}
 }

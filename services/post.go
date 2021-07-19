@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/decoder"
+
 	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/request"
@@ -18,10 +20,11 @@ import (
 type Post struct {
 	file *File
 	post infoblog.PostRepository
+	*decoder.Decoder
 }
 
-func NewPostService(reps infoblog.Repositories, file *File) *Post {
-	return &Post{post: reps.Posts, file: file}
+func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder) *Post {
+	return &Post{post: reps.Posts, file: file, Decoder: d}
 }
 
 func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostCreateReq, u *infoblog.User) (request.PostDataResponse, error) {
@@ -138,20 +141,24 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 			})
 		}
 
-		postDataRes = append(postDataRes, request.PostDataResponse{
-			UUID:  posts[i].UUID,
-			Body:  posts[i].Body,
+		userData := request.UserData{}
+
+		err = p.MapStructs(&userData, &posts[i].User)
+		if err != nil {
+			return request.PostsFeedData{}, err
+		}
+
+		pdr := request.PostDataResponse{
 			Files: postsFileData,
-			User: request.UserData{
-				UUID:       posts[i].User.UUID,
-				Name:       posts[i].User.Name.String,
-				SecondName: posts[i].User.SecondName.String,
-			},
-			Counts: request.PostCountData{
-				Likes:    0,
-				Comments: 0,
-			},
-		})
+			User:  userData,
+		}
+
+		err = p.MapStructs(&pdr, &posts[i].PostEntity)
+		if err != nil {
+			return request.PostsFeedData{}, err
+		}
+
+		postDataRes = append(postDataRes, pdr)
 	}
 
 	return request.PostsFeedData{
@@ -217,12 +224,12 @@ func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFee
 }
 
 func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
-	id, err := p.post.Create(ctx, *pst)
+	_, err := p.post.Create(ctx, *pst)
 	if err != nil {
 		return err
 	}
 
-	post, err := p.post.Find(ctx, id)
+	post, err := p.post.Find(ctx, *pst)
 	if err != nil {
 		return err
 	}

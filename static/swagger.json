@@ -322,6 +322,36 @@
           }
         }
       }
+    },
+    "/user/subscribe": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Обновление профиля.",
+        "operationId": "userSubscribeRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserSubscribeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userSubscribeResponse"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -543,13 +573,12 @@
           },
           "x-go-name": "Files"
         },
-        "id": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ID"
-        },
         "user": {
           "$ref": "#/definitions/UserData"
+        },
+        "uuid": {
+          "type": "string",
+          "x-go-name": "UUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -725,11 +754,6 @@
     "UserData": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ID"
-        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
@@ -737,6 +761,20 @@
         "second_name": {
           "type": "string",
           "x-go-name": "SecondName"
+        },
+        "uuid": {
+          "type": "string",
+          "x-go-name": "UUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "UserSubscribeRequest": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string",
+          "x-go-name": "UUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -813,6 +851,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/Config"
+      }
+    },
+    "userSubscribeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
       }
     }
   },

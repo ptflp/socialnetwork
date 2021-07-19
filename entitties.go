@@ -15,6 +15,7 @@ func init() {
 		"hashtags":   HashTag{},
 		"subscribes": Subscriber{},
 		"files":      File{},
+		"posts":      PostEntity{},
 	}
 
 	for name, entity := range entities {
@@ -28,6 +29,9 @@ func init() {
 
 			// Get the field tag value
 			tag := field.Tag.Get("db")
+			if tag == "" || tag == "-" {
+				continue
+			}
 			if fields == nil {
 				fields = make([]string, 0, t.NumField())
 			}
@@ -44,5 +48,19 @@ func GetFields(tableName string) ([]string, error) {
 		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
 	}
 
-	return v, nil
+	b := make([]string, len(v))
+	copy(b, v)
+
+	return b, nil
+}
+
+func GetFieldsPointers(u interface{}) []interface{} {
+	val := reflect.ValueOf(u).Elem()
+	v := make([]interface{}, val.NumField())
+
+	for i := 0; i < val.NumField(); i++ {
+		valueField := val.Field(i)
+		v[i] = valueField.Addr().Interface()
+	}
+	return v
 }

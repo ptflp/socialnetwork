@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -10,13 +11,13 @@ import (
 )
 
 const (
-	updateUser  = "UPDATE users SET phone = ?, email = ?, name = ?, second_name = ?, email_verified = ?, uuid = ? WHERE id = ?;"
-	setPassword = "UPDATE users SET password = ? WHERE id = ?"
+	updateUser  = "UPDATE users SET phone = ?, email = ?, name = ?, second_name = ?, email_verified = ? WHERE uuid = ?;"
+	setPassword = "UPDATE users SET password = ? WHERE uuid = ?"
 
 	findUserByPhone = "SELECT id, email, phone FROM users WHERE phone = ?"
 	findUserByEmail = "SELECT id, email, phone, password, email_verified FROM users WHERE email = ?"
 
-	createUserByPhone         = "INSERT INTO users (uuid, active, phone) VALUES (?, 1, ?)"
+	createUserByPhone         = "INSERT INTO users (uuid, active, phone) VALUES (?, ?, ?)"
 	createUserByEmailPassword = "INSERT INTO users (uuid, email, password, active, email_verified) VALUES (?, ?, 1, 1)"
 )
 
@@ -46,7 +47,14 @@ func (u *userRepository) FindByEmail(ctx context.Context, user infoblog.User) (i
 
 func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (infoblog.User, error) {
 
-	if err := u.db.QueryRowContext(ctx, findUserByPhone, user.Phone).Scan(&user); err != nil {
+	fields, err := infoblog.GetFields("users")
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"phone": user.Phone}).ToSql()
+
+	if err := u.db.QueryRowContext(ctx, query, args...).Scan(&user); err != nil {
 		return infoblog.User{}, err
 	}
 
@@ -54,7 +62,10 @@ func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (i
 }
 
 func (u *userRepository) CreateUserByPhone(ctx context.Context, user infoblog.User) error {
-	_, err := u.db.MustExecContext(ctx, createUserByPhone, user.UUID, user.Phone).RowsAffected()
+	if !user.Phone.Valid {
+		return fmt.Errorf("bad phone number %s", user.Phone.String)
+	}
+	_, err := u.db.MustExecContext(ctx, createUserByPhone, user.UUID, true, user.Phone).RowsAffected()
 
 	return err
 }
@@ -69,13 +80,13 @@ func (u *userRepository) Update(ctx context.Context, user infoblog.User) error {
 	if user.ID == 0 {
 		return errors.New("wrong user.ID on update")
 	}
-	_, err := u.db.MustExecContext(ctx, updateUser, user.Phone, user.Email, user.Name, user.SecondName, user.EmailVerified, user.ID).RowsAffected()
+	_, err := u.db.MustExecContext(ctx, updateUser, user.Phone, user.Email, user.Name, user.SecondName, user.EmailVerified, user.UUID).RowsAffected()
 
 	return err
 }
 
 func (u *userRepository) SetPassword(ctx context.Context, user infoblog.User) error {
-	_, err := u.db.MustExecContext(ctx, setPassword, user.Password, user.ID).RowsAffected()
+	_, err := u.db.MustExecContext(ctx, setPassword, user.Password, user.UUID).RowsAffected()
 
 	return err
 }
@@ -91,7 +102,7 @@ func (u *userRepository) Find(ctx context.Context, user infoblog.User) (infoblog
 		return infoblog.User{}, err
 	}
 
-	if err := u.db.QueryRowContext(ctx, query, args...).Scan(&user); err != nil {
+	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
 		return infoblog.User{}, err
 	}
 

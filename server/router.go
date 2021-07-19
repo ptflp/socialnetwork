@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/components"
-
 	"gitlab.com/InfoBlogFriends/server/services"
 
 	"gitlab.com/InfoBlogFriends/server/email"
@@ -24,7 +23,6 @@ import (
 
 func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
-	r.Use(middleware.Timeout(200 * time.Millisecond))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
@@ -113,11 +111,13 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 
 	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
 	r.Route("/user", func(r chi.Router) {
+		r.Use(middleware.Timeout(200 * time.Millisecond))
 		r.Use(token.Check)
 		r.Post("/subscribe", users.Subscribe())
 	})
 
 	r.Route("/system", func(r chi.Router) {
+		r.Use(middleware.Timeout(200 * time.Millisecond))
 		r.Use(token.Check)
 		r.Get("/config", func(w http.ResponseWriter, r *http.Request) {
 			cmps.Responder().SendJSON(w, cmps.Config)

@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/jmoiron/sqlx"
 	infoblog "gitlab.com/InfoBlogFriends/server"
@@ -55,36 +58,27 @@ func (pr *postsRepository) Delete(ctx context.Context, p infoblog.Post) error {
 	return err
 }
 
-func (pr *postsRepository) Find(ctx context.Context, id int64) (infoblog.Post, error) {
-	if id < 1 {
-		return infoblog.Post{}, errors.New("repository wrong post id")
+func (pr *postsRepository) Find(ctx context.Context, p infoblog.Post) (infoblog.Post, error) {
+	if len(p.UUID) != 40 {
+		return infoblog.Post{}, errors.New("repository wrong post uuid")
 	}
 
-	var (
-		typeID    sql.NullInt64
-		body      sql.NullString
-		fileID    sql.NullInt64
-		active    sql.NullInt64
-		userID    sql.NullInt64
-		createdAt sql.NullTime
-		updatedAt sql.NullTime
-	)
+	fields, err := infoblog.GetFields("posts")
+	if err != nil {
+		return infoblog.Post{}, err
+	}
 
-	if err := pr.db.QueryRowContext(ctx, findPost, id).Scan(&typeID, &body, &userID, &active, &fileID, &createdAt, &updatedAt); err != nil {
+	query, args, err := sq.Select(fields...).From("posts").Where(sq.Eq{"uuid": p.PostEntity.UUID}).ToSql()
+	if err != nil {
+		return infoblog.Post{}, err
+	}
+
+	if err := pr.db.QueryRowxContext(ctx, query, args...).StructScan(&p.PostEntity); err != nil {
 		return infoblog.Post{}, err
 	}
 
 	return infoblog.Post{
-		PostEntity: infoblog.PostEntity{
-			ID:        id,
-			Type:      typeID.Int64,
-			Body:      body.String,
-			FileID:    fileID.Int64,
-			UserID:    userID.Int64,
-			Active:    active.Int64,
-			CreatedAt: createdAt.Time,
-			UpdatedAt: updatedAt.Time,
-		},
+		PostEntity: p.PostEntity,
 	}, nil
 }
 
@@ -118,7 +112,33 @@ func (pr *postsRepository) FindAll(ctx context.Context, uid int64) ([]infoblog.P
 }
 
 func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {
-	rows, err := pr.db.QueryContext(ctx, findAllRecent, limit, offset)
+	fields, err := infoblog.GetFields("posts")
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	for i := range fields {
+		s := strings.Join([]string{"p", fields[i]}, ".")
+		fields[i] = s
+	}
+
+	userFields, err := infoblog.GetFields("users")
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	for i := range userFields {
+		s := strings.Join([]string{"u", userFields[i]}, ".")
+		userFields[i] = s
+	}
+	fields = append(fields, userFields...)
+
+	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.Active": 1, "p.Type": 1}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	rows, err := pr.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -131,7 +151,11 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 
 	for rows.Next() {
 		post := infoblog.Post{}
-		err = rows.Scan(&post.ID, &post.Type, &post.Body, &post.Active, &post.CreatedAt, &post.UpdatedAt, &post.User.ID, &post.User.Name, &post.User.SecondName, &post.User.Email, &post.User.Phone)
+		pFieldsPointers := infoblog.GetFieldsPointers(&post.PostEntity)
+		uFieldsPointers := infoblog.GetFieldsPointers(&post.User)
+
+		pFieldsPointers = append(pFieldsPointers, uFieldsPointers...)
+		err = rows.Scan(pFieldsPointers...)
 		if err != nil {
 			return nil, nil, nil, err
 		}

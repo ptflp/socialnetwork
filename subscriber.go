@@ -2,7 +2,6 @@ package infoblog
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -10,7 +9,7 @@ type Subscriber struct {
 	ID          int64
 	UserID      int64
 	SubscribeID int64
-	Active      sql.NullBool
+	Active      NullBool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

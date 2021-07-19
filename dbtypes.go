@@ -2,32 +2,38 @@ package infoblog
 
 import "database/sql"
 
-func NewNullString(s string) sql.NullString {
+func NewNullString(s string) NullString {
 	if len(s) == 0 {
-		return sql.NullString{}
+		return NullString{}
 	}
-	return sql.NullString{
-		String: s,
-		Valid:  true,
+	return NullString{
+		sql.NullString{
+			String: s,
+			Valid:  true,
+		},
 	}
 }
 
-func NewNullInt64(n int64) sql.NullInt64 {
+func NewNullInt64(n int64) NullInt64 {
 	if n == 0 {
-		return sql.NullInt64{}
+		return NullInt64{}
 	}
-	return sql.NullInt64{
-		Int64: n,
-		Valid: true,
+	return NullInt64{
+		sql.NullInt64{
+			Int64: n,
+			Valid: true,
+		},
 	}
 }
 
-func NewNullBool(b bool) sql.NullBool {
+func NewNullBool(b bool) NullBool {
 	if !b {
-		return sql.NullBool{}
+		return NullBool{}
 	}
-	return sql.NullBool{
-		Bool:  b,
-		Valid: true,
+	return NullBool{
+		sql.NullBool{
+			Bool:  b,
+			Valid: true,
+		},
 	}
 }

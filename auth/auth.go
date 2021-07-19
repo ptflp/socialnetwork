@@ -276,12 +276,13 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		return nil, errors.New("phone code mismatch")
 	}
 
+	phoneEnt := infoblog.NewNullString(phone)
 	u := infoblog.User{
-		Phone: infoblog.NewNullString(phone),
+		Phone: phoneEnt,
 	}
 	u, err = a.userRepository.FindByPhone(ctx, u)
-	if err != nil {
-
+	u.Phone = phoneEnt
+	if err != nil && err.Error() == "sql: no rows in result set" {
 		rand.Seed(time.Now().UnixNano())
 		id := rand.Intn(89) + 10
 

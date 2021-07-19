@@ -2,7 +2,7 @@ package docs
 
 import "gitlab.com/InfoBlogFriends/server/request"
 
-// swagger:route POST /user/subscribe profile userSubscribeRequest
+// swagger:route POST /user/subscribe user userSubscribeRequest
 // Обновление профиля.
 // security:
 //   - Bearer: []
@@ -18,5 +18,5 @@ type userSubscribeResponse struct {
 // swagger:parameters userSubscribeRequest
 type userSubscribeParams struct {
 	// in:body
-	Body request.ProfileUpdateReq
+	Body request.UserSubscribeRequest
 }
