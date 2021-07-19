@@ -82,33 +82,61 @@ func (pr *postsRepository) Find(ctx context.Context, p infoblog.Post) (infoblog.
 	}, nil
 }
 
-func (pr *postsRepository) FindAll(ctx context.Context, uid int64) ([]infoblog.Post, map[int64]int, []int, error) {
-	if uid < 1 {
-		return nil, nil, nil, errors.New("repository wrong post id")
+func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limit int64, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {
+	fields, err := infoblog.GetFields("posts")
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
-	rows, err := pr.db.QueryContext(ctx, findAllRecent, uid)
+	for i := range fields {
+		s := strings.Join([]string{"p", fields[i]}, ".")
+		fields[i] = s
+	}
+
+	userFields, err := infoblog.GetFields("users")
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	for i := range userFields {
+		s := strings.Join([]string{"u", userFields[i]}, ".")
+		userFields[i] = s
+	}
+	fields = append(fields, userFields...)
+
+	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.active": 1, "p.type": 1, "p.user_uuid": user.UUID}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	rows, err := pr.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
 	defer rows.Close()
 
-	posts := make([]infoblog.Post, 0)
+	postDataRes := make([]infoblog.Post, 0, limit)
+	postIdIndexMap := make(map[int64]int)
+	postsIDs := make([]int, 0, limit)
 
 	for rows.Next() {
 		post := infoblog.Post{}
-		err = rows.Scan(&post.ID, &post.Type, &post.Body, &post.Active, &post.FileID, &post.UserID, &post.CreatedAt, &post.UpdatedAt)
-		post.UserID = uid
+		pFieldsPointers := infoblog.GetFieldsPointers(&post.PostEntity)
+		uFieldsPointers := infoblog.GetFieldsPointers(&post.User)
 
+		pFieldsPointers = append(pFieldsPointers, uFieldsPointers...)
+		err = rows.Scan(pFieldsPointers...)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 
-		posts = append(posts, post)
+		postsIDs = append(postsIDs, int(post.ID))
+		postDataRes = append(postDataRes, post)
+		postIdIndexMap[post.ID] = len(postDataRes) - 1
 	}
 
-	return posts, nil, nil, nil
+	return postDataRes, postIdIndexMap, postsIDs, nil
 }
 
 func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {

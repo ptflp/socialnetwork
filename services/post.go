@@ -168,7 +168,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 }
 
 func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFeedReq) (request.PostsFeedData, error) {
-	posts, postIDIndexMap, postsIDs, err := p.post.FindAll(ctx, u.ID)
+	posts, postIDIndexMap, postsIDs, err := p.post.FindAll(ctx, u, req.Limit, req.Offset)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
