@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	createFile = "INSERT INTO files (type, foreign_id, dir, name, user_id, user_uuid, uuid, foreign_uuid) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	createFile = "INSERT INTO files (type, foreign_id, dir, name, user_id, user_uuid, uuid, foreign_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	updateFile = "UPDATE files SET type = ?, foreign_id = ?, dir = ?, name = ?, user_id = ? WHERE id = ?"
 	activeFile = "UPDATE files SET active = ? WHERE id = ?"
 
