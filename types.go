@@ -1,12 +1,16 @@
 package infoblog
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
+
+	"gitlab.com/InfoBlogFriends/server/decoder"
 )
 
 //NullString is a wrapper around sql.NullString
 type NullString struct {
+	*decoder.Decoder
 	sql.NullString
 }
 
@@ -19,7 +23,18 @@ func (x *NullString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(x.String)
 }
 
+func (x *NullString) UnmarshalJSON(data []byte) error {
+	err := x.Decode(bytes.NewBuffer(data), &x.String)
+	if err != nil {
+		return err
+	}
+	x.Valid = true
+
+	return nil
+}
+
 type NullBool struct {
+	*decoder.Decoder
 	sql.NullBool
 }
 
@@ -32,7 +47,18 @@ func (x *NullBool) MarshalJSON() ([]byte, error) {
 	return json.Marshal(x.Bool)
 }
 
+func (x *NullBool) UnmarshalJSON(data []byte) error {
+	err := x.Decode(bytes.NewBuffer(data), &x.Bool)
+	if err != nil {
+		return err
+	}
+	x.Valid = true
+
+	return nil
+}
+
 type NullInt64 struct {
+	*decoder.Decoder
 	sql.NullInt64
 }
 
@@ -45,7 +71,18 @@ func (x *NullInt64) MarshalJSON() ([]byte, error) {
 	return json.Marshal(x.Int64)
 }
 
+func (x *NullInt64) UnmarshalJSON(data []byte) error {
+	err := x.Decode(bytes.NewBuffer(data), &x.Int64)
+	if err != nil {
+		return err
+	}
+	x.Valid = true
+
+	return nil
+}
+
 type NullTime struct {
+	*decoder.Decoder
 	sql.NullTime
 }
 
@@ -56,4 +93,14 @@ func (x *NullTime) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 	return json.Marshal(x.Time)
+}
+
+func (x *NullTime) UnmarshalJSON(data []byte) error {
+	err := x.Decode(bytes.NewBuffer(data), &x.Time)
+	if err != nil {
+		return err
+	}
+	x.Valid = true
+
+	return nil
 }

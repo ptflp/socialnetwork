@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var decoder = schema.NewDecoder()
+var formDecoder = schema.NewDecoder()
 
 type postsController struct {
 	respond.Responder
@@ -55,7 +55,7 @@ func (a *postsController) Create() http.HandlerFunc {
 		var postAddReq request.PostCreateReq
 
 		// r.PostForm is a map of our POST form values
-		err = decoder.Decode(&postAddReq, r.PostForm)
+		err = formDecoder.Decode(&postAddReq, r.PostForm)
 
 		if err != nil {
 			a.ErrorBadRequest(w, err)
@@ -97,6 +97,35 @@ func (a *postsController) FeedRecent() http.HandlerFunc {
 		}
 
 		feed, err := a.post.FeedRecent(r.Context(), postsListReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.PostsFeedResponse{
+			Success: true,
+			Msg:     "",
+			Data:    feed,
+		})
+	}
+}
+
+func (a *postsController) FeedMy() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		u, err := extractUser(r)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		var postsListReq request.PostsFeedReq
+		err = Decode(r, &postsListReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		feed, err := a.post.FeedMy(r.Context(), u, postsListReq)
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return

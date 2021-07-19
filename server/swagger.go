@@ -30,7 +30,7 @@ const (
     <script>
         window.onload = function() {
           SwaggerUIBundle({
-            url: "/static/swagger.json",
+            url: "/static/swagger.json?123",
             dom_id: '#swagger-ui',
             presets: [
               SwaggerUIBundle.presets.apis,

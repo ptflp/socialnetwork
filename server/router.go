@@ -102,8 +102,9 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Get("/get/uuid/{UUID}", posts.Create())
 
 		r.Route("/feed", func(r chi.Router) {
-			r.Get("/my", posts.FeedRecent())
+			r.Get("/my", posts.FeedMy())
 			r.Post("/recent", posts.FeedRecent())
+
 			r.Get("/subscribed", posts.FeedRecent())
 			r.Get("/user/{UserID}", posts.FeedRecent())
 		})
@@ -111,9 +112,9 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 
 	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
 	r.Route("/user", func(r chi.Router) {
-		r.Use(middleware.Timeout(200 * time.Millisecond))
 		r.Use(token.Check)
 		r.Post("/subscribe", users.Subscribe())
+		r.Post("/unsubscribe", users.Unsubscribe())
 	})
 
 	r.Route("/system", func(r chi.Router) {

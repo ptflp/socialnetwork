@@ -25,21 +25,40 @@ type postsCreateParams struct {
 	File interface{} `json:"file"`
 }
 
-// swagger:route POST /posts/feed/recent posts postsListRequest
+// swagger:route POST /posts/feed/recent posts postsFeedRequest
 // Получение ленты последних постов.
 // security:
 //   - Bearer: []
 // responses:
-//   200: postsListResponse
+//   200: postsFeedResponse
 
-// swagger:response postsListResponse
-type postsListResponse struct {
+// swagger:response postsFeedResponse
+type postsFeedResponse struct {
 	// in:body
 	Body request.PostsFeedResponse
 }
 
-// swagger:parameters postsListRequest
-type postsListParams struct {
+// swagger:parameters postsFeedRequest
+type postsFeedParams struct {
+	// in:body
+	FormData request.PostsFeedReq
+}
+
+// swagger:route POST /posts/feed/my posts postsFeedMyRequest
+// Получение ленты своих постов.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postsFeedMyResponse
+
+// swagger:response postsFeedMyResponse
+type postsFeedMyResponse struct {
+	// in:body
+	Body request.PostsFeedResponse
+}
+
+// swagger:parameters postsFeedMyRequest
+type postsFeedMyParams struct {
 	// in:body
 	FormData request.PostsFeedReq
 }

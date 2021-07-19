@@ -14,9 +14,10 @@ func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 	}
 
 	r := infoblog.Repositories{
-		Files: NewFilesRepository(database),
-		Posts: NewPostsRepository(database),
-		Users: NewUserRepository(database),
+		Files:       NewFilesRepository(database),
+		Posts:       NewPostsRepository(database),
+		Users:       NewUserRepository(database),
+		Subscribers: NewSubscribeRepository(database),
 	}
 
 	return r

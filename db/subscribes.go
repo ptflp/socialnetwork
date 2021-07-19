@@ -8,15 +8,16 @@ import (
 )
 
 const (
-	createSubscribe = "INSERT INTO subscribes (user_id, subscribe_id, active) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE active = 1"
+	createSubscribe = "INSERT INTO subscribes (user_uuid, subscriber_uuid, active) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE active = 1"
+	deleteSubscribe = "INSERT INTO subscribes (user_uuid, subscriber_uuid, active) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE active = 0"
 )
 
 type subsRepository struct {
 	db *sqlx.DB
 }
 
-func (sub *subsRepository) Create(ctx context.Context, uid, subID int64) (int64, error) {
-	res, err := sub.db.ExecContext(ctx, createSubscribe, uid, subID)
+func (sb *subsRepository) Create(ctx context.Context, sub infoblog.Subscriber) (int64, error) {
+	res, err := sb.db.ExecContext(ctx, createSubscribe, sub.UserUUID, sub.SubscriberUUID)
 	if err != nil {
 		return 0, err
 	}
@@ -24,10 +25,20 @@ func (sub *subsRepository) Create(ctx context.Context, uid, subID int64) (int64,
 	return res.LastInsertId()
 }
 
-func (sub *subsRepository) FindByUser(ctx context.Context, uid int64) ([]infoblog.Subscriber, error) {
+func (sb *subsRepository) Delete(ctx context.Context, sub infoblog.Subscriber) error {
+	_, err := sb.db.ExecContext(ctx, deleteSubscribe, sub.UserUUID, sub.SubscriberUUID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (sb *subsRepository) FindByUser(ctx context.Context, user infoblog.User) ([]infoblog.Subscriber, error) {
+
 	panic("implement me")
 }
 
-func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscribesRepository {
+func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {
 	return &subsRepository{db: db}
 }

@@ -5,16 +5,19 @@ import (
 	"time"
 )
 
+//go:generate easytags $GOFILE
+
 type Subscriber struct {
-	ID          int64
-	UserID      int64
-	SubscribeID int64
-	Active      NullBool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID             int64     `json:"id" db:"id"`
+	UserUUID       string    `json:"user_uuid" db:"user_uuid"`
+	SubscriberUUID string    `json:"subscriber_uuid" db:"subscriber_uuid"`
+	Active         NullBool  `json:"active" db:"active"`
+	CreatedAt      time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
 }
 
-type SubscribesRepository interface {
-	Create(ctx context.Context, uid, subID int64) (int64, error)
-	FindByUser(ctx context.Context, uid int64) ([]Subscriber, error)
+type SubscriberRepository interface {
+	Create(ctx context.Context, sub Subscriber) (int64, error)
+	FindByUser(ctx context.Context, user User) ([]Subscriber, error)
+	Delete(ctx context.Context, sub Subscriber) error
 }

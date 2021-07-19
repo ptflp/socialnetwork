@@ -19,13 +19,13 @@ type AuthTokenData struct {
 }
 
 type UserData struct {
-	UUID       string `json:"uuid"`
+	UUID       string `json:"user_id"`
 	Name       string `json:"name"`
 	SecondName string `json:"second_name"`
 }
 
 type PostDataResponse struct {
-	UUID   string         `json:"uuid"`
+	UUID   string         `json:"post_id"`
 	Body   string         `json:"body"`
 	Files  []PostFileData `json:"files"`
 	User   UserData       `json:"user"`
@@ -33,9 +33,8 @@ type PostDataResponse struct {
 }
 
 type PostFileData struct {
-	Link   string `json:"link"`
-	UUID   string `json:"uuid"`
-	PostID int64  `json:"post_id"`
+	Link string `json:"link"`
+	UUID string `json:"file_id"`
 }
 
 type PostCountData struct {

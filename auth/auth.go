@@ -95,7 +95,8 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 
 func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
-	err := a.Cache().Get(fmt.Sprintf(EmailVerificationKey, req.ActivationID), &u)
+	key := fmt.Sprintf(EmailVerificationKey, req.ActivationID)
+	err := a.Cache().Get(key, &u)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +118,7 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 				return nil, err
 			}
 			if u.EmailVerified.Bool == true {
-				return nil, fmt.Errorf("user with email %s already verified", u.Email)
+				return nil, fmt.Errorf("user with email %s already verified", u.Email.String)
 			}
 			if u.EmailVerified.Bool == false {
 				u.EmailVerified = infoblog.NewNullBool(true)

@@ -135,9 +135,8 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 		postsFileData := make([]request.PostFileData, 0, req.Limit)
 		for j := range posts[i].Files {
 			postsFileData = append(postsFileData, request.PostFileData{
-				Link:   "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
-				UUID:   posts[i].Files[j].UUID,
-				PostID: posts[i].Files[j].ForeignID,
+				Link: "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
+				UUID: posts[i].Files[j].UUID,
 			})
 		}
 
@@ -195,9 +194,8 @@ func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFee
 		postsFileData := make([]request.PostFileData, 0, req.Limit)
 		for j := range posts[i].Files {
 			postsFileData = append(postsFileData, request.PostFileData{
-				Link:   "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
-				UUID:   posts[i].Files[j].UUID,
-				PostID: posts[i].Files[j].ForeignID,
+				Link: "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
+				UUID: posts[i].Files[j].UUID,
 			})
 		}
 

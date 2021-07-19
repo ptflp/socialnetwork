@@ -18,7 +18,7 @@ const (
 	findUserByEmail = "SELECT id, email, phone, password, email_verified FROM users WHERE email = ?"
 
 	createUserByPhone         = "INSERT INTO users (uuid, active, phone) VALUES (?, ?, ?)"
-	createUserByEmailPassword = "INSERT INTO users (uuid, email, password, active, email_verified) VALUES (?, ?, 1, 1)"
+	createUserByEmailPassword = "INSERT INTO users (uuid, email, password, active, email_verified) VALUES (?, ?, ?, 1, 1)"
 )
 
 type userRepository struct {
@@ -38,7 +38,7 @@ func (u *userRepository) FindByEmail(ctx context.Context, user infoblog.User) (i
 
 	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"email": user.Email}).ToSql()
 
-	if err := u.db.QueryRowContext(ctx, query, args...).Scan(&user); err != nil {
+	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
 		return infoblog.User{}, err
 	}
 

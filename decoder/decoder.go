@@ -9,11 +9,17 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+var decoderSingleton *Decoder
+
 type Decoder struct {
 }
 
 func NewDecoder() *Decoder {
-	return &Decoder{}
+	if decoderSingleton == nil {
+		decoderSingleton = &Decoder{}
+	}
+
+	return decoderSingleton
 }
 
 func (d *Decoder) Decode(r io.Reader, val interface{}) error {

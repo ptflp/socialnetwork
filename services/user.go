@@ -14,10 +14,10 @@ import (
 
 type User struct {
 	userRepository infoblog.UserRepository
-	subsRepository infoblog.SubscribesRepository
+	subsRepository infoblog.SubscriberRepository
 }
 
-func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscribesRepository) *User {
+func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscriberRepository) *User {
 	return &User{userRepository: repository, subsRepository: subs}
 }
 
@@ -88,7 +88,7 @@ func (u *User) SetPassword(ctx context.Context, user infoblog.User) error {
 	return u.userRepository.SetPassword(ctx, user)
 }
 
-func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscribeRequest) error {
+func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
 	if err != nil {
 		return err
@@ -97,7 +97,29 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 		return errors.New("user with specified id not found")
 	}
 
-	_, err = u.subsRepository.Create(ctx, user.ID, sub.ID)
+	_, err = u.subsRepository.Create(ctx, infoblog.Subscriber{
+		UserUUID:       user.UUID,
+		SubscriberUUID: subscribeRequest.UUID,
+		Active:         infoblog.NewNullBool(true),
+	})
+
+	return err
+}
+
+func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
+	if err != nil {
+		return err
+	}
+	if sub.ID < 1 {
+		return errors.New("user with specified id not found")
+	}
+
+	err = u.subsRepository.Delete(ctx, infoblog.Subscriber{
+		UserUUID:       user.UUID,
+		SubscriberUUID: subscribeRequest.UUID,
+		Active:         infoblog.NewNullBool(false),
+	})
 
 	return err
 }

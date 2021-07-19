@@ -2,6 +2,6 @@ package request
 
 //go:generate easytags $GOFILE
 
-type UserSubscribeRequest struct {
-	UUID string `json:"uuid"`
+type UserSubscriberRequest struct {
+	UUID string `json:"user_id"`
 }
