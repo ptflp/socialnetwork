@@ -54,10 +54,11 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 
 	post := infoblog.Post{
 		PostEntity: infoblog.PostEntity{
-			Body:   req.Body,
-			UserID: u.ID,
-			Type:   1,
-			UUID:   postUUID,
+			Body:     req.Body,
+			UserID:   u.ID,
+			Type:     1,
+			UUID:     postUUID,
+			UserUUID: u.UUID,
 		},
 	}
 

@@ -12,7 +12,8 @@ type File struct {
 	Dir         string    `json:"dir" db:"dir"`
 	Name        string    `json:"name" db:"name"`
 	Active      int64     `json:"active" db:"active"`
-	UserID      int64     `json:"user_id" db:"user_id"`
+	UserID      int64     `json:"-" db:"user_id"`
+	UserUUID    int64     `json:"user_id" db:"user_uuid"`
 	UUID        string    `json:"file_id" db:"uuid"`
 	ForeignUUID string    `json:"foreign_uuid" db:"foreign_uuid"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
