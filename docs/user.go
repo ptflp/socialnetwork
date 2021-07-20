@@ -41,7 +41,7 @@ type userUnsubscribeParams struct {
 }
 
 // swagger:route GET /user/list user userListRequest
-// Отписаться от пользователя.
+// Лист пользователей
 // security:
 //   - Bearer: []
 // responses:

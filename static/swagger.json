@@ -362,10 +362,10 @@
             ]
           }
         ],
+        "description": "Лист пользователей",
         "tags": [
           "user"
         ],
-        "summary": "Отписаться от пользователя.",
         "operationId": "userListRequest",
         "responses": {
           "200": {
