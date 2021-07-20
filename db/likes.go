@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"strings"
 
 	sq "github.com/Masterminds/squirrel"
@@ -46,6 +47,20 @@ func (lr *likesRepository) Find(ctx context.Context, like *infoblog.Like) (infob
 	err = lr.db.QueryRowxContext(ctx, query, args...).StructScan(&likeFound)
 
 	return likeFound, err
+}
+
+func (lr *likesRepository) CountByUser(ctx context.Context, user infoblog.User) (int64, error) {
+
+	var count sql.NullInt64
+
+	query, args, err := sq.Select("COUNT(id)").From("likes").Where(sq.Eq{"user_uuid": user.UUID, "active": 1}).ToSql()
+	if err != nil {
+		return count.Int64, err
+	}
+
+	err = lr.db.QueryRowContext(ctx, query, args...).Scan(&count)
+
+	return count.Int64, err
 }
 
 func NewLikesRepository(db *sqlx.DB) infoblog.LikeRepository {

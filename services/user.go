@@ -14,13 +14,14 @@ import (
 
 type User struct {
 	*decoder.Decoder
-	userRepository infoblog.UserRepository
-	subsRepository infoblog.SubscriberRepository
-	post           *Post
+	userRepository  infoblog.UserRepository
+	subsRepository  infoblog.SubscriberRepository
+	likesRepository infoblog.LikeRepository
+	post            *Post
 }
 
-func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscriberRepository, post *Post) *User {
-	return &User{userRepository: repository, subsRepository: subs, Decoder: decoder.NewDecoder(), post: post}
+func NewUserService(rs infoblog.Repositories, subs infoblog.SubscriberRepository, post *Post) *User {
+	return &User{userRepository: rs.Users, subsRepository: subs, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes}
 }
 
 func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
@@ -55,6 +56,7 @@ func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.User
 
 	postCount, err := u.post.CountByUser(ctx, user)
 	subsCount, err := u.subsRepository.CountByUser(ctx, user)
+	likesCount, err := u.likesRepository.CountByUser(ctx, user)
 
 	if err != nil {
 		return request.UserData{}, err
@@ -64,7 +66,7 @@ func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.User
 		Posts:       postCount,
 		Subscribers: subsCount,
 		Friends:     377,
-		Likes:       233,
+		Likes:       likesCount,
 	}
 
 	return userData, nil
