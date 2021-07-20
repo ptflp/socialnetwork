@@ -40,6 +40,14 @@ type UserData struct {
 	Language       int64     `json:"language" db:"language" ops:"update,create"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
+
+	Counts *UserDataCounts `json:"counts,omitempty"`
+}
+
+type UserDataCounts struct {
+	Posts       int `json:"posts"`
+	Subscribers int `json:"subscribers"`
+	Likes       int `json:"likes"`
 }
 
 type PostDataResponse struct {

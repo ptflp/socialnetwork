@@ -52,6 +52,12 @@ func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.User
 		return request.UserData{}, err
 	}
 
+	userData.Counts = &request.UserDataCounts{
+		Posts:       89,
+		Subscribers: 144,
+		Likes:       233,
+	}
+
 	return userData, nil
 }
 
