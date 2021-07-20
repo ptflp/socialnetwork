@@ -159,6 +159,11 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 			return request.PostsFeedData{}, err
 		}
 
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
+		if err != nil {
+			return request.PostsFeedData{}, err
+		}
+
 		postDataRes = append(postDataRes, pdr)
 	}
 
@@ -180,7 +185,7 @@ func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFee
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
-	count, err := p.post.CountRecent(ctx)
+	count, err := p.post.CountByUser(ctx, u)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
@@ -201,20 +206,29 @@ func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFee
 			})
 		}
 
-		postDataRes = append(postDataRes, request.PostDataResponse{
-			UUID:  posts[i].UUID,
-			Body:  posts[i].Body,
+		userData := request.UserData{}
+
+		err = p.MapStructs(&userData, &posts[i].User)
+		if err != nil {
+			return request.PostsFeedData{}, err
+		}
+
+		pdr := request.PostDataResponse{
 			Files: postsFileData,
-			User: request.UserData{
-				UUID:       posts[i].User.UUID,
-				Name:       posts[i].User.Name.String,
-				SecondName: posts[i].User.SecondName.String,
-			},
-			Counts: request.PostCountData{
-				Likes:    0,
-				Comments: 0,
-			},
-		})
+			User:  userData,
+		}
+
+		err = p.MapStructs(&pdr, &posts[i].PostEntity)
+		if err != nil {
+			return request.PostsFeedData{}, err
+		}
+
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
+		if err != nil {
+			return request.PostsFeedData{}, err
+		}
+
+		postDataRes = append(postDataRes, pdr)
 	}
 
 	return request.PostsFeedData{

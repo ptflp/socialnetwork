@@ -20,4 +20,5 @@ type LikeRepository interface {
 	Upsert(ctx context.Context, like Like) error
 	Find(ctx context.Context, like *Like) (Like, error)
 	CountByUser(ctx context.Context, user User) (int64, error)
+	CountByPost(ctx context.Context, like Like) (int64, error)
 }
