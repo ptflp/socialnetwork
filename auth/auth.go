@@ -107,6 +107,7 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 		return nil, err
 	}
 
+	u.EmailVerified = infoblog.NewNullBool(true)
 	err = a.userRepository.CreateUser(ctx, u)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
@@ -116,13 +117,6 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 			}
 			if u.EmailVerified.Bool {
 				return nil, fmt.Errorf("user with email %s already verified", u.Email.String)
-			}
-			if !u.EmailVerified.Bool {
-				u.EmailVerified = infoblog.NewNullBool(true)
-				err = a.userRepository.Update(ctx, u)
-				if err != nil {
-					return nil, err
-				}
 			}
 		} else {
 			return nil, err
