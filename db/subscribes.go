@@ -2,6 +2,9 @@ package db
 
 import (
 	"context"
+	"database/sql"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/jmoiron/sqlx"
 	infoblog "gitlab.com/InfoBlogFriends/server"
@@ -37,6 +40,20 @@ func (sb *subsRepository) Delete(ctx context.Context, sub infoblog.Subscriber) e
 func (sb *subsRepository) FindByUser(ctx context.Context, user infoblog.User) ([]infoblog.Subscriber, error) {
 
 	panic("implement me")
+}
+
+func (sb *subsRepository) CountByUser(ctx context.Context, user infoblog.User) (int64, error) {
+
+	var count sql.NullInt64
+
+	query, args, err := sq.Select("COUNT(id)").From("subscribes").Where(sq.Eq{"user_uuid": user.UUID}).ToSql()
+	if err != nil {
+		return count.Int64, err
+	}
+
+	err = sb.db.QueryRowContext(ctx, query, args...).Scan(&count)
+
+	return count.Int64, err
 }
 
 func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {

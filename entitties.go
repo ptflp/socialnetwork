@@ -9,6 +9,7 @@ import (
 var entityFields = map[string][]string{}
 var entityUpdateFields = map[string][]string{}
 var entityCreateFields = map[string][]string{}
+var entityDeleteFields = map[string][]string{}
 
 // register entities
 func init() {
@@ -28,6 +29,7 @@ func init() {
 		var allFields []string
 		var updateFields []string
 		var createFields []string
+		var deleteFields []string
 
 		for i := 0; i < t.NumField(); i++ {
 
@@ -41,6 +43,10 @@ func init() {
 
 			if createFields == nil {
 				createFields = make([]string, 0, t.NumField())
+			}
+
+			if deleteFields == nil {
+				deleteFields = make([]string, 0, t.NumField())
 			}
 
 			// Get the field, returns https://golang.org/pkg/reflect/#StructField
@@ -62,6 +68,8 @@ func init() {
 						updateFields = append(updateFields, filedName)
 					case "create":
 						createFields = append(createFields, filedName)
+					case "delete":
+						deleteFields = append(deleteFields, filedName)
 					}
 				}
 			}
@@ -72,6 +80,8 @@ func init() {
 		entityFields[name] = allFields
 
 		entityCreateFields[name] = createFields
+
+		entityDeleteFields[name] = deleteFields
 	}
 }
 
@@ -101,6 +111,18 @@ func GetUpdateFields(tableName string) ([]string, error) {
 
 func GetCreateFields(tableName string) ([]string, error) {
 	v, ok := entityCreateFields[tableName]
+	if !ok {
+		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
+	}
+
+	b := make([]string, len(v))
+	copy(b, v)
+
+	return b, nil
+}
+
+func GetDeleteFields(tableName string) ([]string, error) {
+	v, ok := entityDeleteFields[tableName]
 	if !ok {
 		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
 	}

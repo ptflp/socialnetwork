@@ -37,4 +37,5 @@ type PostRepository interface {
 	FindAll(ctx context.Context, user User, limit int64, offset int64) ([]Post, map[int64]int, []int, error)
 	FindAllRecent(ctx context.Context, limit, offset int64) ([]Post, map[int64]int, []int, error)
 	CountRecent(ctx context.Context) (int64, error)
+	CountByUser(ctx context.Context, user User) (int64, error)
 }

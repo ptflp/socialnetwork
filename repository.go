@@ -5,4 +5,5 @@ type Repositories struct {
 	Posts       PostRepository
 	Users       UserRepository
 	Subscribers SubscriberRepository
+	Likes       LikeRepository
 }

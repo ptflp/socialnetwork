@@ -20,11 +20,12 @@ import (
 type Post struct {
 	file *File
 	post infoblog.PostRepository
+	like infoblog.LikeRepository
 	*decoder.Decoder
 }
 
 func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder) *Post {
-	return &Post{post: reps.Posts, file: file, Decoder: d}
+	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes}
 }
 
 func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostCreateReq, u *infoblog.User) (request.PostDataResponse, error) {
@@ -220,6 +221,40 @@ func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFee
 		Count: count,
 		Posts: postDataRes,
 	}, nil
+}
+
+func (p *Post) CountByUser(ctx context.Context, user infoblog.User) (int64, error) {
+	return p.post.CountByUser(ctx, user)
+}
+
+func (p *Post) Like(ctx context.Context, req request.PostLikeReq) error {
+	u, ok := ctx.Value("user").(*infoblog.User)
+	if !ok {
+		return fmt.Errorf("get user from request context err")
+	}
+
+	post, err := p.post.Find(ctx, infoblog.Post{
+		PostEntity: infoblog.PostEntity{UUID: req.UUID},
+	})
+
+	if err != nil {
+		return err
+	}
+	like := infoblog.Like{
+		Type:        1,
+		ForeignUUID: post.UUID,
+		UserUUID:    post.UserUUID,
+		LikerUUID:   u.UUID,
+	}
+
+	likeFound, err := p.like.Find(ctx, &like)
+	if err != nil {
+		like.Active = infoblog.NewNullBool(true)
+		return p.like.Upsert(ctx, like)
+	}
+	likeFound.Active = infoblog.NewNullBool(!likeFound.Active.Bool)
+
+	return p.like.Upsert(ctx, likeFound)
 }
 
 func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {

@@ -62,3 +62,22 @@ type postsFeedMyParams struct {
 	// in:body
 	FormData request.PostsFeedReq
 }
+
+// swagger:route POST /posts/like posts postLikeRequest
+// Получение ленты своих постов.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postLikeResponse
+
+// swagger:response postLikeResponse
+type postLikeResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters postLikeRequest
+type postLikeParams struct {
+	// in:body
+	FormData request.PostLikeReq
+}

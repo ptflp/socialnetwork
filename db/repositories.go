@@ -8,16 +8,17 @@ import (
 
 func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 
-	database, err := NewDB(cmps.Logger(), cmps.Config().DB)
+	mainDB, err := NewDB(cmps.Logger(), cmps.Config().DB)
 	if err != nil {
 		cmps.Logger().Fatal("db initialization error", zap.Error(err))
 	}
 
 	r := infoblog.Repositories{
-		Files:       NewFilesRepository(database),
-		Posts:       NewPostsRepository(database),
-		Users:       NewUserRepository(database),
-		Subscribers: NewSubscribeRepository(database),
+		Files:       NewFilesRepository(mainDB),
+		Posts:       NewPostsRepository(mainDB),
+		Users:       NewUserRepository(mainDB),
+		Subscribers: NewSubscribeRepository(mainDB),
+		Likes:       NewLikesRepository(mainDB),
 	}
 
 	return r

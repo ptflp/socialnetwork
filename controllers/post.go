@@ -104,7 +104,6 @@ func (a *postsController) FeedRecent() http.HandlerFunc {
 
 		a.SendJSON(w, request.PostsFeedResponse{
 			Success: true,
-			Msg:     "",
 			Data:    feed,
 		})
 	}
@@ -133,8 +132,28 @@ func (a *postsController) FeedMy() http.HandlerFunc {
 
 		a.SendJSON(w, request.PostsFeedResponse{
 			Success: true,
-			Msg:     "",
 			Data:    feed,
+		})
+	}
+}
+
+func (a *postsController) Like() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var postLikeReq request.PostLikeReq
+		err := Decode(r, &postLikeReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = a.post.Like(r.Context(), postLikeReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.PostsFeedResponse{
+			Success: true,
 		})
 	}
 }

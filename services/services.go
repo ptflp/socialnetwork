@@ -16,11 +16,12 @@ type Services struct {
 
 func NewServices(cmps components.Componenter, repositories infoblog.Repositories) Services {
 	file := NewFileService(repositories.Files)
+	post := NewPostService(repositories, file, cmps.Decoder())
 
 	return Services{
 		AuthService: auth.NewAuthService(repositories, cmps),
-		User:        NewUserService(repositories.Users, repositories.Subscribers),
-		Post:        NewPostService(repositories, file, cmps.Decoder()),
+		User:        NewUserService(repositories.Users, repositories.Subscribers, post),
+		Post:        post,
 		File:        file,
 	}
 }

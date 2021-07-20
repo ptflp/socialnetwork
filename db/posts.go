@@ -204,6 +204,20 @@ func (pr *postsRepository) CountRecent(ctx context.Context) (int64, error) {
 	return count.Int64, err
 }
 
+func (pr *postsRepository) CountByUser(ctx context.Context, user infoblog.User) (int64, error) {
+
+	var count sql.NullInt64
+
+	query, args, err := sq.Select("COUNT(id)").From("posts").Where(sq.Eq{"user_uuid": user.UUID}).ToSql()
+	if err != nil {
+		return count.Int64, err
+	}
+
+	err = pr.db.QueryRowContext(ctx, query, args...).Scan(&count)
+
+	return count.Int64, err
+}
+
 func NewPostsRepository(db *sqlx.DB) infoblog.PostRepository {
 	return &postsRepository{db: db}
 }

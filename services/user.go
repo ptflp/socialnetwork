@@ -16,10 +16,11 @@ type User struct {
 	*decoder.Decoder
 	userRepository infoblog.UserRepository
 	subsRepository infoblog.SubscriberRepository
+	post           *Post
 }
 
-func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscriberRepository) *User {
-	return &User{userRepository: repository, subsRepository: subs, Decoder: decoder.NewDecoder()}
+func NewUserService(repository infoblog.UserRepository, subs infoblog.SubscriberRepository, post *Post) *User {
+	return &User{userRepository: repository, subsRepository: subs, Decoder: decoder.NewDecoder(), post: post}
 }
 
 func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
@@ -52,9 +53,17 @@ func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.User
 		return request.UserData{}, err
 	}
 
+	postCount, err := u.post.CountByUser(ctx, user)
+	subsCount, err := u.subsRepository.CountByUser(ctx, user)
+
+	if err != nil {
+		return request.UserData{}, err
+	}
+
 	userData.Counts = &request.UserDataCounts{
-		Posts:       89,
-		Subscribers: 144,
+		Posts:       postCount,
+		Subscribers: subsCount,
+		Friends:     377,
 		Likes:       233,
 	}
 

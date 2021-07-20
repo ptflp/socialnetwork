@@ -20,4 +20,5 @@ type SubscriberRepository interface {
 	Create(ctx context.Context, sub Subscriber) (int64, error)
 	FindByUser(ctx context.Context, user User) ([]Subscriber, error)
 	Delete(ctx context.Context, sub Subscriber) error
+	CountByUser(ctx context.Context, user User) (int64, error)
 }

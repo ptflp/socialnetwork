@@ -41,13 +41,17 @@ type UserData struct {
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
 
+	IsFriends    bool `json:"is_friends"`
+	IsSubscriber bool `json:"is_subscriber"`
+
 	Counts *UserDataCounts `json:"counts,omitempty"`
 }
 
 type UserDataCounts struct {
-	Posts       int `json:"posts"`
-	Subscribers int `json:"subscribers"`
-	Likes       int `json:"likes"`
+	Posts       int64 `json:"posts"`
+	Subscribers int64 `json:"subscribers"`
+	Friends     int64 `json:"friends"`
+	Likes       int64 `json:"likes"`
 }
 
 type PostDataResponse struct {

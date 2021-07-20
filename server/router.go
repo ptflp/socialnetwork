@@ -97,6 +97,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 	posts := controllers.NewPostsController(cmps.Responder(), services.User, services.File, services.Post, cmps.Logger())
 	r.Route("/posts", func(r chi.Router) {
 		r.Use(token.Check)
+		r.Post("/like", posts.Like())
 		r.Post("/create", posts.Create())
 		r.Post("/update/{UUID}", posts.Create())
 		r.Post("/delete/{UUID}", posts.Create())
