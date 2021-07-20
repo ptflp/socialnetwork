@@ -362,10 +362,10 @@
             ]
           }
         ],
-        "description": "Лист пользователей",
         "tags": [
           "user"
         ],
+        "summary": "Лист пользователей.",
         "operationId": "userListRequest",
         "responses": {
           "200": {
