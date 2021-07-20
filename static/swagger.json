@@ -263,7 +263,7 @@
         "tags": [
           "posts"
         ],
-        "summary": "Получение ленты своих постов.",
+        "summary": "Лайк поста.",
         "operationId": "postLikeRequest",
         "parameters": [
           {

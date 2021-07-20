@@ -64,7 +64,7 @@ type postsFeedMyParams struct {
 }
 
 // swagger:route POST /posts/like posts postLikeRequest
-// Получение ленты своих постов.
+// Лайк поста.
 // security:
 //   - Bearer: []
 // responses:
