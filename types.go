@@ -28,6 +28,9 @@ func (x *NullString) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	x.Valid = true
+	if len(x.String) == 0 {
+		x.Valid = false
+	}
 
 	return nil
 }

@@ -90,3 +90,34 @@ func (u *usersController) Unsubscribe() http.HandlerFunc {
 		})
 	}
 }
+
+func (u *usersController) List() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := extractUser(r)
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		var usersSubscribeReq request.UserSubscriberRequest
+
+		// r.PostForm is u map of our POST form values
+		err = u.Decode(r.Body, &usersSubscribeReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = u.user.List(r.Context(), user, usersSubscribeReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+		})
+	}
+}

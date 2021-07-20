@@ -38,7 +38,7 @@ func (u *User) CreateByEmailPassword(ctx context.Context, user infoblog.User) er
 	}
 
 	user.Password = infoblog.NewNullString(passHash)
-	return u.userRepository.CreateUserByEmailPassword(ctx, user)
+	return u.userRepository.CreateUser(ctx, user)
 }
 
 func (u *User) GetProfile(ctx context.Context, user infoblog.User) (infoblog.User, error) {
@@ -93,6 +93,24 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 }
 
 func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
+	if err != nil {
+		return err
+	}
+	if sub.ID < 1 {
+		return errors.New("user with specified id not found")
+	}
+
+	err = u.subsRepository.Delete(ctx, infoblog.Subscriber{
+		UserUUID:       user.UUID,
+		SubscriberUUID: subscribeRequest.UUID,
+		Active:         infoblog.NewNullBool(false),
+	})
+
+	return err
+}
+
+func (u *User) List(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
 	if err != nil {
 		return err

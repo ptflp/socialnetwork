@@ -67,11 +67,23 @@ func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (i
 	return user, nil
 }
 
-func (u *userRepository) CreateUserByPhone(ctx context.Context, user infoblog.User) error {
+func (u *userRepository) CreateUser(ctx context.Context, user infoblog.User) error {
 	if !user.Phone.Valid {
 		return fmt.Errorf("bad phone number %s", user.Phone.String)
 	}
-	_, err := u.db.MustExecContext(ctx, createUserByPhone, user.UUID, true, user.Phone).RowsAffected()
+	if len(user.UUID) != 40 {
+		return fmt.Errorf("create user by phone wrong uuid length %s", user.UUID)
+	}
+
+	createFields, err := infoblog.GetCreateFields("users")
+	if err != nil {
+		return err
+	}
+	createFieldsPointers := infoblog.GetFieldsPointers(&user, "create")
+
+	queryRaw := sq.Insert("users").Columns(createFields...).Values(createFieldsPointers...)
+	query, args, err := queryRaw.ToSql()
+	_, err = u.db.MustExecContext(ctx, query, args...).RowsAffected()
 
 	return err
 }

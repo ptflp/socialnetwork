@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/decoder"
+
 	"gitlab.com/InfoBlogFriends/server/components"
 
 	"github.com/google/uuid"
@@ -37,6 +39,7 @@ const (
 )
 
 type service struct {
+	*decoder.Decoder
 	smsProvider    providers.SMS
 	userRepository infoblog.UserRepository
 	components.Componenter
@@ -46,7 +49,7 @@ func NewAuthService(
 	repositories infoblog.Repositories,
 	cmps components.Componenter,
 ) *service {
-	return &service{Componenter: cmps, userRepository: repositories.Users, smsProvider: cmps.SMS()}
+	return &service{Componenter: cmps, userRepository: repositories.Users, smsProvider: cmps.SMS(), Decoder: decoder.NewDecoder()}
 }
 
 func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivationRequest) error {
@@ -94,23 +97,17 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 }
 
 func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (*request.AuthTokenData, error) {
-	var u infoblog.User
+	u, err := createDefaultUser()
+	if err != nil {
+		return nil, err
+	}
 	key := fmt.Sprintf(EmailVerificationKey, req.ActivationID)
-	err := a.Cache().Get(key, &u)
-	if err != nil {
-		return nil, err
-	}
-	rand.Seed(time.Now().UnixNano())
-	id := rand.Intn(89) + 10
-
-	uUUID, err := uuid.NewUUID()
+	err = a.Cache().Get(key, &u)
 	if err != nil {
 		return nil, err
 	}
 
-	u.UUID = strings.Join([]string{uUUID.String(), fmt.Sprintf("-u%d", id)}, "")
-
-	err = a.userRepository.CreateUserByEmailPassword(ctx, u)
+	err = a.userRepository.CreateUser(ctx, u)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			u, err = a.userRepository.FindByEmail(ctx, u)
@@ -282,22 +279,18 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 		Phone: phoneEnt,
 	}
 	u, err = a.userRepository.FindByPhone(ctx, u)
-	u.Phone = phoneEnt
 	if err != nil && err.Error() == "sql: no rows in result set" {
-		rand.Seed(time.Now().UnixNano())
-		id := rand.Intn(89) + 10
+		u, err = createDefaultUser()
+		if err != nil {
+			return nil, err
+		}
+		u.Phone = phoneEnt
 
-		uUUID, err := uuid.NewUUID()
+		err = a.userRepository.CreateUser(ctx, u)
 		if err != nil {
 			return nil, err
 		}
 
-		u.UUID = strings.Join([]string{uUUID.String(), fmt.Sprintf("-u%d", id)}, "")
-
-		err = a.userRepository.CreateUserByPhone(ctx, u)
-		if err != nil {
-			return nil, err
-		}
 		u, err = a.userRepository.Find(ctx, u)
 		if err != nil {
 			return nil, err
@@ -320,4 +313,23 @@ func genCode() int {
 	code := rand.Intn(8999) + 1000
 
 	return code
+}
+
+func createDefaultUser() (infoblog.User, error) {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Intn(89) + 10
+
+	uUUID, err := uuid.NewUUID()
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	UUID := strings.Join([]string{uUUID.String(), fmt.Sprintf("-u%d", id)}, "")
+
+	return infoblog.User{
+		UUID:        UUID,
+		Trial:       infoblog.NewNullBool(true),
+		NotifyEmail: infoblog.NewNullBool(true),
+		Language:    infoblog.NewNullInt64(1),
+	}, nil
 }
