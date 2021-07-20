@@ -45,7 +45,7 @@ func (a *profileController) Update() http.HandlerFunc {
 			return
 		}
 
-		*u, err = a.user.UpdateProfile(ctx, profileUpdateReq, *u)
+		userData, err := a.user.UpdateProfile(ctx, profileUpdateReq, *u)
 		if err != nil {
 			a.logger.Error("user service update profile", zap.Error(err))
 			a.ErrorInternal(w, err)
@@ -56,9 +56,9 @@ func (a *profileController) Update() http.HandlerFunc {
 			Success: true,
 			Msg:     "Данные профиля обновлены",
 			Data: struct {
-				User infoblog.User `json:"user"`
+				User request.UserData `json:"user"`
 			}{
-				*u,
+				userData,
 			},
 		})
 	}
@@ -82,7 +82,7 @@ func (a *profileController) GetProfile() http.HandlerFunc {
 			Success: true,
 			Msg:     "",
 			Data: struct {
-				User infoblog.User `json:"user"`
+				User request.UserData `json:"user"`
 			}{
 				user,
 			},

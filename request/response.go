@@ -1,5 +1,7 @@
 package request
 
+import "time"
+
 //go:generate easytags $GOFILE
 type Response struct {
 	Success bool        `json:"success"`
@@ -19,9 +21,25 @@ type AuthTokenData struct {
 }
 
 type UserData struct {
-	UUID       string `json:"user_id"`
-	Name       string `json:"name"`
-	SecondName string `json:"second_name"`
+	UUID           string    `json:"user_id" db:"uuid" ops:"create"`
+	Phone          string    `json:"phone" db:"phone" ops:"update,create"`
+	Email          string    `json:"email" db:"email" ops:"update,create"`
+	Password       string    `json:"password,omitempty" db:"password" ops:"create"`
+	Active         bool      `json:"active" db:"active" ops:"create"`
+	Name           string    `json:"name" db:"name" ops:"update,create"`
+	SecondName     string    `json:"second_name" db:"second_name" ops:"update,create"`
+	EmailVerified  bool      `json:"email_verified" db:"email_verified"`
+	Description    string    `json:"description" db:"description" ops:"update,create"`
+	NickName       string    `json:"nickname" db:"nickname" ops:"update,create"`
+	ShowSubs       bool      `json:"show_subs" db:"show_subs" ops:"update,create"`
+	Cost           float64   `json:"cost" db:"cost" ops:"update,create"`
+	Trial          bool      `json:"trial" db:"trial" ops:"update,create"`
+	NotifyEmail    bool      `json:"notify_email" db:"notify_email" ops:"update,create"`
+	NotifyTelegram bool      `json:"notify_telegram" db:"notify_telegram" ops:"update,create"`
+	NotifyPush     bool      `json:"notify_push" db:"notify_push" ops:"update,create"`
+	Language       int64     `json:"language" db:"language" ops:"update,create"`
+	CreatedAt      time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type PostDataResponse struct {

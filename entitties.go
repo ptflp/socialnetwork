@@ -10,6 +10,7 @@ var entityFields = map[string][]string{}
 var entityUpdateFields = map[string][]string{}
 var entityCreateFields = map[string][]string{}
 
+// register entities
 func init() {
 
 	entities := map[string]interface{}{

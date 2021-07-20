@@ -41,27 +41,42 @@ func (u *User) CreateByEmailPassword(ctx context.Context, user infoblog.User) er
 	return u.userRepository.CreateUser(ctx, user)
 }
 
-func (u *User) GetProfile(ctx context.Context, user infoblog.User) (infoblog.User, error) {
+func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.UserData, error) {
 	user, err := u.userRepository.Find(ctx, user)
 	if err != nil {
-		return infoblog.User{}, err
+		return request.UserData{}, err
+	}
+	userData := request.UserData{}
+	err = u.MapStructs(&userData, &user)
+	if err != nil {
+		return request.UserData{}, err
 	}
 
-	return user, nil
+	return userData, nil
 }
 
-func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.ProfileUpdateReq, user infoblog.User) (infoblog.User, error) {
+func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.ProfileUpdateReq, user infoblog.User) (request.UserData, error) {
 	user, err := u.userRepository.Find(ctx, user)
 	if err != nil {
-		return infoblog.User{}, err
+		return request.UserData{}, err
 	}
 
 	err = u.MapStructs(&user, &profileUpdateReq)
 	if err != nil {
-		return infoblog.User{}, err
+		return request.UserData{}, err
+	}
+	err = u.userRepository.Update(ctx, user)
+	if err != nil {
+		return request.UserData{}, err
 	}
 
-	return user, u.userRepository.Update(ctx, user)
+	userData := request.UserData{}
+	err = u.MapStructs(&userData, &user)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	return userData, nil
 }
 
 func (u *User) SetPassword(ctx context.Context, user infoblog.User) error {
