@@ -11,7 +11,7 @@ type User struct {
 	Phone          NullString  `json:"phone" db:"phone" ops:"update,create"`
 	Email          NullString  `json:"email" db:"email" ops:"update,create"`
 	Password       NullString  `json:"password,omitempty" db:"password" ops:"create"`
-	Active         NullBool    `json:"active" db:"active" ops:"create"`
+	Active         NullBool    `json:"active" db:"active" ops:"create,update"`
 	Name           NullString  `json:"name" db:"name" ops:"update,create"`
 	SecondName     NullString  `json:"second_name" db:"second_name" ops:"update,create"`
 	EmailVerified  NullBool    `json:"email_verified" db:"email_verified"`

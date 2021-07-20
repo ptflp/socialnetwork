@@ -65,6 +65,7 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 	if err != nil {
 		return request.UserData{}, err
 	}
+	user.Active = infoblog.NewNullBool(true)
 	err = u.userRepository.Update(ctx, user)
 	if err != nil {
 		return request.UserData{}, err
