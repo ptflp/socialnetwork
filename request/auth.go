@@ -6,7 +6,7 @@ type PhoneCodeRequest struct {
 
 type CheckCodeRequest struct {
 	Phone string `json:"phone"`
-	Code  int
+	Code  int    `json:"code"`
 }
 
 type EmailActivationRequest struct {
