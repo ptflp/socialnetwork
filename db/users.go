@@ -145,3 +145,22 @@ func (u *userRepository) Find(ctx context.Context, user infoblog.User) (infoblog
 
 	return user, nil
 }
+
+func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
+	fields, err := infoblog.GetFields("users")
+	if err != nil {
+		return nil, err
+	}
+
+	query, _, err := sq.Select(fields...).From("users").ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var users []infoblog.User
+	if err = u.db.Select(&users, query); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

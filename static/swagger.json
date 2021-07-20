@@ -353,6 +353,27 @@
         }
       }
     },
+    "/user/list": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Отписаться от пользователя.",
+        "operationId": "userListRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userListResponse"
+          }
+        }
+      }
+    },
     "/user/subscribe": {
       "post": {
         "security": [
@@ -461,9 +482,10 @@
     "CheckCodeRequest": {
       "type": "object",
       "properties": {
-        "Code": {
+        "code": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "x-go-name": "Code"
         },
         "phone": {
           "type": "string",
@@ -847,13 +869,81 @@
     "UserData": {
       "type": "object",
       "properties": {
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "cost": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Cost"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "description": {
+          "type": "string",
+          "x-go-name": "Description"
+        },
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "email_verified": {
+          "type": "boolean",
+          "x-go-name": "EmailVerified"
+        },
+        "language": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Language"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
         },
+        "nickname": {
+          "type": "string",
+          "x-go-name": "NickName"
+        },
+        "notify_email": {
+          "type": "boolean",
+          "x-go-name": "NotifyEmail"
+        },
+        "notify_push": {
+          "type": "boolean",
+          "x-go-name": "NotifyPush"
+        },
+        "notify_telegram": {
+          "type": "boolean",
+          "x-go-name": "NotifyTelegram"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "phone": {
+          "type": "string",
+          "x-go-name": "Phone"
+        },
         "second_name": {
           "type": "string",
           "x-go-name": "SecondName"
+        },
+        "show_subs": {
+          "type": "boolean",
+          "x-go-name": "ShowSubs"
+        },
+        "trial": {
+          "type": "boolean",
+          "x-go-name": "Trial"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
         },
         "user_id": {
           "type": "string",
@@ -950,6 +1040,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/Config"
+      }
+    },
+    "userListResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
       }
     },
     "userSubscribeResponse": {

@@ -65,6 +65,7 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 	if err != nil {
 		return request.UserData{}, err
 	}
+
 	user.Active = infoblog.NewNullBool(true)
 	err = u.userRepository.Update(ctx, user)
 	if err != nil {
@@ -126,20 +127,21 @@ func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeReq
 	return err
 }
 
-func (u *User) List(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
-	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
+func (u *User) List(ctx context.Context) ([]request.UserData, error) {
+	users, err := u.userRepository.FindAll(ctx)
 	if err != nil {
-		return err
-	}
-	if sub.ID < 1 {
-		return errors.New("user with specified id not found")
+		return nil, err
 	}
 
-	err = u.subsRepository.Delete(ctx, infoblog.Subscriber{
-		UserUUID:       user.UUID,
-		SubscriberUUID: subscribeRequest.UUID,
-		Active:         infoblog.NewNullBool(false),
-	})
+	usersData := []request.UserData{}
+	for _, user := range users {
+		userData := request.UserData{}
+		err = u.MapStructs(&userData, &user)
+		if err != nil {
+			return nil, err
+		}
+		usersData = append(usersData, userData)
+	}
 
-	return err
+	return usersData, nil
 }

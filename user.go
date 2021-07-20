@@ -33,6 +33,7 @@ type UserRepository interface {
 	SetPassword(ctx context.Context, user User) error
 
 	Find(ctx context.Context, user User) (User, error)
+	FindAll(ctx context.Context) ([]User, error)
 	FindByPhone(ctx context.Context, user User) (User, error)
 	FindByEmail(ctx context.Context, user User) (User, error)
 
