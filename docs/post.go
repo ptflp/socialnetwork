@@ -32,7 +32,7 @@ type postsCreateParams struct {
 // swagger:response postFileUploadResponse
 type postFileUploadResponse struct {
 	// in:body
-	Body request.PostsFeedResponse
+	Body request.Response
 }
 
 // swagger:parameters postFileUploadRequest

@@ -44,6 +44,8 @@ type UserData struct {
 	IsFriends    bool `json:"is_friends"`
 	IsSubscriber bool `json:"is_subscriber"`
 
+	PasswordSet *bool `json:"password_set,omitempty"`
+
 	Counts *UserDataCounts `json:"counts,omitempty"`
 }
 

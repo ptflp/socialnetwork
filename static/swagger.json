@@ -1085,6 +1085,10 @@
           "type": "string",
           "x-go-name": "Password"
         },
+        "password_set": {
+          "type": "boolean",
+          "x-go-name": "PasswordSet"
+        },
         "phone": {
           "type": "string",
           "x-go-name": "Phone"
@@ -1210,7 +1214,7 @@
     "postFileUploadResponse": {
       "description": "",
       "schema": {
-        "$ref": "#/definitions/PostsFeedResponse"
+        "$ref": "#/definitions/Response"
       }
     },
     "postLikeResponse": {
