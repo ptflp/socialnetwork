@@ -790,7 +790,8 @@
           "x-go-name": "UUID"
         },
         "post_type": {
-          "type": "string",
+          "type": "integer",
+          "format": "int64",
           "x-go-name": "Type"
         },
         "user": {

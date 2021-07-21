@@ -124,7 +124,7 @@ func (u *User) SetPassword(ctx context.Context, setPasswordReq request.SetPasswo
 		}
 	}
 
-	passHash, err := hasher.HashPassword(user.Password.String)
+	passHash, err := hasher.HashPassword(setPasswordReq.Password)
 	if err != nil {
 		return err
 	}
