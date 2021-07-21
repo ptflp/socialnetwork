@@ -58,7 +58,8 @@ type UserDataCounts struct {
 
 type PostDataResponse struct {
 	UUID   string         `json:"post_id"`
-	Body   string         `json:"body"`
+	Body   string         `json:"description"`
+	Type   int64          `json:"post_type"`
 	Files  []PostFileData `json:"files"`
 	User   UserData       `json:"user"`
 	Counts PostCountData  `json:"counts"`

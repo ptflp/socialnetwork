@@ -3,8 +3,10 @@ package request
 //go:generate easytags $GOFILE
 
 type PostCreateReq struct {
-	Body    string   `json:"body"`
-	FilesID []string `json:"files_id"`
+	Description string   `json:"description"`
+	PostType    int64    `json:"post_type"`
+	FilesID     []string `json:"files_id"`
+	Price       *float64 `json:"price"`
 }
 
 type PostsFeedReq struct {

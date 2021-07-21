@@ -13,18 +13,10 @@ import (
 )
 
 const (
-	createPost = "INSERT INTO posts (body, file_id, user_id, user_uuid, uuid, file_uuid, type) VALUES (?, ?, ?, ?, ?, ?, 1)"
-
-	countActivePosts = "SELECT COUNT(id) as count From posts WHERE active = 1"
-
-	updatePost = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
-	deletePost = "UPDATE posts SET active = ? WHERE id = ?"
-
-	findPost      = "SELECT type, body, user_id, active, file_id, created_at, updated_at FROM posts WHERE id = ? AND type = 1"
-	findAllPost   = "SELECT id, type, body, active, file_id, created_at, updated_at FROM posts WHERE user_id = ? AND active = 1"
-	findAllRecent = "SELECT p.id, p.type, body, p.active, p.created_at, p.updated_at, u.id as uid, u.name, u.second_name, u.email, u.phone FROM posts p LEFT JOIN users u on p.user_id = u.id WHERE p.active = 1 AND p.type = 1 ORDER BY p.created_at LIMIT ? OFFSET ?"
-
-	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1 AND p.type = 1"
+	createPost     = "INSERT INTO posts (body, file_id, user_id, user_uuid, uuid, file_uuid, type) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	updatePost     = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
+	deletePost     = "UPDATE posts SET active = ? WHERE id = ?"
+	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1"
 )
 
 type postsRepository struct {
@@ -32,7 +24,7 @@ type postsRepository struct {
 }
 
 func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, error) {
-	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID, p.UserID, p.UserUUID, p.UUID, p.FileUUID)
+	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID, p.UserID, p.UserUUID, p.UUID, p.FileUUID, p.Type)
 	if err != nil {
 		return 0, err
 	}
@@ -104,7 +96,7 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 	}
 	fields = append(fields, userFields...)
 
-	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.active": 1, "p.type": 1, "p.user_uuid": user.UUID}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.active": 1, "p.user_uuid": user.UUID}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -161,7 +153,7 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 	}
 	fields = append(fields, userFields...)
 
-	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.Active": 1, "p.Type": 1}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.Active": 1}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
 	if err != nil {
 		return nil, nil, nil, err
 	}

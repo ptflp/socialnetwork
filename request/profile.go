@@ -17,5 +17,6 @@ type ProfileUpdateReq struct {
 }
 
 type SetPasswordReq struct {
-	Password string
+	Password    string  `json:"password"`
+	OldPassword *string `json:"old_password"`
 }

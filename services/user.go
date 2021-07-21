@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
@@ -43,8 +44,13 @@ func (u *User) CreateByEmailPassword(ctx context.Context, user infoblog.User) er
 	return u.userRepository.CreateUser(ctx, user)
 }
 
-func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.UserData, error) {
-	user, err := u.userRepository.Find(ctx, user)
+func (u *User) GetProfile(ctx context.Context) (request.UserData, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	user, err = u.userRepository.Find(ctx, user)
 	if err != nil {
 		return request.UserData{}, err
 	}
@@ -68,6 +74,8 @@ func (u *User) GetProfile(ctx context.Context, user infoblog.User) (request.User
 		Friends:     377,
 		Likes:       likesCount,
 	}
+
+	userData.PasswordSet = &user.Password.Valid
 
 	return userData, nil
 }
@@ -98,7 +106,24 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 	return userData, nil
 }
 
-func (u *User) SetPassword(ctx context.Context, user infoblog.User) error {
+func (u *User) SetPassword(ctx context.Context, setPasswordReq request.SetPasswordReq) error {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
+	user, err = u.userRepository.Find(ctx, user)
+	if err != nil {
+		return err
+	}
+	if user.Password.Valid {
+		if setPasswordReq.OldPassword == nil {
+			return fmt.Errorf("old password is required")
+		}
+		if !hasher.CheckPasswordHash(*setPasswordReq.OldPassword, user.Password.String) {
+			return fmt.Errorf("wrong old password")
+		}
+	}
+
 	passHash, err := hasher.HashPassword(user.Password.String)
 	if err != nil {
 		return err

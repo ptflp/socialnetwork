@@ -28,6 +28,18 @@ func NewNullInt64(n int64) NullInt64 {
 	}
 }
 
+func NewNullFloat64(n float64) NullFloat64 {
+	if n == 0 {
+		return NullFloat64{}
+	}
+	return NullFloat64{
+		sql.NullFloat64{
+			Float64: n,
+			Valid:   true,
+		},
+	}
+}
+
 func NewNullBool(b bool) NullBool {
 	if !b {
 		return NullBool{}

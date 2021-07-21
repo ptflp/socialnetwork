@@ -744,9 +744,9 @@
     "PostCreateReq": {
       "type": "object",
       "properties": {
-        "body": {
+        "description": {
           "type": "string",
-          "x-go-name": "Body"
+          "x-go-name": "Description"
         },
         "files_id": {
           "type": "array",
@@ -754,6 +754,16 @@
             "type": "string"
           },
           "x-go-name": "FilesID"
+        },
+        "post_type": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "PostType"
+        },
+        "price": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Price"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -761,12 +771,12 @@
     "PostDataResponse": {
       "type": "object",
       "properties": {
-        "body": {
-          "type": "string",
-          "x-go-name": "Body"
-        },
         "counts": {
           "$ref": "#/definitions/PostCountData"
+        },
+        "description": {
+          "type": "string",
+          "x-go-name": "Body"
         },
         "files": {
           "type": "array",
@@ -778,6 +788,10 @@
         "post_id": {
           "type": "string",
           "x-go-name": "UUID"
+        },
+        "post_type": {
+          "type": "string",
+          "x-go-name": "Type"
         },
         "user": {
           "$ref": "#/definitions/UserData"
@@ -1010,8 +1024,13 @@
     "SetPasswordReq": {
       "type": "object",
       "properties": {
-        "Password": {
-          "type": "string"
+        "old_password": {
+          "type": "string",
+          "x-go-name": "OldPassword"
+        },
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"

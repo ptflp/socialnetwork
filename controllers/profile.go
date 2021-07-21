@@ -66,13 +66,7 @@ func (a *profileController) Update() http.HandlerFunc {
 
 func (a *profileController) GetProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		u, ok := ctx.Value("user").(*infoblog.User)
-		if !ok {
-			a.ErrorInternal(w, errors.New("type assertion to user err"))
-			return
-		}
-		user, err := a.user.GetProfile(ctx, *u)
+		user, err := a.user.GetProfile(r.Context())
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return
@@ -92,13 +86,6 @@ func (a *profileController) GetProfile() http.HandlerFunc {
 
 func (a *profileController) SetPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		u, ok := ctx.Value("user").(*infoblog.User)
-		if !ok {
-			a.ErrorInternal(w, errors.New("type assertion to user err"))
-			return
-		}
-
 		var setPasswordReq request.SetPasswordReq
 		err := json.NewDecoder(r.Body).Decode(&setPasswordReq)
 		if err != nil {
@@ -106,7 +93,7 @@ func (a *profileController) SetPassword() http.HandlerFunc {
 			return
 		}
 
-		err = a.user.SetPassword(ctx, *u)
+		err = a.user.SetPassword(r.Context(), setPasswordReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
 			return

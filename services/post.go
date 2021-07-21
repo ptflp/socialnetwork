@@ -75,6 +75,14 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		return request.PostDataResponse{}, err
 	}
 
+	var price infoblog.NullFloat64
+	if req.PostType == 2 {
+		if req.Price == nil {
+			return request.PostDataResponse{}, fmt.Errorf("bad price %s", req.Price)
+		}
+		price = infoblog.NewNullFloat64(*req.Price)
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Intn(89) + 10
 	pUUID, err := uuid.NewUUID()
@@ -84,12 +92,13 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	postUUID := strings.Join([]string{pUUID.String(), fmt.Sprintf("-p%d", id)}, "")
 	post := infoblog.Post{
 		PostEntity: infoblog.PostEntity{
-			Body:     req.Body,
+			Body:     req.Description,
 			UserID:   u.ID,
-			Type:     1,
+			Type:     req.PostType,
 			UUID:     postUUID,
 			UserUUID: u.UUID,
 			Active:   1,
+			Price:    price,
 		},
 	}
 	err = p.savePostDB(ctx, &post)
@@ -114,22 +123,19 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		files = append(files, file)
 	}
 
-	// 4. update post and activate
+	postDataRes := request.PostDataResponse{}
+	err = p.MapStructs(&postDataRes, &post.PostEntity)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
 
-	return request.PostDataResponse{
-		UUID:  post.UUID,
-		Body:  post.Body,
-		Files: files,
-		User: request.UserData{
-			UUID:       u.UUID,
-			Name:       "",
-			SecondName: "",
-		},
-		Counts: request.PostCountData{
-			Likes:    0,
-			Comments: 0,
-		},
-	}, nil
+	err = p.MapStructs(&postDataRes.User, &u)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	// 4. update post and activate
+	return postDataRes, nil
 }
 
 func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (request.PostsFeedData, error) {
