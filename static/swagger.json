@@ -155,6 +155,36 @@
         }
       }
     },
+    "/people/id": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "people"
+        ],
+        "summary": "Отписаться от пользователя.",
+        "operationId": "peopleIDRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserIDNickRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/peopleIDResponse"
+          }
+        }
+      }
+    },
     "/people/list": {
       "get": {
         "security": [
@@ -165,7 +195,7 @@
           }
         ],
         "tags": [
-          "user"
+          "people"
         ],
         "summary": "Лист пользователей.",
         "operationId": "userListRequest",
@@ -186,7 +216,7 @@
           }
         ],
         "tags": [
-          "user"
+          "people"
         ],
         "summary": "Подписаться на пользователя.",
         "operationId": "userSubscribeRequest",
@@ -195,7 +225,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/UserSubscriberRequest"
+              "$ref": "#/definitions/UserIDRequest"
             }
           }
         ],
@@ -216,7 +246,7 @@
           }
         ],
         "tags": [
-          "user"
+          "people"
         ],
         "summary": "Отписаться от пользователя.",
         "operationId": "userUnsubscribeRequest",
@@ -225,7 +255,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/UserSubscriberRequest"
+              "$ref": "#/definitions/UserIDRequest"
             }
           }
         ],
@@ -1079,7 +1109,21 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
-    "UserSubscriberRequest": {
+    "UserIDNickRequest": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "x-go-name": "NickName"
+        },
+        "user_id": {
+          "type": "string",
+          "x-go-name": "UUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "UserIDRequest": {
       "type": "object",
       "properties": {
         "user_id": {
@@ -1122,6 +1166,12 @@
       }
     },
     "getProfileResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "peopleIDResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

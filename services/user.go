@@ -108,7 +108,7 @@ func (u *User) SetPassword(ctx context.Context, user infoblog.User) error {
 	return u.userRepository.SetPassword(ctx, user)
 }
 
-func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
+func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 	return err
 }
 
-func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserSubscriberRequest) error {
+func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
 	if err != nil {
 		return err
@@ -161,4 +161,31 @@ func (u *User) List(ctx context.Context) ([]request.UserData, error) {
 	}
 
 	return usersData, nil
+}
+
+func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.UserData, error) {
+	user := infoblog.User{}
+	var err error
+	if req.UUID != nil {
+		user.UUID = *req.UUID
+		user, err = u.userRepository.Find(ctx, user)
+		if err != nil {
+			return request.UserData{}, err
+		}
+	}
+	if req.NickName != nil {
+		user.NickName = infoblog.NewNullString(*req.NickName)
+		user, err = u.userRepository.FindNickname(ctx, user)
+		if err != nil {
+			return request.UserData{}, err
+		}
+	}
+
+	userData := request.UserData{}
+	err = u.MapStructs(&userData, &user)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	return userData, nil
 }

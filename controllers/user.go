@@ -37,7 +37,7 @@ func (u *usersController) Subscribe() http.HandlerFunc {
 			return
 		}
 
-		var usersSubscribeReq request.UserSubscriberRequest
+		var usersSubscribeReq request.UserIDRequest
 
 		// r.PostForm is u map of our POST form values
 		err = u.Decode(r.Body, &usersSubscribeReq)
@@ -68,7 +68,7 @@ func (u *usersController) Unsubscribe() http.HandlerFunc {
 			return
 		}
 
-		var usersSubscribeReq request.UserSubscriberRequest
+		var usersSubscribeReq request.UserIDRequest
 
 		// r.PostForm is u map of our POST form values
 		err = u.Decode(r.Body, &usersSubscribeReq)
@@ -107,6 +107,32 @@ func (u *usersController) List() http.HandlerFunc {
 				Users []request.UserData `json:"users"`
 			}{
 				Users: usersData,
+			},
+		})
+	}
+}
+
+func (u *usersController) Get() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var userIDNickReq request.UserIDNickRequest
+
+		// r.PostForm is u map of our POST form values
+		err := u.Decode(r.Body, &userIDNickReq)
+
+		userData, err := u.user.Get(r.Context(), userIDNickReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+			Data: struct {
+				Users request.UserData `json:"user"`
+			}{
+				Users: userData,
 			},
 		})
 	}

@@ -2,7 +2,7 @@ package docs
 
 import "gitlab.com/InfoBlogFriends/server/request"
 
-// swagger:route POST /people/subscribe user userSubscribeRequest
+// swagger:route POST /people/subscribe people userSubscribeRequest
 // Подписаться на пользователя.
 // security:
 //   - Bearer: []
@@ -18,10 +18,10 @@ type userSubscribeResponse struct {
 // swagger:parameters userSubscribeRequest
 type userSubscribeParams struct {
 	// in:body
-	Body request.UserSubscriberRequest
+	Body request.UserIDRequest
 }
 
-// swagger:route POST /people/unsubscribe user userUnsubscribeRequest
+// swagger:route POST /people/unsubscribe people userUnsubscribeRequest
 // Отписаться от пользователя.
 // security:
 //   - Bearer: []
@@ -37,10 +37,10 @@ type userUnsubscribeResponse struct {
 // swagger:parameters userUnsubscribeRequest
 type userUnsubscribeParams struct {
 	// in:body
-	Body request.UserSubscriberRequest
+	Body request.UserIDRequest
 }
 
-// swagger:route GET /people/list user userListRequest
+// swagger:route GET /people/list people userListRequest
 // Лист пользователей.
 // security:
 //   - Bearer: []
@@ -51,4 +51,23 @@ type userUnsubscribeParams struct {
 type userListResponse struct {
 	// in:body
 	Body request.Response
+}
+
+// swagger:route POST /people/id people peopleIDRequest
+// Отписаться от пользователя.
+// security:
+//   - Bearer: []
+// responses:
+//   200: peopleIDResponse
+
+// swagger:response peopleIDResponse
+type peopleIDResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters peopleIDRequest
+type peopleIDParams struct {
+	// in:body
+	Body request.UserIDNickRequest
 }
