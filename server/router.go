@@ -108,7 +108,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 			r.Post("/recent", posts.FeedRecent())
 
 			r.Get("/subscribed", posts.FeedRecent())
-			r.Post("/user/{UserID}", posts.FeedUser())
+			r.Post("/user", posts.FeedUser())
 		})
 	})
 

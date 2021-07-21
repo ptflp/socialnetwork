@@ -263,7 +263,7 @@
         "tags": [
           "posts"
         ],
-        "summary": "Получение ленты своих постов.",
+        "summary": "Получение ленты постов пользователя.",
         "operationId": "postsFeedUserRequest",
         "parameters": [
           {
