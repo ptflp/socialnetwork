@@ -124,7 +124,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Use(middleware.Timeout(200 * time.Millisecond))
 		r.Use(token.Check)
 		r.Get("/config", func(w http.ResponseWriter, r *http.Request) {
-			cmps.Responder().SendJSON(w, cmps.Config)
+			cmps.Responder().SendJSON(w, cmps.Config())
 		})
 	})
 
