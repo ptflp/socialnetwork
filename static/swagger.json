@@ -278,21 +278,15 @@
         "tags": [
           "posts"
         ],
-        "summary": "Создание поста с файлом.",
+        "summary": "Создание поста.",
         "operationId": "postsCreateRequest",
         "parameters": [
           {
-            "name": "FormData",
+            "name": "Body",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/PostCreateReq"
             }
-          },
-          {
-            "type": "file",
-            "x-go-name": "File",
-            "name": "file",
-            "in": "formData"
           }
         ],
         "responses": {
@@ -388,6 +382,35 @@
         "responses": {
           "200": {
             "$ref": "#/responses/postsFeedUserResponse"
+          }
+        }
+      }
+    },
+    "/posts/file/upload": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Загрузка файла поста.",
+        "operationId": "postFileUploadRequest",
+        "parameters": [
+          {
+            "type": "file",
+            "x-go-name": "File",
+            "name": "file",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postFileUploadResponse"
           }
         }
       }
@@ -724,6 +747,13 @@
         "body": {
           "type": "string",
           "x-go-name": "Body"
+        },
+        "files_id": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "FilesID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1175,6 +1205,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
+      }
+    },
+    "postFileUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostsFeedResponse"
       }
     },
     "postLikeResponse": {

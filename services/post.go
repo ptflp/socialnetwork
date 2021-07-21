@@ -28,31 +28,60 @@ func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder) 
 	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes}
 }
 
-func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.PostCreateReq, u *infoblog.User) (request.PostDataResponse, error) {
+func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFileData, error) {
 	// 1. save file to filesystem
+	u, err := extractUser(ctx)
+	if err != nil {
+		return request.PostFileData{}, err
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Intn(89) + 10
 
 	fUUID, err := uuid.NewUUID()
 	if err != nil {
-		return request.PostDataResponse{}, err
+		return request.PostFileData{}, err
 	}
 
 	fileUUID := strings.Join([]string{fUUID.String(), fmt.Sprintf("-f%d", id)}, "")
 
 	file, err := p.file.SaveFileSystem(formFile, u.ID, fileUUID)
 	if err != nil {
-		return request.PostDataResponse{}, err
+		return request.PostFileData{}, err
 	}
 
 	// 2. save post to db
 
+	// 3. update file info, save to db
+	file.Active = 1
+	file.Type = 1
+	file.UserID = u.ID
+	file.UserUUID = u.UUID
+
+	err = p.file.SaveDB(ctx, &file)
+	if err != nil {
+		return request.PostFileData{}, err
+	}
+
+	return request.PostFileData{
+		Link: "/" + path.Join(file.Dir, file.Name),
+		UUID: file.UUID,
+	}, nil
+}
+
+func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request.PostDataResponse, error) {
+	u, err := extractUser(ctx)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Intn(89) + 10
 	pUUID, err := uuid.NewUUID()
 	if err != nil {
 		return request.PostDataResponse{}, err
 	}
 	postUUID := strings.Join([]string{pUUID.String(), fmt.Sprintf("-p%d", id)}, "")
-
 	post := infoblog.Post{
 		PostEntity: infoblog.PostEntity{
 			Body:     req.Body,
@@ -60,43 +89,37 @@ func (p *Post) SavePost(ctx context.Context, formFile FormFile, req request.Post
 			Type:     1,
 			UUID:     postUUID,
 			UserUUID: u.UUID,
+			Active:   1,
 		},
 	}
-
 	err = p.savePostDB(ctx, &post)
 	if err != nil {
 		return request.PostDataResponse{}, err
 	}
 
-	// 3. update file info, save to db
-	file.ForeignID = post.ID
-	file.Active = 1
-	file.Type = 1
-	file.UserID = u.ID
-	file.ForeignUUID = postUUID
-
-	err = p.file.SaveDB(ctx, &file)
+	err = p.file.UpdatePostUUID(ctx, req.FilesID, post)
+	// 1. save file to filesystem
+	filesRaw, err := p.file.GetByIDs(ctx, req.FilesID)
 	if err != nil {
 		return request.PostDataResponse{}, err
+	}
+
+	files := make([]request.PostFileData, 0, len(filesRaw))
+
+	for i := range filesRaw {
+		file := request.PostFileData{
+			Link: "/" + path.Join(filesRaw[i].Dir, filesRaw[i].Name),
+			UUID: filesRaw[i].UUID,
+		}
+		files = append(files, file)
 	}
 
 	// 4. update post and activate
-	post.FileID = file.ID
-	post.Active = 1
-	err = p.post.Update(ctx, post)
-	if err != nil {
-		return request.PostDataResponse{}, err
-	}
 
 	return request.PostDataResponse{
-		UUID: post.UUID,
-		Body: post.Body,
-		Files: []request.PostFileData{
-			{
-				Link: "/" + path.Join(file.Dir, file.Name),
-				UUID: file.UUID,
-			},
-		},
+		UUID:  post.UUID,
+		Body:  post.Body,
+		Files: files,
 		User: request.UserData{
 			UUID:       u.UUID,
 			Name:       "",

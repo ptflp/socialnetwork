@@ -189,3 +189,16 @@ func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.
 
 	return userData, nil
 }
+
+func extractUser(ctx context.Context) (infoblog.User, error) {
+	u, ok := ctx.Value("user").(*infoblog.User)
+	if !ok {
+		return infoblog.User{}, errors.New("type assertion to user err")
+	}
+
+	if u.ID == 0 {
+		return infoblog.User{}, errors.New("user not exists")
+	}
+
+	return *u, nil
+}

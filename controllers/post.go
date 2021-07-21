@@ -39,12 +39,33 @@ func NewPostsController(responder respond.Responder, user *services.User, file *
 
 func (a *postsController) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		u, err := extractUser(r)
+		var postAddReq request.PostCreateReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &postAddReq)
+
 		if err != nil {
 			a.ErrorBadRequest(w, err)
 			return
 		}
-		err = r.ParseMultipartForm(100 << 20)
+
+		post, err := a.post.SavePost(r.Context(), postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    post,
+		})
+	}
+}
+
+func (a *postsController) UploadFile() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(100 << 20)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
 			return
@@ -56,10 +77,10 @@ func (a *postsController) Create() http.HandlerFunc {
 		}
 		defer file.Close()
 
-		var postAddReq request.PostCreateReq
+		var postFileUpload request.PostCreateReq
 
 		// r.PostForm is a map of our POST form values
-		err = formDecoder.Decode(&postAddReq, r.PostForm)
+		err = formDecoder.Decode(&postFileUpload, r.PostForm)
 
 		if err != nil {
 			a.ErrorBadRequest(w, err)
@@ -71,7 +92,7 @@ func (a *postsController) Create() http.HandlerFunc {
 			FileHeader: fHeader,
 		}
 
-		post, err := a.post.SavePost(r.Context(), formFile, postAddReq, &u)
+		fileData, err := a.post.SaveFile(r.Context(), formFile)
 
 		if err != nil {
 			a.ErrorBadRequest(w, err)
@@ -80,7 +101,7 @@ func (a *postsController) Create() http.HandlerFunc {
 
 		a.SendJSON(w, request.Response{
 			Success: true,
-			Data:    post,
+			Data:    fileData,
 		})
 	}
 }

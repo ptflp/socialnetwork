@@ -3,6 +3,9 @@ package db
 import (
 	"context"
 	"errors"
+	"strings"
+
+	sq "github.com/Masterminds/squirrel"
 
 	"github.com/jmoiron/sqlx"
 	infoblog "gitlab.com/InfoBlogFriends/server"
@@ -40,6 +43,27 @@ func (f *filesRepository) Update(ctx context.Context, p infoblog.File) error {
 		return errors.New("repository update wrong file id")
 	}
 	return f.db.QueryRowContext(ctx, updateFile, p.Type, p.ForeignID, p.Dir, p.Name, p.UserID).Err()
+}
+
+func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post infoblog.Post) error {
+	query, args, err := sq.Update("files").Set("foreign_uuid", post.UUID).ToSql()
+	if err != nil {
+		return err
+	}
+
+	queryIn := strings.Join([]string{"SELECT * WHERE uuid IN (?)"}, "")
+
+	queryIn, args2, err := sqlx.In(queryIn, ids)
+	if err != nil {
+		return err
+	}
+	s := strings.Split(queryIn, "WHERE")
+
+	query = strings.Join([]string{query, " WHERE", s[1]}, "")
+
+	args = append(args, args2...)
+
+	return f.db.QueryRowContext(ctx, query, args...).Err()
 }
 
 func (f *filesRepository) Delete(ctx context.Context, p infoblog.File) error {
@@ -113,6 +137,32 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []int) ([]
 		}
 
 		files = append(files, file)
+	}
+
+	return files, nil
+}
+
+func (f *filesRepository) FindByIDs(ctx context.Context, ids []string) ([]infoblog.File, error) {
+	fields, err := infoblog.GetFields("files")
+	if err != nil {
+		return nil, err
+	}
+
+	query, _, err := sq.Select(fields...).From("files").ToSql()
+	if err != nil {
+		return nil, err
+	}
+	query = strings.Join([]string{query, " WHERE uuid IN (?)"}, "")
+
+	query, args, err := sqlx.In(query, ids)
+	if err != nil {
+		return nil, err
+	}
+	var files []infoblog.File
+
+	err = f.db.Select(&files, query, args...)
+	if err != nil {
+		return nil, err
 	}
 
 	return files, nil

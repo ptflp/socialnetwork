@@ -81,6 +81,14 @@ func (f *File) SaveDB(ctx context.Context, file *infoblog.File) error {
 	return err
 }
 
+func (f *File) GetByIDs(ctx context.Context, ids []string) ([]infoblog.File, error) {
+	return f.fileRep.FindByIDs(ctx, ids)
+}
+
+func (f *File) UpdatePostUUID(ctx context.Context, ids []string, p infoblog.Post) error {
+	return f.fileRep.UpdatePostUUID(ctx, ids, p)
+}
+
 func (f *File) GetFilesPostsIDs(ctx context.Context, postsIDs []int) ([]infoblog.File, error) {
 	return f.fileRep.FindByPostsIDs(ctx, postsIDs)
 }

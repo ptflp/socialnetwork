@@ -99,6 +99,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Use(token.Check)
 		r.Post("/like", posts.Like())
 		r.Post("/create", posts.Create())
+		r.Post("/file/upload", posts.UploadFile())
 		r.Post("/update/{UUID}", posts.Create())
 		r.Post("/delete/{UUID}", posts.Create())
 		r.Get("/get/uuid/{UUID}", posts.Create())
