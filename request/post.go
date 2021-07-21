@@ -11,6 +11,12 @@ type PostsFeedReq struct {
 	Offset int64 `json:"offset"`
 }
 
+type PostsFeedUserReq struct {
+	Limit  int64  `json:"limit"`
+	Offset int64  `json:"offset"`
+	UUID   string `json:"user_id"`
+}
+
 type PostLikeReq struct {
 	UUID string `json:"post_id"`
 }

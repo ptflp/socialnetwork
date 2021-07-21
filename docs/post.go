@@ -60,7 +60,26 @@ type postsFeedMyResponse struct {
 // swagger:parameters postsFeedMyRequest
 type postsFeedMyParams struct {
 	// in:body
-	FormData request.PostsFeedReq
+	Body request.PostsFeedReq
+}
+
+// swagger:route POST /posts/feed/user posts postsFeedUserRequest
+// Получение ленты постов пользователя.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postsFeedUserResponse
+
+// swagger:response postsFeedUserResponse
+type postsFeedUserResponse struct {
+	// in:body
+	Body request.PostsFeedResponse
+}
+
+// swagger:parameters postsFeedUserRequest
+type postsFeedUserParams struct {
+	// in:body
+	Body request.PostsFeedUserReq
 }
 
 // swagger:route POST /posts/like posts postLikeRequest
@@ -79,5 +98,5 @@ type postLikeResponse struct {
 // swagger:parameters postLikeRequest
 type postLikeParams struct {
 	// in:body
-	FormData request.PostLikeReq
+	Body request.PostLikeReq
 }

@@ -207,7 +207,7 @@
         "operationId": "postsFeedMyRequest",
         "parameters": [
           {
-            "name": "FormData",
+            "name": "Body",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/PostsFeedReq"
@@ -251,6 +251,36 @@
         }
       }
     },
+    "/posts/feed/user": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Получение ленты своих постов.",
+        "operationId": "postsFeedUserRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostsFeedUserReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postsFeedUserResponse"
+          }
+        }
+      }
+    },
     "/posts/like": {
       "post": {
         "security": [
@@ -267,7 +297,7 @@
         "operationId": "postLikeRequest",
         "parameters": [
           {
-            "name": "FormData",
+            "name": "Body",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/PostLikeReq"
@@ -770,6 +800,26 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "PostsFeedUserReq": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Offset"
+        },
+        "user_id": {
+          "type": "string",
+          "x-go-name": "UUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "ProfileUpdateReq": {
       "type": "object",
       "properties": {
@@ -1096,6 +1146,12 @@
       }
     },
     "postsFeedResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostsFeedResponse"
+      }
+    },
+    "postsFeedUserResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/PostsFeedResponse"

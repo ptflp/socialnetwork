@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/decoder"
+
 	"github.com/gorilla/schema"
 	"gitlab.com/InfoBlogFriends/server/request"
 
@@ -16,6 +18,7 @@ import (
 var formDecoder = schema.NewDecoder()
 
 type postsController struct {
+	*decoder.Decoder
 	respond.Responder
 	user   *services.User
 	file   *services.File
@@ -25,6 +28,7 @@ type postsController struct {
 
 func NewPostsController(responder respond.Responder, user *services.User, file *services.File, post *services.Post, logger *zap.Logger) *postsController {
 	return &postsController{
+		Decoder:   decoder.NewDecoder(),
 		Responder: responder,
 		user:      user,
 		file:      file,
@@ -124,7 +128,38 @@ func (a *postsController) FeedMy() http.HandlerFunc {
 			return
 		}
 
-		feed, err := a.post.FeedMy(r.Context(), u, postsListReq)
+		req := request.PostsFeedUserReq{}
+
+		err = a.MapStructs(&req, &postsListReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+		req.UUID = u.UUID
+
+		feed, err := a.post.FeedByUser(r.Context(), req)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.PostsFeedResponse{
+			Success: true,
+			Data:    feed,
+		})
+	}
+}
+
+func (a *postsController) FeedUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var postsListReq request.PostsFeedUserReq
+		err := Decode(r, &postsListReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		feed, err := a.post.FeedByUser(r.Context(), postsListReq)
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return

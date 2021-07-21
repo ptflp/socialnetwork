@@ -173,7 +173,8 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 	}, nil
 }
 
-func (p *Post) FeedMy(ctx context.Context, u infoblog.User, req request.PostsFeedReq) (request.PostsFeedData, error) {
+func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (request.PostsFeedData, error) {
+	u := infoblog.User{UUID: req.UUID}
 	posts, postIDIndexMap, postsIDs, err := p.post.FindAll(ctx, u, req.Limit, req.Offset)
 	if err != nil {
 		return request.PostsFeedData{}, err
