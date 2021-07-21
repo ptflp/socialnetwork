@@ -113,11 +113,12 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 	})
 
 	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
-	r.Route("/user", func(r chi.Router) {
+	r.Route("/people", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/subscribe", users.Subscribe())
 		r.Post("/unsubscribe", users.Unsubscribe())
 		r.Get("/list", users.List())
+		r.Post("/id", users.List())
 	})
 
 	r.Route("/system", func(r chi.Router) {

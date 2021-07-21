@@ -2,7 +2,7 @@ package docs
 
 import "gitlab.com/InfoBlogFriends/server/request"
 
-// swagger:route POST /user/subscribe user userSubscribeRequest
+// swagger:route POST /people/subscribe user userSubscribeRequest
 // Подписаться на пользователя.
 // security:
 //   - Bearer: []
@@ -21,7 +21,7 @@ type userSubscribeParams struct {
 	Body request.UserSubscriberRequest
 }
 
-// swagger:route POST /user/unsubscribe user userUnsubscribeRequest
+// swagger:route POST /people/unsubscribe user userUnsubscribeRequest
 // Отписаться от пользователя.
 // security:
 //   - Bearer: []
@@ -40,7 +40,7 @@ type userUnsubscribeParams struct {
 	Body request.UserSubscriberRequest
 }
 
-// swagger:route GET /user/list user userListRequest
+// swagger:route GET /people/list user userListRequest
 // Лист пользователей.
 // security:
 //   - Bearer: []

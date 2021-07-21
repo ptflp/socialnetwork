@@ -155,6 +155,87 @@
         }
       }
     },
+    "/people/list": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Лист пользователей.",
+        "operationId": "userListRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userListResponse"
+          }
+        }
+      }
+    },
+    "/people/subscribe": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Подписаться на пользователя.",
+        "operationId": "userSubscribeRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserSubscriberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userSubscribeResponse"
+          }
+        }
+      }
+    },
+    "/people/unsubscribe": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "user"
+        ],
+        "summary": "Отписаться от пользователя.",
+        "operationId": "userUnsubscribeRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserSubscriberRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userUnsubscribeResponse"
+          }
+        }
+      }
+    },
     "/posts/create": {
       "post": {
         "security": [
@@ -409,87 +490,6 @@
         "responses": {
           "200": {
             "$ref": "#/responses/systemGetConfig"
-          }
-        }
-      }
-    },
-    "/user/list": {
-      "get": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Лист пользователей.",
-        "operationId": "userListRequest",
-        "responses": {
-          "200": {
-            "$ref": "#/responses/userListResponse"
-          }
-        }
-      }
-    },
-    "/user/subscribe": {
-      "post": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Подписаться на пользователя.",
-        "operationId": "userSubscribeRequest",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/UserSubscriberRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/userSubscribeResponse"
-          }
-        }
-      }
-    },
-    "/user/unsubscribe": {
-      "post": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Отписаться от пользователя.",
-        "operationId": "userUnsubscribeRequest",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/UserSubscriberRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/userUnsubscribeResponse"
           }
         }
       }
