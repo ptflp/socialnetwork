@@ -54,7 +54,7 @@ type userListResponse struct {
 }
 
 // swagger:route POST /people/id people peopleIDRequest
-// Отписаться от пользователя.
+// Получить пользователя по никнейму или айди.
 // security:
 //   - Bearer: []
 // responses:

@@ -167,7 +167,7 @@
         "tags": [
           "people"
         ],
-        "summary": "Отписаться от пользователя.",
+        "summary": "Получить пользователя по никнейму или айди.",
         "operationId": "peopleIDRequest",
         "parameters": [
           {
