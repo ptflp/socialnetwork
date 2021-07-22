@@ -20,7 +20,7 @@ func NewServices(cmps components.Componenter, repositories infoblog.Repositories
 
 	return Services{
 		AuthService: auth.NewAuthService(repositories, cmps),
-		User:        NewUserService(repositories, repositories.Subscribers, post),
+		User:        NewUserService(repositories, post, cmps),
 		Post:        post,
 		File:        file,
 	}

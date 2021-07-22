@@ -4,6 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
+	"time"
+
+	"gitlab.com/InfoBlogFriends/server/utils"
+
+	"gitlab.com/InfoBlogFriends/server/components"
+	"go.uber.org/zap"
+
+	"gitlab.com/InfoBlogFriends/server/validators"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
@@ -13,16 +22,23 @@ import (
 	"gitlab.com/InfoBlogFriends/server/request"
 )
 
+const (
+	PhoneRecoverKey   = "phone:recover:%s"
+	PhoneRecoveryUUID = "P"
+	RecoveryIDKey     = "recover:id:%s"
+)
+
 type User struct {
 	*decoder.Decoder
 	userRepository  infoblog.UserRepository
 	subsRepository  infoblog.SubscriberRepository
 	likesRepository infoblog.LikeRepository
 	post            *Post
+	components.Componenter
 }
 
-func NewUserService(rs infoblog.Repositories, subs infoblog.SubscriberRepository, post *Post) *User {
-	return &User{userRepository: rs.Users, subsRepository: subs, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes}
+func NewUserService(rs infoblog.Repositories, post *Post, cmps components.Componenter) *User {
+	return &User{userRepository: rs.Users, subsRepository: rs.Subscribers, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes, Componenter: cmps}
 }
 
 func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
@@ -215,6 +231,109 @@ func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.
 	return userData, nil
 }
 
+func (u *User) PasswordRecover(ctx context.Context, req request.PasswordRecoverRequest) error {
+	user := infoblog.User{}
+
+	err := u.MapStructs(&user, &req)
+	if err != nil {
+		return err
+	}
+
+	if user.Email.Valid {
+		err = validators.CheckEmailFormat(user.Email.String)
+		if err != nil {
+			return err
+		}
+		user, err = u.userRepository.FindByEmail(ctx, user)
+		if err != nil {
+			return err
+		}
+		// send email
+	}
+
+	if user.Phone.Valid {
+		user.Phone.String, err = validators.CheckPhoneFormat(user.Phone.String)
+		if err != nil {
+			return err
+		}
+		user, err = u.userRepository.FindByPhone(ctx, user)
+		if err != nil {
+			return err
+		}
+
+		code := genCode()
+		if u.Config().SMSC.Dev {
+			code = 3455
+		}
+		u.Cache().Set(fmt.Sprintf(PhoneRecoverKey, user.Phone.String), &code, 15*time.Minute)
+		if u.Config().SMSC.Dev {
+			return nil
+		}
+
+		err = u.Componenter.SMS().Send(ctx, user.Phone.String, fmt.Sprintf("Ваш код: %d", code))
+		if err != nil {
+			u.Logger().Error("send sms err", zap.String("user.Phone.String", user.Phone.String), zap.Int("code", code))
+		}
+
+		return err
+	}
+
+	return errors.New("bad request params")
+}
+
+func (u *User) CheckPhoneCode(ctx context.Context, req request.CheckPhoneCodeRequest) (request.RecoverChekPhoneResponse, error) {
+	var code int64
+	var user infoblog.User
+	err := u.Cache().Get(fmt.Sprintf(PhoneRecoverKey, req.Phone), &code)
+	if err != nil {
+		return request.RecoverChekPhoneResponse{}, err
+	}
+	if code != req.Code {
+		return request.RecoverChekPhoneResponse{}, errors.New("user code error")
+	}
+	user.Phone = infoblog.NewNullString(req.Phone)
+	user, err = u.userRepository.FindByPhone(ctx, user)
+	if err != nil {
+		return request.RecoverChekPhoneResponse{}, err
+	}
+
+	recoverID, err := utils.ProjectUUIDGen(PhoneRecoveryUUID)
+	if err != nil {
+		return request.RecoverChekPhoneResponse{}, err
+	}
+	u.Cache().Set(fmt.Sprintf(RecoveryIDKey, recoverID), &user.UUID, 15*time.Minute)
+
+	return request.RecoverChekPhoneResponse{
+		Success: true,
+		Data: request.RecoverCheckPhoneData{
+			RecoverID: recoverID,
+		},
+	}, nil
+}
+
+func (u *User) PasswordReset(ctx context.Context, req request.PasswordResetRequest) error {
+	var user infoblog.User
+	err := u.Cache().Get(fmt.Sprintf(RecoveryIDKey, req.RecoverID), &user.UUID)
+	if err != nil {
+		return err
+	}
+	user, err = u.userRepository.Find(ctx, user)
+	if err != nil {
+		return err
+	}
+	passHash, err := hasher.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
+	user.Password = infoblog.NewNullString(passHash)
+	err = u.userRepository.SetPassword(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func extractUser(ctx context.Context) (infoblog.User, error) {
 	u, ok := ctx.Value("user").(*infoblog.User)
 	if !ok {
@@ -226,4 +345,11 @@ func extractUser(ctx context.Context) (infoblog.User, error) {
 	}
 
 	return *u, nil
+}
+
+func genCode() int {
+	rand.Seed(time.Now().UnixNano())
+	code := rand.Intn(8999) + 1000
+
+	return code
 }

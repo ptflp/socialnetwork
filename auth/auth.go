@@ -36,6 +36,7 @@ import (
 
 const (
 	EmailVerificationKey = "email:verification:%s"
+	PhoneRegistrationKey = "phone:registration:%s"
 )
 
 type service struct {
@@ -240,7 +241,7 @@ func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) b
 	if a.Config().SMSC.Dev {
 		code = 3455
 	}
-	a.Cache().Set("code:"+phone, &code, 15*time.Minute)
+	a.Cache().Set(fmt.Sprintf(PhoneRegistrationKey, phone), &code, 15*time.Minute)
 	if a.Config().SMSC.Dev {
 		return true
 	}
@@ -259,7 +260,7 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 	if err != nil {
 		return nil, err
 	}
-	err = a.Cache().Get("code:"+phone, &code)
+	err = a.Cache().Get(fmt.Sprintf(PhoneRegistrationKey, phone), &code)
 	if err != nil {
 		return nil, err
 	}

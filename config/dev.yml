@@ -20,4 +20,4 @@ server:
 
 
 SMSC:
-  dev: true
+  dev: false

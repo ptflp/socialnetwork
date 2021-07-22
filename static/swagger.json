@@ -526,6 +526,96 @@
         }
       }
     },
+    "/recover/check/phone": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "recover"
+        ],
+        "summary": "Получить пользователя по никнейму или айди.",
+        "operationId": "checkPhoneCodeRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CheckPhoneCodeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/checkPhoneCodeResponse"
+          }
+        }
+      }
+    },
+    "/recover/password": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "recover"
+        ],
+        "summary": "Получить пользователя по никнейму или айди.",
+        "operationId": "recoverPasswordRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PasswordRecoverRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/recoverPasswordResponse"
+          }
+        }
+      }
+    },
+    "/recover/set/password": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "recover"
+        ],
+        "summary": "Получить пользователя по никнейму или айди.",
+        "operationId": "passwordResetRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PasswordResetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/passwordResetResponse"
+          }
+        }
+      }
+    },
     "/system/config": {
       "get": {
         "security": [
@@ -593,6 +683,21 @@
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
     "CheckCodeRequest": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Code"
+        },
+        "phone": {
+          "type": "string",
+          "x-go-name": "Phone"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "CheckPhoneCodeRequest": {
       "type": "object",
       "properties": {
         "code": {
@@ -711,6 +816,34 @@
         "activation_id": {
           "type": "string",
           "x-go-name": "ActivationID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PasswordRecoverRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "phone": {
+          "type": "string",
+          "x-go-name": "Phone"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "PasswordResetRequest": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "x-go-name": "Password"
+        },
+        "recover_id": {
+          "type": "string",
+          "x-go-name": "RecoverID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1101,10 +1234,6 @@
           "type": "boolean",
           "x-go-name": "NotifyTelegram"
         },
-        "password": {
-          "type": "string",
-          "x-go-name": "Password"
-        },
         "password_set": {
           "type": "boolean",
           "x-go-name": "PasswordSet"
@@ -1213,6 +1342,12 @@
         "$ref": "#/definitions/AuthTokenData"
       }
     },
+    "checkPhoneCodeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
     "emailRegistrationResponse": {
       "description": "",
       "schema": {
@@ -1220,6 +1355,12 @@
       }
     },
     "getProfileResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "passwordResetResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
@@ -1274,6 +1415,12 @@
       }
     },
     "profileUpdateResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "recoverPasswordResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

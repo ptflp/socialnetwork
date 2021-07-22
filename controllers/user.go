@@ -70,7 +70,6 @@ func (u *usersController) Unsubscribe() http.HandlerFunc {
 
 		var usersSubscribeReq request.UserIDRequest
 
-		// r.PostForm is u map of our POST form values
 		err = u.Decode(r.Body, &usersSubscribeReq)
 
 		if err != nil {
@@ -117,7 +116,6 @@ func (u *usersController) Get() http.HandlerFunc {
 
 		var userIDNickReq request.UserIDNickRequest
 
-		// r.PostForm is u map of our POST form values
 		err := u.Decode(r.Body, &userIDNickReq)
 
 		userData, err := u.user.Get(r.Context(), userIDNickReq)
@@ -134,6 +132,79 @@ func (u *usersController) Get() http.HandlerFunc {
 			}{
 				Users: userData,
 			},
+		})
+	}
+}
+
+func (u *usersController) RecoverPassword() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var passwordRecReq request.PasswordRecoverRequest
+
+		err := u.Decode(r.Body, &passwordRecReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = u.user.PasswordRecover(r.Context(), passwordRecReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+		})
+	}
+}
+
+func (u *usersController) CheckPhoneCode() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var checkPhoneCodeReq request.CheckPhoneCodeRequest
+
+		err := u.Decode(r.Body, &checkPhoneCodeReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		res, err := u.user.CheckPhoneCode(r.Context(), checkPhoneCodeReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, res)
+	}
+}
+
+func (u *usersController) PasswordReset() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var passwordResetReq request.PasswordResetRequest
+
+		err := u.Decode(r.Body, &passwordResetReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = u.user.PasswordReset(r.Context(), passwordResetReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
 		})
 	}
 }

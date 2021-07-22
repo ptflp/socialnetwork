@@ -92,6 +92,8 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Route("/set", func(r chi.Router) {
 			r.Post("/password", profileController.SetPassword())
 		})
+		r.Post("/upload/avatar", profileController.Update())
+		r.Post("/upload/background", profileController.Update())
 	})
 
 	posts := controllers.NewPostsController(cmps.Responder(), services.User, services.File, services.Post, cmps.Logger())
@@ -120,6 +122,12 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Post("/unsubscribe", users.Unsubscribe())
 		r.Get("/list", users.List())
 		r.Post("/get", users.Get())
+	})
+
+	r.Route("/recover", func(r chi.Router) {
+		r.Post("/password", users.RecoverPassword())
+		r.Post("/check/phone", users.CheckPhoneCode())
+		r.Post("/set/password", users.PasswordReset())
 	})
 
 	r.Route("/system", func(r chi.Router) {

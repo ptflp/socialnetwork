@@ -84,3 +84,13 @@ type PostsFeedResponse struct {
 	Msg     string        `json:"msg"`
 	Data    PostsFeedData `json:"data"`
 }
+
+type RecoverChekPhoneResponse struct {
+	Success bool                  `json:"success"`
+	Msg     string                `json:"msg"`
+	Data    RecoverCheckPhoneData `json:"data"`
+}
+
+type RecoverCheckPhoneData struct {
+	RecoverID string `json:"recover_id"`
+}
