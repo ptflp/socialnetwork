@@ -155,7 +155,7 @@ func (u *User) SetPassword(ctx context.Context, setPasswordReq request.SetPasswo
 }
 
 func (u *User) prepareRecoveryTemplate(recoverUrl string) (bytes.Buffer, error) {
-	tmpl, err := template.ParseFiles("./templates/password_recover.html")
+	tmpl, err := template.ParseFiles("./templates/password_recovery.html")
 	if err != nil {
 		u.Logger().Error("recover password template parse", zap.Error(err))
 		return bytes.Buffer{}, err
