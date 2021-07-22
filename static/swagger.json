@@ -538,7 +538,7 @@
         "tags": [
           "recover"
         ],
-        "summary": "Получить пользователя по никнейму или айди.",
+        "summary": "Проверка кода смс при запросе восстановления пароля.",
         "operationId": "checkPhoneCodeRequest",
         "parameters": [
           {
@@ -568,7 +568,7 @@
         "tags": [
           "recover"
         ],
-        "summary": "Получить пользователя по никнейму или айди.",
+        "summary": "Запрос на восстановление пароля по почте или телефону.",
         "operationId": "recoverPasswordRequest",
         "parameters": [
           {
@@ -598,7 +598,7 @@
         "tags": [
           "recover"
         ],
-        "summary": "Получить пользователя по никнейму или айди.",
+        "summary": "Установка пароля по recover_id, указывается в редиректе с почты /profile/password/{hash}, либо при проверке смс кода.",
         "operationId": "passwordResetRequest",
         "parameters": [
           {

@@ -3,7 +3,7 @@ package docs
 import "gitlab.com/InfoBlogFriends/server/request"
 
 // swagger:route POST /recover/password recover recoverPasswordRequest
-// Получить пользователя по никнейму или айди.
+// Запрос на восстановление пароля по почте или телефону.
 // security:
 //   - Bearer: []
 // responses:
@@ -22,7 +22,7 @@ type recoverPasswordParams struct {
 }
 
 // swagger:route POST /recover/check/phone recover checkPhoneCodeRequest
-// Получить пользователя по никнейму или айди.
+// Проверка кода смс при запросе восстановления пароля.
 // security:
 //   - Bearer: []
 // responses:
@@ -41,7 +41,7 @@ type checkPhoneCodeParams struct {
 }
 
 // swagger:route POST /recover/set/password recover passwordResetRequest
-// Получить пользователя по никнейму или айди.
+// Установка пароля по recover_id, указывается в редиректе с почты /profile/password/{hash}, либо при проверке смс кода.
 // security:
 //   - Bearer: []
 // responses:
