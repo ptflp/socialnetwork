@@ -25,3 +25,7 @@ type PasswordResetRequest struct {
 	RecoverID string `json:"recover_id"`
 	Password  string `json:"password"`
 }
+
+type EmailRequest struct {
+	Email string `json:"email"`
+}

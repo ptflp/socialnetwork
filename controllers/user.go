@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -205,6 +206,35 @@ func (u *usersController) PasswordReset() http.HandlerFunc {
 
 		u.SendJSON(w, request.Response{
 			Success: true,
+		})
+	}
+}
+
+func (u *usersController) EmailExist() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var emailRequest request.EmailRequest
+
+		err := u.Decode(r.Body, &emailRequest)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = u.user.EmailExist(r.Context(), emailRequest)
+
+		if err != nil {
+			u.SendJSON(w, request.Response{
+				Success: false,
+				Msg:     fmt.Sprintf("%s не зарегистрирована", emailRequest.Email),
+			})
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+			Msg:     fmt.Sprintf("%s уже существует", emailRequest.Email),
 		})
 	}
 }

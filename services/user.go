@@ -387,6 +387,14 @@ func (u *User) PasswordReset(ctx context.Context, req request.PasswordResetReque
 	return err
 }
 
+func (u *User) EmailExist(ctx context.Context, req request.EmailRequest) error {
+	var user infoblog.User
+	user.Email = infoblog.NewNullString(req.Email)
+	_, err := u.userRepository.FindByEmail(ctx, user)
+
+	return err
+}
+
 func (u *User) generateRecoverUrl(user infoblog.User) (string, string, error) {
 
 	recoverID, err := u.GenerateRecoverID(user)

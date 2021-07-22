@@ -155,6 +155,36 @@
         }
       }
     },
+    "/exist/email": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "exist"
+        ],
+        "summary": "Проверка на существование почты.",
+        "operationId": "existEmailRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/EmailRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/existEmailResponse"
+          }
+        }
+      }
+    },
     "/people/id": {
       "post": {
         "security": [
@@ -810,6 +840,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "EmailRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "EmailVerificationRequest": {
       "type": "object",
       "properties": {
@@ -1349,6 +1389,12 @@
       }
     },
     "emailRegistrationResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "existEmailResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

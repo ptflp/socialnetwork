@@ -130,6 +130,10 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Post("/set/password", users.PasswordReset())
 	})
 
+	r.Route("/exist", func(r chi.Router) {
+		r.Post("/email", users.EmailExist())
+	})
+
 	r.Route("/system", func(r chi.Router) {
 		r.Use(middleware.Timeout(200 * time.Millisecond))
 		r.Use(token.Check)
