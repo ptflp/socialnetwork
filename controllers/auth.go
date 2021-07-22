@@ -64,7 +64,7 @@ func (a *authController) EmailActivation() http.HandlerFunc {
 			return
 		}
 		a.SendJSON(w, request.Response{
-			Success: false,
+			Success: true,
 			Msg:     fmt.Sprintf("Ссылка активации отправлена на почту %s", emailActivationReq.Email),
 			Data:    nil,
 		})
