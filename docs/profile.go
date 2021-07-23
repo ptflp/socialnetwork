@@ -54,3 +54,23 @@ type getProfileResponse struct {
 	// in:body
 	Body request.Response
 }
+
+// swagger:route POST /profile/upload/avatar profile avatarUploadRequest
+// Загрузка файла поста.
+// security:
+//   - Bearer: []
+// responses:
+//   200: avatarUploadResponse
+
+// swagger:response avatarUploadResponse
+type avatarUploadResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters avatarUploadRequest
+type avatarUploadParams struct {
+	// in: formData
+	// swagger:file
+	File interface{} `json:"file"`
+}

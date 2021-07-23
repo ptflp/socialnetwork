@@ -77,16 +77,6 @@ func (a *postsController) UploadFile() http.HandlerFunc {
 		}
 		defer file.Close()
 
-		var postFileUpload request.PostCreateReq
-
-		// r.PostForm is a map of our POST form values
-		err = formDecoder.Decode(&postFileUpload, r.PostForm)
-
-		if err != nil {
-			a.ErrorBadRequest(w, err)
-			return
-		}
-
 		formFile := services.FormFile{
 			File:       file,
 			FileHeader: fHeader,

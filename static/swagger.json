@@ -586,6 +586,35 @@
         }
       }
     },
+    "/profile/upload/avatar": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "profile"
+        ],
+        "summary": "Загрузка файла поста.",
+        "operationId": "avatarUploadRequest",
+        "parameters": [
+          {
+            "type": "file",
+            "x-go-name": "File",
+            "name": "file",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/avatarUploadResponse"
+          }
+        }
+      }
+    },
     "/recover/check/phone": {
       "post": {
         "security": [
@@ -721,6 +750,9 @@
         "refresh_token": {
           "type": "string",
           "x-go-name": "RefreshToken"
+        },
+        "user": {
+          "$ref": "#/definitions/UserData"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1322,6 +1354,10 @@
           "type": "string",
           "x-go-name": "Phone"
         },
+        "profile_image": {
+          "type": "string",
+          "x-go-name": "Avatar"
+        },
         "second_name": {
           "type": "string",
           "x-go-name": "SecondName"
@@ -1414,6 +1450,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/AuthTokenResponse"
+      }
+    },
+    "avatarUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
       }
     },
     "checkCodeResponse": {

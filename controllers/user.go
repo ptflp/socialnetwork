@@ -118,6 +118,10 @@ func (u *usersController) Get() http.HandlerFunc {
 		var userIDNickReq request.UserIDNickRequest
 
 		err := u.Decode(r.Body, &userIDNickReq)
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
 
 		userData, err := u.user.Get(r.Context(), userIDNickReq)
 

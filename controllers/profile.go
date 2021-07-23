@@ -106,3 +106,36 @@ func (a *profileController) SetPassword() http.HandlerFunc {
 		})
 	}
 }
+
+func (a *profileController) UploadAvatar() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(100 << 20)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+		file, fHeader, err := r.FormFile("file")
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+		defer file.Close()
+
+		formFile := services.FormFile{
+			File:       file,
+			FileHeader: fHeader,
+		}
+
+		userData, err := a.user.SaveAvatar(r.Context(), formFile)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    userData,
+		})
+	}
+}

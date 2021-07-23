@@ -8,6 +8,11 @@ import (
 	"gitlab.com/InfoBlogFriends/server/decoder"
 )
 
+const (
+	FilePost = iota + 1
+	FileAvatar
+)
+
 //NullString is a wrapper around sql.NullString
 type NullString struct {
 	sql.NullString

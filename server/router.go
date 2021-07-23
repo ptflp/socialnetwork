@@ -92,7 +92,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 		r.Route("/set", func(r chi.Router) {
 			r.Post("/password", profileController.SetPassword())
 		})
-		r.Post("/upload/avatar", profileController.Update())
+		r.Post("/upload/avatar", profileController.UploadAvatar())
 		r.Post("/upload/background", profileController.Update())
 	})
 

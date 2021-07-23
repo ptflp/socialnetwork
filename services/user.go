@@ -8,7 +8,11 @@ import (
 	"html/template"
 	"math/rand"
 	"net/url"
+	"path"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/email"
 
@@ -39,11 +43,12 @@ type User struct {
 	subsRepository  infoblog.SubscriberRepository
 	likesRepository infoblog.LikeRepository
 	post            *Post
+	file            *File
 	components.Componenter
 }
 
-func NewUserService(rs infoblog.Repositories, post *Post, cmps components.Componenter) *User {
-	return &User{userRepository: rs.Users, subsRepository: rs.Subscribers, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes, Componenter: cmps}
+func NewUserService(rs infoblog.Repositories, post *Post, cmps components.Componenter, file *File) *User {
+	return &User{userRepository: rs.Users, subsRepository: rs.Subscribers, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes, Componenter: cmps, file: file}
 }
 
 func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
@@ -417,6 +422,61 @@ func (u *User) generateRecoverUrl(user infoblog.User) (string, string, error) {
 	uri.Path = fmt.Sprintf("profile/password/%s", recoverID)
 
 	return uri.String(), recoverID, err
+}
+
+func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserData, error) {
+	// 1. save file to filesystem
+	user, err := extractUser(ctx)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Intn(89) + 10
+
+	fUUID, err := uuid.NewUUID()
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	fileUUID := strings.Join([]string{fUUID.String(), fmt.Sprintf("-f%d", id)}, "")
+
+	file, err := u.file.SaveFileSystem(formFile, user.ID, fileUUID)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	// 2. save post to db
+
+	// 3. update file info, save to db
+	file.Active = 1
+	file.Type = infoblog.FileAvatar
+	file.UserID = user.ID
+	file.UserUUID = user.UUID
+
+	err = u.file.SaveDB(ctx, &file)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	link := "/" + path.Join(file.Dir, file.Name)
+
+	user, err = u.userRepository.Find(ctx, user)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	user.Avatar = infoblog.NewNullString(link)
+
+	err = u.userRepository.Update(ctx, user)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	var userData request.UserData
+	err = u.MapStructs(&userData, &user)
+
+	return userData, nil
 }
 
 func extractUser(ctx context.Context) (infoblog.User, error) {
