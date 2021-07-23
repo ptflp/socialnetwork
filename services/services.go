@@ -14,14 +14,16 @@ type Services struct {
 	File *File
 }
 
-func NewServices(cmps components.Componenter, repositories infoblog.Repositories) Services {
+func NewServices(cmps components.Componenter, repositories infoblog.Repositories) *Services {
+	var services Services
 	file := NewFileService(repositories.Files)
-	post := NewPostService(repositories, file, cmps.Decoder())
+	post := NewPostService(repositories, file, cmps.Decoder(), &services)
+	user := NewUserService(repositories, post, cmps, file)
 
-	return Services{
-		AuthService: auth.NewAuthService(repositories, cmps),
-		User:        NewUserService(repositories, post, cmps, file),
-		Post:        post,
-		File:        file,
-	}
+	services.AuthService = auth.NewAuthService(repositories, cmps)
+	services.User = user
+	services.Post = post
+	services.File = file
+
+	return &services
 }

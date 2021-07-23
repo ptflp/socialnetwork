@@ -18,14 +18,15 @@ import (
 )
 
 type Post struct {
-	file *File
-	post infoblog.PostRepository
-	like infoblog.LikeRepository
+	services *Services
+	file     *File
+	post     infoblog.PostRepository
+	like     infoblog.LikeRepository
 	*decoder.Decoder
 }
 
-func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder) *Post {
-	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes}
+func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder, services *Services) *Post {
+	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes, services: services}
 }
 
 func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFileData, error) {
@@ -173,7 +174,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 
 		userData := request.UserData{}
 
-		err = p.MapStructs(&userData, &posts[i].User)
+		userData, err = p.services.User.GetUserData(posts[i].User)
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -238,7 +239,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 
 		userData := request.UserData{}
 
-		err = p.MapStructs(&userData, &posts[i].User)
+		userData, err = p.services.User.GetUserData(posts[i].User)
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}

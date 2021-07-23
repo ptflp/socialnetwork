@@ -21,7 +21,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mux, error) {
+func NewRouter(services *services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)

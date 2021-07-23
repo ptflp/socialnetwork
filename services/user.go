@@ -473,10 +473,18 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 		return request.UserData{}, err
 	}
 
-	var userData request.UserData
-	err = u.MapStructs(&userData, &user)
+	userData, err := u.GetUserData(user)
 
 	return userData, nil
+}
+
+func (u *User) GetUserData(user infoblog.User) (request.UserData, error) {
+
+	var userData request.UserData
+	err := u.MapStructs(&userData, &user)
+
+	userData.AvatarSet = user.Avatar.Valid
+	return userData, err
 }
 
 func extractUser(ctx context.Context) (infoblog.User, error) {

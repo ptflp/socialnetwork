@@ -46,6 +46,7 @@ type UserData struct {
 	IsSubscriber bool `json:"is_subscriber"`
 
 	PasswordSet *bool `json:"password_set,omitempty"`
+	AvatarSet   bool  `json:"profile_image_set"`
 
 	Counts *UserDataCounts `json:"counts,omitempty"`
 }
