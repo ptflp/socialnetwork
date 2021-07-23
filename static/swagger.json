@@ -598,7 +598,7 @@
         "tags": [
           "profile"
         ],
-        "summary": "Загрузка файла поста.",
+        "summary": "Загрузка аватарки пользователя.",
         "operationId": "avatarUploadRequest",
         "parameters": [
           {

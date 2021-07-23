@@ -56,7 +56,7 @@ type getProfileResponse struct {
 }
 
 // swagger:route POST /profile/upload/avatar profile avatarUploadRequest
-// Загрузка файла поста.
+// Загрузка аватарки пользователя.
 // security:
 //   - Bearer: []
 // responses:
