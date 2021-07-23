@@ -185,6 +185,36 @@
         }
       }
     },
+    "/exist/nickname": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "exist"
+        ],
+        "summary": "Проверка на существование никнейма.",
+        "operationId": "existNicknameRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/NicknameRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/existNicknameResponse"
+          }
+        }
+      }
+    },
     "/people/id": {
       "post": {
         "security": [
@@ -860,6 +890,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "NicknameRequest": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "x-go-name": "Nickname"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "PasswordRecoverRequest": {
       "type": "object",
       "properties": {
@@ -1395,6 +1435,12 @@
       }
     },
     "existEmailResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "existNicknameResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

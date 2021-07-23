@@ -20,3 +20,22 @@ type existEmailParams struct {
 	// in:body
 	Body request.EmailRequest
 }
+
+// swagger:route POST /exist/nickname exist existNicknameRequest
+// Проверка на существование никнейма.
+// security:
+//   - Bearer: []
+// responses:
+//   200: existNicknameResponse
+
+// swagger:response existNicknameResponse
+type existNicknameResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters existNicknameRequest
+type existNicknameParams struct {
+	// in:body
+	Body request.NicknameRequest
+}

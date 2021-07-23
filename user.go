@@ -36,7 +36,7 @@ type UserRepository interface {
 	FindAll(ctx context.Context) ([]User, error)
 	FindByPhone(ctx context.Context, user User) (User, error)
 	FindByEmail(ctx context.Context, user User) (User, error)
-	FindNickname(ctx context.Context, user User) (User, error)
+	FindByNickname(ctx context.Context, user User) (User, error)
 
 	CreateUser(ctx context.Context, user User) error
 	CreateUserByEmailPassword(ctx context.Context, user User) error

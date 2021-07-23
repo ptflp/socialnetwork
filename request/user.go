@@ -29,3 +29,7 @@ type PasswordResetRequest struct {
 type EmailRequest struct {
 	Email string `json:"email"`
 }
+
+type NicknameRequest struct {
+	Nickname string `json:"nickname"`
+}

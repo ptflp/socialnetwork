@@ -132,6 +132,7 @@ func NewRouter(services services.Services, cmps components.Componenter) (*chi.Mu
 
 	r.Route("/exist", func(r chi.Router) {
 		r.Post("/email", users.EmailExist())
+		r.Post("/nickname", users.NicknameExist())
 	})
 
 	r.Route("/system", func(r chi.Router) {

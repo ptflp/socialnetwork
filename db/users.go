@@ -143,7 +143,7 @@ func (u *userRepository) Find(ctx context.Context, user infoblog.User) (infoblog
 	return user, nil
 }
 
-func (u *userRepository) FindNickname(ctx context.Context, user infoblog.User) (infoblog.User, error) {
+func (u *userRepository) FindByNickname(ctx context.Context, user infoblog.User) (infoblog.User, error) {
 	fields, err := infoblog.GetFields("users")
 	if err != nil {
 		return infoblog.User{}, err

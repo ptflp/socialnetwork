@@ -238,3 +238,32 @@ func (u *usersController) EmailExist() http.HandlerFunc {
 		})
 	}
 }
+
+func (u *usersController) NicknameExist() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var nickNameReq request.NicknameRequest
+
+		err := u.Decode(r.Body, &nickNameReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = u.user.NicknameExist(r.Context(), nickNameReq)
+
+		if err != nil {
+			u.SendJSON(w, request.Response{
+				Success: false,
+				Msg:     fmt.Sprintf("%s не зарегистрирован", nickNameReq.Nickname),
+			})
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+			Msg:     fmt.Sprintf("%s уже существует", nickNameReq.Nickname),
+		})
+	}
+}

@@ -238,7 +238,7 @@ func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.
 	}
 	if req.NickName != nil {
 		user.NickName = infoblog.NewNullString(*req.NickName)
-		user, err = u.userRepository.FindNickname(ctx, user)
+		user, err = u.userRepository.FindByNickname(ctx, user)
 		if err != nil {
 			return request.UserData{}, err
 		}
@@ -391,6 +391,14 @@ func (u *User) EmailExist(ctx context.Context, req request.EmailRequest) error {
 	var user infoblog.User
 	user.Email = infoblog.NewNullString(req.Email)
 	_, err := u.userRepository.FindByEmail(ctx, user)
+
+	return err
+}
+
+func (u *User) NicknameExist(ctx context.Context, req request.NicknameRequest) error {
+	var user infoblog.User
+	user.NickName = infoblog.NewNullString(req.Nickname)
+	_, err := u.userRepository.FindByNickname(ctx, user)
 
 	return err
 }
