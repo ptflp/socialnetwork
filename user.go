@@ -10,6 +10,7 @@ type User struct {
 	UUID           string      `json:"user_id" db:"uuid" ops:"create"`
 	Phone          NullString  `json:"phone" db:"phone" ops:"update,create"`
 	Email          NullString  `json:"email" db:"email" ops:"update,create"`
+	Avatar         NullString  `json:"profile_image" db:"avatar" ops:"update"`
 	Password       NullString  `json:"password,omitempty" db:"password" ops:"create"`
 	Active         NullBool    `json:"active" db:"active" ops:"create,update"`
 	Name           NullString  `json:"name" db:"name" ops:"update,create"`

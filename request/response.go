@@ -16,14 +16,16 @@ type AuthTokenResponse struct {
 }
 
 type AuthTokenData struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string   `json:"access_token"`
+	RefreshToken string   `json:"refresh_token"`
+	User         UserData `json:"user"`
 }
 
 type UserData struct {
 	UUID           string    `json:"user_id" db:"uuid" ops:"create"`
 	Phone          string    `json:"phone" db:"phone" ops:"update,create"`
 	Email          string    `json:"email" db:"email" ops:"update,create"`
+	Avatar         string    `json:"profile_image" db:"avatar" ops:"update"`
 	Active         bool      `json:"active" db:"active" ops:"create"`
 	Name           string    `json:"name" db:"name" ops:"update,create"`
 	SecondName     string    `json:"second_name" db:"second_name" ops:"update,create"`

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/decoder"
+
 	"gitlab.com/InfoBlogFriends/server/cache"
 
 	"gitlab.com/InfoBlogFriends/server/hasher"
@@ -33,6 +35,7 @@ const (
 )
 
 type JWTKeys struct {
+	*decoder.Decoder
 	signKey     *rsa.PrivateKey
 	verifyKey   *rsa.PublicKey
 	signBytes   []byte
@@ -43,8 +46,9 @@ type JWTKeys struct {
 
 func NewJWTKeys(logger *zap.Logger, cache cache.Cache) (*JWTKeys, error) {
 	j := &JWTKeys{
-		logger: logger,
-		cache:  cache,
+		Decoder: decoder.NewDecoder(),
+		logger:  logger,
+		cache:   cache,
 	}
 	err := j.ReadKeys()
 	if err != nil {
@@ -126,10 +130,17 @@ func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, erro
 		return nil, err
 	}
 
-	return &req.AuthTokenData{
+	authToken := req.AuthTokenData{
 		AccessToken:  access,
 		RefreshToken: refresh,
-	}, err
+	}
+
+	err = j.MapStructs(&authToken.User, u)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authToken, err
 }
 
 func (j *JWTKeys) CreateAccessToken(u infoblog.User) (string, error) {
