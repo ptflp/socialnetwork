@@ -2,7 +2,7 @@
 //
 // Documentation of infoblog API.
 //
-//     Schemes: http
+//     Schemes: https
 //     BasePath: /
 //     Version: 1.0.0
 //
