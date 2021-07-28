@@ -121,6 +121,9 @@ type RefreshToken struct {
 }
 
 func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, error) {
+	if len(u.UUID) < 40 {
+		return nil, errors.New("wrong user")
+	}
 	access, err := j.CreateAccessToken(*u)
 	if err != nil {
 		return nil, err

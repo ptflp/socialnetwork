@@ -14,9 +14,9 @@ require (
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/json-iterator/go v1.1.11
 	github.com/nyaruka/phonenumbers v1.0.70
-	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.8.0
 	github.com/subosito/gotenv v1.2.0
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
 )

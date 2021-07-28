@@ -37,6 +37,8 @@ import (
 const (
 	EmailVerificationKey = "email:verification:%s"
 	PhoneRegistrationKey = "phone:registration:%s"
+
+	SocialsAuthKey = "socials:auth:%s"
 )
 
 type service struct {
@@ -301,6 +303,46 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 	}
 
 	return token, err
+}
+
+func (a *service) SocialCallback(ctx context.Context, state string) (string, error) {
+	u, err := extractUser(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := a.userRepository.FindByFacebook(ctx, u)
+	if err != nil {
+		user, err = createDefaultUser()
+		if err != nil {
+			return "", err
+		}
+		user.FacebookID = u.FacebookID
+		err = a.userRepository.CreateUser(ctx, user)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	a.Cache().Set(fmt.Sprintf(SocialsAuthKey, state), &user, 10*time.Minute)
+
+	url, err := url.Parse(a.Config().App.FrontEnd)
+	if err != nil {
+		return "", err
+	}
+
+	url.Path = fmt.Sprintf("socials/%s", state)
+
+	return url.String(), nil
+}
+
+func extractUser(ctx context.Context) (infoblog.User, error) {
+	u, ok := ctx.Value("user").(*infoblog.User)
+	if !ok {
+		return infoblog.User{}, errors.New("type assertion to user err")
+	}
+
+	return *u, nil
 }
 
 func genCode() int {

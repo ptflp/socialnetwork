@@ -161,6 +161,24 @@ func (u *userRepository) FindByNickname(ctx context.Context, user infoblog.User)
 	return user, nil
 }
 
+func (u *userRepository) FindByFacebook(ctx context.Context, user infoblog.User) (infoblog.User, error) {
+	fields, err := infoblog.GetFields("users")
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"facebook_id": user.FacebookID}).ToSql()
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
+		return infoblog.User{}, err
+	}
+
+	return user, nil
+}
+
 func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
 	fields, err := infoblog.GetFields("users")
 	if err != nil {

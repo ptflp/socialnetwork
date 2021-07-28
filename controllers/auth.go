@@ -173,3 +173,11 @@ func (a *authController) CheckCode() http.HandlerFunc {
 		})
 	}
 }
+
+func (a *authController) SocialsCallback() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		state := r.FormValue("state")
+		url, _ := a.authService.SocialCallback(r.Context(), state)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	}
+}

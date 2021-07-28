@@ -14,6 +14,7 @@ type Config struct {
 	Redis  Redis
 	SMSC   SMSC
 	Email  Email
+	Oauth2
 }
 
 const (

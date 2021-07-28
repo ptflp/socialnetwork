@@ -21,6 +21,7 @@ type Componenter interface {
 	Cache() cache.Cache
 	SMS() providers.SMS
 	Decoder() *decoder.Decoder
+	Facebook() providers.Socials
 }
 
 type Components struct {
@@ -33,6 +34,7 @@ type Components struct {
 	cache     cache.Cache
 	sms       providers.SMS
 	decoder   *decoder.Decoder
+	facebook  *providers.Facebook
 }
 
 func (c *Components) Logger() *zap.Logger {
@@ -71,6 +73,10 @@ func (c *Components) Decoder() *decoder.Decoder {
 	return c.decoder
 }
 
+func (c *Components) Facebook() providers.Socials {
+	return c.facebook
+}
+
 func NewComponents(logger *zap.Logger) *Components {
 	responder, err := respond.NewResponder(logger)
 	if err != nil {
@@ -93,6 +99,8 @@ func NewComponents(logger *zap.Logger) *Components {
 		logger.Fatal("jwt initialization error", zap.Error(err))
 	}
 
+	facebook := providers.NewFacebookAuth(&conf.Oauth2.Facebook)
+
 	mailClient := email.NewClient(&conf.Email, logger)
 	smsc := providers.NewSMSC(&conf.SMSC)
 
@@ -106,5 +114,6 @@ func NewComponents(logger *zap.Logger) *Components {
 		cache:     c,
 		sms:       smsc,
 		decoder:   decoder.NewDecoder(),
+		facebook:  facebook,
 	}
 }
