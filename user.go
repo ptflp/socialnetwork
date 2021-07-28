@@ -26,6 +26,7 @@ type User struct {
 	NotifyPush     NullBool    `json:"notify_push" db:"notify_push" ops:"update,create"`
 	Language       NullInt64   `json:"language" db:"language" ops:"update,create"`
 	FacebookID     NullInt64   `json:"facebook_id" db:"facebook_id" ops:"update,create"`
+	GoogleID       NullString  `json:"google_id" db:"google_id" ops:"update,create"`
 	CreatedAt      time.Time   `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time   `json:"updated_at" db:"updated_at"`
 }
@@ -40,6 +41,7 @@ type UserRepository interface {
 	FindByEmail(ctx context.Context, user User) (User, error)
 	FindByNickname(ctx context.Context, user User) (User, error)
 	FindByFacebook(ctx context.Context, user User) (User, error)
+	FindByGoogle(ctx context.Context, user User) (User, error)
 
 	CreateUser(ctx context.Context, user User) error
 	CreateUserByEmailPassword(ctx context.Context, user User) error

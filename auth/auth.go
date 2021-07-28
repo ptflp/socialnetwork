@@ -311,17 +311,43 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 		return "", err
 	}
 
-	user, err := a.userRepository.FindByFacebook(ctx, u)
-	if err != nil {
-		user, err = createDefaultUser()
+	provider, ok := ctx.Value("provider").(string)
+	if !ok {
+		return "", fmt.Errorf("wrong provider")
+	}
+
+	var user infoblog.User
+	switch provider {
+	case "facebook":
+		user, err = a.userRepository.FindByFacebook(ctx, u)
 		if err != nil {
-			return "", err
+			user, err = createDefaultUser()
+			if err != nil {
+				return "", err
+			}
+			user.FacebookID = u.FacebookID
+			user.Name = u.Name
+			err = a.userRepository.CreateUser(ctx, user)
+			if err != nil {
+				return "", err
+			}
 		}
-		user.FacebookID = u.FacebookID
-		err = a.userRepository.CreateUser(ctx, user)
+	case "google":
+		user, err = a.userRepository.FindByGoogle(ctx, u)
 		if err != nil {
-			return "", err
+			user, err = createDefaultUser()
+			if err != nil {
+				return "", err
+			}
+			user.GoogleID = u.GoogleID
+			user.Name = u.Name
+			err = a.userRepository.CreateUser(ctx, user)
+			if err != nil {
+				return "", err
+			}
 		}
+	default:
+		return "", fmt.Errorf("unknown provider %s", provider)
 	}
 
 	a.Cache().Set(fmt.Sprintf(SocialsAuthKey, state), &user, 10*time.Minute)

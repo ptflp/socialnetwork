@@ -136,7 +136,7 @@ type facebookLoginResponse struct {
 	Body request.Response
 }
 
-// swagger:route GET /auth/oauth2/facebook/login auth GoogleLoginRequest
+// swagger:route GET /auth/oauth2/google/login auth GoogleLoginRequest
 // Авторизация с помощью гугл.
 // security:
 //   - Bearer: []

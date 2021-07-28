@@ -162,12 +162,36 @@ func (u *userRepository) FindByNickname(ctx context.Context, user infoblog.User)
 }
 
 func (u *userRepository) FindByFacebook(ctx context.Context, user infoblog.User) (infoblog.User, error) {
+	if !user.FacebookID.Valid {
+		return infoblog.User{}, fmt.Errorf("invalid facebook_id %d", user.FacebookID.Int64)
+	}
 	fields, err := infoblog.GetFields("users")
 	if err != nil {
 		return infoblog.User{}, err
 	}
 
 	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"facebook_id": user.FacebookID}).ToSql()
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	if err := u.db.QueryRowxContext(ctx, query, args...).StructScan(&user); err != nil {
+		return infoblog.User{}, err
+	}
+
+	return user, nil
+}
+
+func (u *userRepository) FindByGoogle(ctx context.Context, user infoblog.User) (infoblog.User, error) {
+	if !user.GoogleID.Valid {
+		return infoblog.User{}, fmt.Errorf("invalid facebook_id %s", user.GoogleID.String)
+	}
+	fields, err := infoblog.GetFields("users")
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	query, args, err := sq.Select(fields...).From("users").Where(sq.Eq{"google_id": user.GoogleID}).ToSql()
 	if err != nil {
 		return infoblog.User{}, err
 	}

@@ -50,7 +50,9 @@ func (a *AuthSocials) Callback(next http.Handler) http.Handler {
 		}
 		state := r.FormValue("state")
 		ctx := context.WithValue(r.Context(), "user", &u)
-		ctx = context.WithValue(ctx, "state", &state)
+		ctx = context.WithValue(ctx, "state", state)
+		ctx = context.WithValue(ctx, "provider", providerName)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

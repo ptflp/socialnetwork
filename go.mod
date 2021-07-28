@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/cors v1.2.0
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/schema v1.2.0
 	github.com/jmoiron/sqlx v1.3.4
@@ -18,5 +19,8 @@ require (
 	github.com/subosito/gotenv v1.2.0
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/oauth2 v0.0.0-20210402161424-2e8d93401602
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
+	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
+	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )

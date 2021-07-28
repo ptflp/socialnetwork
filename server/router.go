@@ -81,11 +81,11 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/code", authController.SendCode())
 		r.Post("/checkcode", authController.CheckCode())
 
-		oauth2 := middlewares.NewAuthSocials(cmps.Responder(), cmps.Cache(), cmps.Facebook(), cmps.Facebook())
+		oauth2 := middlewares.NewAuthSocials(cmps.Responder(), cmps.Cache(), cmps.Facebook(), cmps.Google())
 		r.Route("/oauth2", func(r chi.Router) {
 			r.Post("/state", authController.Oauth2State())
 			r.Route("/{provider}", func(r chi.Router) {
-				r.Route("/redirect", func(r chi.Router) {
+				r.Route("/login", func(r chi.Router) {
 					r.Use(oauth2.Redirect)
 					r.Get("/", func(writer http.ResponseWriter, r *http.Request) {
 						return

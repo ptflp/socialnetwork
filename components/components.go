@@ -22,6 +22,7 @@ type Componenter interface {
 	SMS() providers.SMS
 	Decoder() *decoder.Decoder
 	Facebook() providers.Socials
+	Google() providers.Socials
 }
 
 type Components struct {
@@ -34,7 +35,8 @@ type Components struct {
 	cache     cache.Cache
 	sms       providers.SMS
 	decoder   *decoder.Decoder
-	facebook  *providers.Facebook
+	facebook  providers.Socials
+	google    providers.Socials
 }
 
 func (c *Components) Logger() *zap.Logger {
@@ -77,6 +79,10 @@ func (c *Components) Facebook() providers.Socials {
 	return c.facebook
 }
 
+func (c *Components) Google() providers.Socials {
+	return c.google
+}
+
 func NewComponents(logger *zap.Logger) *Components {
 	responder, err := respond.NewResponder(logger)
 	if err != nil {
@@ -100,6 +106,7 @@ func NewComponents(logger *zap.Logger) *Components {
 	}
 
 	facebook := providers.NewFacebookAuth(&conf.Oauth2.Facebook)
+	google := providers.NewGoogleAuth(&conf.Oauth2.Google)
 
 	mailClient := email.NewClient(&conf.Email, logger)
 	smsc := providers.NewSMSC(&conf.SMSC)
@@ -115,5 +122,6 @@ func NewComponents(logger *zap.Logger) *Components {
 		sms:       smsc,
 		decoder:   decoder.NewDecoder(),
 		facebook:  facebook,
+		google:    google,
 	}
 }

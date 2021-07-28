@@ -2,11 +2,9 @@ package providers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
 	"gitlab.com/InfoBlogFriends/server/request"
@@ -28,30 +26,18 @@ type Facebook struct {
 func NewFacebookAuth(config *oauth2.Config) *Facebook {
 	config.Endpoint = facebook.Endpoint
 	config.Scopes = []string{"public_profile"}
-	config.RedirectURL = "https://cbf8129b5d2f.ngrok.io/auth/provider/facebook/callback"
 
 	return &Facebook{config: config, Decoder: decoder.NewDecoder()}
 }
 
 func (f *Facebook) RedirectUrl() string {
-	Url, err := url.Parse(f.config.Endpoint.AuthURL)
-	if err != nil {
-		log.Fatal("Parse: ", err)
-	}
 	uuid, err := utils.ProjectUUIDGen("F")
 	if err != nil {
 		return ""
 	}
-	parameters := url.Values{}
-	parameters.Add("client_id", f.config.ClientID)
-	parameters.Add("scope", strings.Join(f.config.Scopes, " "))
-	parameters.Add("redirect_uri", f.config.RedirectURL)
-	parameters.Add("response_type", "code")
-	parameters.Add("state", uuid)
-	Url.RawQuery = parameters.Encode()
-	u := Url.String()
+	url := f.config.AuthCodeURL(uuid)
 
-	return u
+	return url
 }
 
 func (f *Facebook) Callback(r *http.Request) (infoblog.User, error) {
@@ -83,5 +69,6 @@ func (f *Facebook) Callback(r *http.Request) (infoblog.User, error) {
 
 	return infoblog.User{
 		FacebookID: infoblog.NewNullInt64(int64(facebookID)),
+		Name:       infoblog.NewNullString(req.Name),
 	}, nil
 }

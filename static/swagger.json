@@ -144,6 +144,27 @@
         "tags": [
           "auth"
         ],
+        "summary": "Авторизация с помощью фэйсбук.",
+        "operationId": "FacebookLoginRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/FacebookLoginResponse"
+          }
+        }
+      }
+    },
+    "/auth/oauth2/google/login": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "auth"
+        ],
         "summary": "Авторизация с помощью гугл.",
         "operationId": "GoogleLoginRequest",
         "responses": {
