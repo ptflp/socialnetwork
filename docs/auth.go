@@ -105,3 +105,46 @@ type refTokenParams struct {
 	// in:body
 	Body request.RefreshTokenRequest
 }
+
+// swagger:route POST /auth/oauth2/state auth Oauth2StateRequest
+// Авторизация с помощью state oauth2.
+// responses:
+//   200: OauthStateResponse
+
+// swagger:response OauthStateResponse
+type oauthStateResponse struct {
+	// in:body
+	Body request.AuthTokenResponse
+}
+
+// swagger:parameters Oauth2StateRequest
+type oauthStateParams struct {
+	// in:body
+	Body request.StateRequest
+}
+
+// swagger:route GET /auth/oauth2/facebook/login auth FacebookLoginRequest
+// Авторизация с помощью фэйсбук.
+// security:
+//   - Bearer: []
+// responses:
+//   200: FacebookLoginResponse
+
+// swagger:response FacebookLoginResponse
+type facebookLoginResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:route GET /auth/oauth2/facebook/login auth GoogleLoginRequest
+// Авторизация с помощью гугл.
+// security:
+//   - Bearer: []
+// responses:
+//   200: GoogleLoginResponse
+
+// swagger:response GoogleLoginResponse
+type googleLoginResponse struct {
+	// in:body
+	Body request.Response
+}

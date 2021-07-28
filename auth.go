@@ -12,6 +12,7 @@ type AuthService interface {
 	EmailActivation(ctx context.Context, req *request.EmailActivationRequest) error
 	EmailVerification(ctx context.Context, req *request.EmailVerificationRequest) (*request.AuthTokenData, error)
 	SocialCallback(ctx context.Context, state string) (string, error)
+	Oauth2Token(ctx context.Context, tokenRequest request.StateRequest) (*request.AuthTokenData, error)
 	EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (*request.AuthTokenData, error)
 	RefreshToken(ctx context.Context, req *request.RefreshTokenRequest) (*request.AuthTokenData, error)
 }

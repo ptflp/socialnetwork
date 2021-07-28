@@ -132,6 +132,50 @@
         }
       }
     },
+    "/auth/oauth2/facebook/login": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Авторизация с помощью гугл.",
+        "operationId": "GoogleLoginRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GoogleLoginResponse"
+          }
+        }
+      }
+    },
+    "/auth/oauth2/state": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Авторизация с помощью state oauth2.",
+        "operationId": "Oauth2StateRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/StateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/OauthStateResponse"
+          }
+        }
+      }
+    },
     "/auth/token/refresh": {
       "post": {
         "tags": [
@@ -816,6 +860,12 @@
         "Email": {
           "$ref": "#/definitions/Email"
         },
+        "Facebook": {
+          "$ref": "#/definitions/Config"
+        },
+        "Google": {
+          "$ref": "#/definitions/Config"
+        },
         "Redis": {
           "$ref": "#/definitions/Redis"
         },
@@ -1281,6 +1331,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "StateRequest": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "x-go-name": "State"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "UserData": {
       "type": "object",
       "properties": {
@@ -1357,6 +1417,10 @@
         "profile_image": {
           "type": "string",
           "x-go-name": "Avatar"
+        },
+        "profile_image_set": {
+          "type": "boolean",
+          "x-go-name": "AvatarSet"
         },
         "second_name": {
           "type": "string",
@@ -1441,6 +1505,24 @@
       }
     },
     "EmailVerificationResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/AuthTokenResponse"
+      }
+    },
+    "FacebookLoginResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "GoogleLoginResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "OauthStateResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/AuthTokenResponse"

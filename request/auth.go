@@ -26,3 +26,7 @@ type EmailLoginRequest struct {
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
+
+type StateRequest struct {
+	State string `json:"state"`
+}

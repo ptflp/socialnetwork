@@ -336,6 +336,26 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 	return url.String(), nil
 }
 
+func (a *service) Oauth2Token(ctx context.Context, stateRequest request.StateRequest) (*request.AuthTokenData, error) {
+	var u infoblog.User
+	key := fmt.Sprintf(SocialsAuthKey, stateRequest.State)
+	err := a.Cache().Get(key, &u)
+	if err != nil {
+		return nil, err
+	}
+	err = a.Cache().Del(key)
+	if err != nil {
+		a.Logger().Error("social auth key deletion", zap.Error(err))
+	}
+
+	token, err := a.JWTKeys().GenerateAuthTokens(&u)
+	if err != nil {
+		return nil, err
+	}
+
+	return token, err
+}
+
 func extractUser(ctx context.Context) (infoblog.User, error) {
 	u, ok := ctx.Value("user").(*infoblog.User)
 	if !ok {

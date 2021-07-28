@@ -83,6 +83,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 
 		oauth2 := middlewares.NewAuthSocials(cmps.Responder(), cmps.Cache(), cmps.Facebook(), cmps.Facebook())
 		r.Route("/oauth2", func(r chi.Router) {
+			r.Post("/state", authController.Oauth2State())
 			r.Route("/{provider}", func(r chi.Router) {
 				r.Route("/redirect", func(r chi.Router) {
 					r.Use(oauth2.Redirect)
@@ -92,7 +93,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 				})
 				r.Route("/callback", func(r chi.Router) {
 					r.Use(oauth2.Callback)
-					r.Get("/", authController.SocialsCallback())
+					r.Get("/", authController.Oauth2Callback())
 				})
 			})
 		})

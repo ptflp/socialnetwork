@@ -174,10 +174,31 @@ func (a *authController) CheckCode() http.HandlerFunc {
 	}
 }
 
-func (a *authController) SocialsCallback() http.HandlerFunc {
+func (a *authController) Oauth2Callback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		state := r.FormValue("state")
 		url, _ := a.authService.SocialCallback(r.Context(), state)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	}
+}
+
+func (a *authController) Oauth2State() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var stateReq request.StateRequest
+		err := json.NewDecoder(r.Body).Decode(&stateReq)
+		token, err := a.authService.Oauth2Token(r.Context(), stateReq)
+		if err != nil {
+			a.SendJSON(w, request.Response{
+				Success: false,
+				Msg:     fmt.Sprintf("Ошибка проверки кода: %s", err),
+				Data:    nil,
+			})
+			return
+		}
+		a.SendJSON(w, request.AuthTokenResponse{
+			Success: true,
+			Msg:     "",
+			Data:    *token,
+		})
 	}
 }
