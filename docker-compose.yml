@@ -37,6 +37,8 @@ services:
       - 3000:8955
     command: bash -c "go run ./cmd/server"
     restart: always
+    networks:
+      - skynet
     environment:
       - DEV=${DEV}
       - VIRTUAL_HOST=infoblog.ptflp.ru
@@ -48,6 +50,8 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     container_name: "infoblogdb"
+    networks:
+      - skynet
     ports:
       - 3306:3306
     environment:
@@ -59,11 +63,15 @@ services:
     image: redis
     restart: always
     container_name: "infoblogredis"
+    networks:
+      - skynet
     ports:
       - 127.0.0.1:6379:6379
   adminer:
     image: adminer
     restart: always
+    networks:
+      - skynet
     ports:
       - 8888:8080
 volumes:
