@@ -33,8 +33,6 @@ services:
   api:
     container_name: "infoblogserver"
     build: "."
-    ports:
-      - 3000:8955
     command: bash -c "go run ./cmd/server"
     restart: always
     networks:
@@ -43,6 +41,7 @@ services:
       - DEV=${DEV}
       - VIRTUAL_HOST=infoblog.ptflp.ru
       - LETSENCRYPT_HOST=infoblog.ptflp.ru
+      - VIRTUAL_PORT=8955
     volumes:
       - ./:/go/src/gitlab.com/InfoBlogFriends/server
   db:
