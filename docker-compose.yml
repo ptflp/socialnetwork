@@ -24,6 +24,7 @@ services:
       - acme:/etc/acme.sh
     environment:
       - DEFAULT_EMAIL=globallinkliberty@gmail.com
+      - NGINX_PROXY_CONTAINER=nginx-proxy
     restart: always
   api:
     container_name: "infoblogserver"
