@@ -125,6 +125,8 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	}
 
 	postDataRes := request.PostDataResponse{}
+	postDataRes.Files = files
+
 	err = p.MapStructs(&postDataRes, &post.PostEntity)
 	if err != nil {
 		return request.PostDataResponse{}, err

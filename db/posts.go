@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	createPost     = "INSERT INTO posts (body, file_id, user_id, user_uuid, uuid, file_uuid, type) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	createPost     = "INSERT INTO posts (body, file_id, user_id, user_uuid, uuid, file_uuid, type, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	updatePost     = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
 	deletePost     = "UPDATE posts SET active = ? WHERE id = ?"
 	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1"
@@ -24,7 +24,7 @@ type postsRepository struct {
 }
 
 func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, error) {
-	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID, p.UserID, p.UserUUID, p.UUID, p.FileUUID, p.Type)
+	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID, p.UserID, p.UserUUID, p.UUID, p.FileUUID, p.Type, p.Active)
 	if err != nil {
 		return 0, err
 	}
