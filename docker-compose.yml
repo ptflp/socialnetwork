@@ -1,7 +1,7 @@
 version: '3.3'
 services:
-  proxy:
-    container_name: "proxy"
+  nginx-proxy:
+    container_name: "nginx-proxy"
     image: "nginxproxy/nginx-proxy"
     ports:
       - 80:80
