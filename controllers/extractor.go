@@ -14,9 +14,5 @@ func extractUser(r *http.Request) (infoblog.User, error) {
 		return infoblog.User{}, errors.New("type assertion to user err")
 	}
 
-	if u.ID == 0 {
-		return infoblog.User{}, errors.New("user not exists")
-	}
-
 	return *u, nil
 }
