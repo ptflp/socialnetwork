@@ -35,6 +35,8 @@ services:
     restart: always
     environment:
       - DEV=${DEV}
+      - VIRTUAL_HOST=infoblog.ptflp.ru
+      - LETSENCRYPT_HOST=infoblog.ptflp.ru
     volumes:
       - ./:/go/src/gitlab.com/InfoBlogFriends/server
   db:
