@@ -222,13 +222,6 @@
     },
     "/exist/email": {
       "post": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
         "tags": [
           "exist"
         ],
@@ -252,13 +245,6 @@
     },
     "/exist/nickname": {
       "post": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
         "tags": [
           "exist"
         ],
@@ -928,12 +914,6 @@
       "type": "object",
       "properties": {
         "From": {
-          "type": "string"
-        },
-        "Login": {
-          "type": "string"
-        },
-        "Password": {
           "type": "string"
         },
         "Port": {

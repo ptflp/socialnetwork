@@ -36,8 +36,8 @@ oauth2:
   google:
     clientID: "48097972269-g6jhrco7gii44i76j7trqseikb9d44ke.apps.googleusercontent.com"
     clientSecret: "6oBPBedmIwmFmiZvqkeCp2n_"
-    redirectUrl: "https://3e7305205715.ngrok.io/auth/oauth2/google/callback"
+    redirectUrl: "https://26ae5ac3f657.ngrok.io/auth/oauth2/facebook/callback"
   facebook:
     clientID: "536162860767446"
     clientSecret: "6f4846f480c96a7fe19ecb5824b71a18"
-    redirectUrl: "https://3e7305205715.ngrok.io/auth/oauth2/facebook/callback"
+    redirectUrl: "https://26ae5ac3f657.ngrok.io/auth/oauth2/facebook/callback"

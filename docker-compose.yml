@@ -1,8 +1,32 @@
 version: '3.3'
 services:
+  proxy:
+    container_name: "proxy"
+    image: "nginxproxy/nginx-proxy"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    restart: always
+  acme:
+    container_name: "acme"
+    image: "nginxproxy/acme-companion"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=globallinkliberty@gmail.com
+    restart: always
   api:
-    container_name: 'infoblogserver'
-    build: '.'
+    container_name: "infoblogserver"
+    build: "."
     ports:
       - 3000:8955
     command: bash -c "go run ./cmd/server"
@@ -15,7 +39,7 @@ services:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
-    container_name: 'infoblogdb'
+    container_name: "infoblogdb"
     ports:
       - 3306:3306
     environment:
@@ -26,7 +50,7 @@ services:
   redis:
     image: redis
     restart: always
-    container_name: 'infoblogredis'
+    container_name: "infoblogredis"
     ports:
       - 127.0.0.1:6379:6379
   adminer:
@@ -34,3 +58,8 @@ services:
     restart: always
     ports:
       - 8888:8080
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:

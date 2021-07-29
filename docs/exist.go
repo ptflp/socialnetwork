@@ -4,8 +4,6 @@ import "gitlab.com/InfoBlogFriends/server/request"
 
 // swagger:route POST /exist/email exist existEmailRequest
 // Проверка на существование почты.
-// security:
-//   - Bearer: []
 // responses:
 //   200: existEmailResponse
 
@@ -23,8 +21,6 @@ type existEmailParams struct {
 
 // swagger:route POST /exist/nickname exist existNicknameRequest
 // Проверка на существование никнейма.
-// security:
-//   - Bearer: []
 // responses:
 //   200: existNicknameResponse
 
