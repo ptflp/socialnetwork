@@ -14,7 +14,7 @@ import (
 const (
 	createFile = "INSERT INTO files (type, foreign_id, dir, name, user_id, user_uuid, uuid, foreign_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 	updateFile = "UPDATE files SET type = ?, foreign_id = ?, dir = ?, name = ?, user_id = ? WHERE id = ?"
-	activeFile = "UPDATE files SET active = ? WHERE id = ?"
+	activeFile = "UPDATE files SET active = ? WHERE uuid = ?"
 
 	selectFile     = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE active = 1 AND id = ?"
 	findAllFile    = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE active = 1 AND type = ? AND foreign_id = ?"
@@ -30,19 +30,44 @@ func NewFilesRepository(db *sqlx.DB) infoblog.FileRepository {
 }
 
 func (f *filesRepository) Create(ctx context.Context, p *infoblog.File) (int64, error) {
-	res, err := f.db.ExecContext(ctx, createFile, p.Type, p.ForeignID, p.Dir, p.Name, p.UserID, p.UserUUID, p.UUID, p.ForeignUUID)
+	createFields, err := infoblog.GetCreateFields("files")
 	if err != nil {
 		return 0, err
 	}
+	createFieldsPointers := infoblog.GetFieldsPointers(p, "create")
 
-	return res.LastInsertId()
+	queryRaw := sq.Insert("files").Columns(createFields...).Values(createFieldsPointers...)
+	query, args, err := queryRaw.ToSql()
+
+	return f.db.MustExecContext(ctx, query, args...).RowsAffected()
 }
 
-func (f *filesRepository) Update(ctx context.Context, p infoblog.File) error {
-	if p.ID < 1 {
-		return errors.New("repository update wrong file id")
+func (f *filesRepository) Update(ctx context.Context, file infoblog.File) error {
+	if len(file.UUID) != 40 {
+		return errors.New("wrong file uuid on update")
 	}
-	return f.db.QueryRowContext(ctx, updateFile, p.Type, p.ForeignID, p.Dir, p.Name, p.UserID).Err()
+	updateFields, err := infoblog.GetUpdateFields("files")
+	if err != nil {
+		return err
+	}
+	updateFieldsPointers := infoblog.GetFieldsPointers(&file, "update")
+
+	queryRaw := sq.Update("files").Where(sq.Eq{"uuid": file.UUID})
+	for i := range updateFields {
+		queryRaw = queryRaw.Set(updateFields[i], updateFieldsPointers[i])
+	}
+
+	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return err
+	}
+	res, err := f.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	_, err = res.RowsAffected()
+
+	return err
 }
 
 func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post infoblog.Post) error {
@@ -70,25 +95,43 @@ func (f *filesRepository) Delete(ctx context.Context, p infoblog.File) error {
 	if p.ID < 1 {
 		return errors.New("repository delete wrong file id")
 	}
-	return f.db.QueryRowContext(ctx, activeFile, 0, p.ID).Err()
+	return f.db.QueryRowContext(ctx, activeFile, 0, p.UUID).Err()
 }
 
-func (f *filesRepository) Find(ctx context.Context, id int64) (infoblog.File, error) {
-	if id < 1 {
-		return infoblog.File{}, errors.New("repository find wrong file id")
+func (f *filesRepository) Find(ctx context.Context, file infoblog.File) (infoblog.File, error) {
+	fields, err := infoblog.GetFields("files")
+	if err != nil {
+		return infoblog.File{}, err
 	}
-	file := infoblog.File{}
-	err := f.db.QueryRowContext(ctx, selectFile, id).Scan(&file)
+
+	queryRaw := sq.Select(fields...).From("files").Where(sq.Eq{"uuid": file.UUID})
+	query, args, err := queryRaw.ToSql()
+
+	file = infoblog.File{}
+	err = f.db.QueryRowxContext(ctx, query, args...).StructScan(&file)
 
 	return file, err
 }
 
-func (f *filesRepository) FindAll(ctx context.Context, postID int64) ([]infoblog.File, error) {
-	return f.FindByTypeFID(ctx, 1, postID)
+func (f *filesRepository) FindAll(ctx context.Context, postUUID string) ([]infoblog.File, error) {
+	return f.FindByTypeFUUID(ctx, 1, postUUID)
 }
 
-func (f *filesRepository) FindByTypeFID(ctx context.Context, typeID int64, foreignID int64) ([]infoblog.File, error) {
-	rows, err := f.db.QueryContext(ctx, findAllFile, typeID, foreignID)
+func (f *filesRepository) FindByTypeFUUID(ctx context.Context, typeID int64, foreignUUID string) ([]infoblog.File, error) {
+
+	fields, err := infoblog.GetFields("files")
+	if err != nil {
+		return nil, err
+	}
+
+	queryRaw := sq.Select(fields...).From("files").Where(sq.Eq{"type": typeID, "foreign_uuid": foreignUUID})
+	query, args, err := queryRaw.ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := f.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +142,7 @@ func (f *filesRepository) FindByTypeFID(ctx context.Context, typeID int64, forei
 
 	for rows.Next() {
 		file := infoblog.File{}
-		err = rows.Scan(&file.ID, file.Type, file.ForeignID, file.Dir, file.Name, file.Active, file.UserID, file.CreatedAt, file.UpdatedAt)
+		err = rows.StructScan(&file)
 		if err != nil {
 			return nil, err
 		}
@@ -110,18 +153,23 @@ func (f *filesRepository) FindByTypeFID(ctx context.Context, typeID int64, forei
 	return files, nil
 }
 
-func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []int) ([]infoblog.File, error) {
-	if len(postsIDs) < 1 {
-		return nil, nil
+func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) ([]infoblog.File, error) {
+	fields, err := infoblog.GetFields("files")
+	if err != nil {
+		return nil, err
 	}
-	query, args, err := sqlx.In(findByPostsIDs, postsIDs)
+
+	queryRaw := sq.Select(fields...).From("files").Where(sq.Eq{"active": 1, "type": 1})
+	query, args, err := queryRaw.ToSql()
+	query = query + " AND foreign_uuid IN (?)"
+	query, args, err = sqlx.In(query, 1, 1, postsIDs)
 
 	if err != nil {
 		return nil, err
 	}
 	// sqlx.In returns queries with the `?` bindvar, we can rebind it for our backend
 	query = f.db.Rebind(query)
-	rows, err := f.db.Query(query, args...)
+	rows, err := f.db.Queryx(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +179,7 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []int) ([]
 
 	for rows.Next() {
 		file := infoblog.File{}
-		err = rows.Scan(&file.ID, &file.Type, &file.ForeignID, &file.Dir, &file.Name, &file.Active, &file.UserID, &file.UUID, &file.CreatedAt, &file.UpdatedAt)
+		err = rows.StructScan(&file)
 		if err != nil {
 			return nil, err
 		}

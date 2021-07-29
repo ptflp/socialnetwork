@@ -132,16 +132,8 @@ func (a *postsController) FeedMy() http.HandlerFunc {
 			return
 		}
 
-		var postsListReq request.PostsFeedReq
-		err = Decode(r, &postsListReq)
-		if err != nil {
-			a.ErrorBadRequest(w, err)
-			return
-		}
-
 		req := request.PostsFeedUserReq{}
-
-		err = a.MapStructs(&req, &postsListReq)
+		err = Decode(r, &req)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
 			return

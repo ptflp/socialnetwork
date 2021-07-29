@@ -56,7 +56,6 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFil
 	// 3. update file info, save to db
 	file.Active = 1
 	file.Type = 1
-	file.UserID = u.ID
 	file.UserUUID = u.UUID
 
 	err = p.file.SaveDB(ctx, &file)
@@ -159,7 +158,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 	}
 
 	for i := range files {
-		id := postIDIndexMap[files[i].ForeignID]
+		id := postIDIndexMap[files[i].ForeignUUID]
 		posts[id].Files = append(posts[id].Files, files[i])
 	}
 
@@ -224,7 +223,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 	}
 
 	for i := range files {
-		id := postIDIndexMap[files[i].ForeignID]
+		id := postIDIndexMap[files[i].ForeignUUID]
 		posts[id].Files = append(posts[id].Files, files[i])
 	}
 

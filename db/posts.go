@@ -74,7 +74,7 @@ func (pr *postsRepository) Find(ctx context.Context, p infoblog.Post) (infoblog.
 	}, nil
 }
 
-func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limit int64, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {
+func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limit int64, offset int64) ([]infoblog.Post, map[string]int, []string, error) {
 	fields, err := infoblog.GetFields("posts")
 	if err != nil {
 		return nil, nil, nil, err
@@ -109,8 +109,8 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 	defer rows.Close()
 
 	postDataRes := make([]infoblog.Post, 0, limit)
-	postIdIndexMap := make(map[int64]int)
-	postsIDs := make([]int, 0, limit)
+	postIdIndexMap := make(map[string]int)
+	postsIDs := make([]string, 0, limit)
 
 	for rows.Next() {
 		post := infoblog.Post{}
@@ -123,15 +123,15 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 			return nil, nil, nil, err
 		}
 
-		postsIDs = append(postsIDs, int(post.ID))
+		postsIDs = append(postsIDs, post.UUID)
 		postDataRes = append(postDataRes, post)
-		postIdIndexMap[post.ID] = len(postDataRes) - 1
+		postIdIndexMap[post.UUID] = len(postDataRes) - 1
 	}
 
 	return postDataRes, postIdIndexMap, postsIDs, nil
 }
 
-func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[int64]int, []int, error) {
+func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[string]int, []string, error) {
 	fields, err := infoblog.GetFields("posts")
 	if err != nil {
 		return nil, nil, nil, err
@@ -166,8 +166,8 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 	defer rows.Close()
 
 	postDataRes := make([]infoblog.Post, 0, limit)
-	postIdIndexMap := make(map[int64]int)
-	postsIDs := make([]int, 0, limit)
+	postUUIDIndexMap := make(map[string]int)
+	postsUUID := make([]string, 0, limit)
 
 	for rows.Next() {
 		post := infoblog.Post{}
@@ -180,12 +180,12 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 			return nil, nil, nil, err
 		}
 
-		postsIDs = append(postsIDs, int(post.ID))
+		postsUUID = append(postsUUID, post.UUID)
 		postDataRes = append(postDataRes, post)
-		postIdIndexMap[post.ID] = len(postDataRes) - 1
+		postUUIDIndexMap[post.UUID] = len(postDataRes) - 1
 	}
 
-	return postDataRes, postIdIndexMap, postsIDs, nil
+	return postDataRes, postUUIDIndexMap, postsUUID, nil
 }
 
 func (pr *postsRepository) CountRecent(ctx context.Context) (int64, error) {

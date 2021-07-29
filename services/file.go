@@ -89,6 +89,6 @@ func (f *File) UpdatePostUUID(ctx context.Context, ids []string, p infoblog.Post
 	return f.fileRep.UpdatePostUUID(ctx, ids, p)
 }
 
-func (f *File) GetFilesPostsIDs(ctx context.Context, postsIDs []int) ([]infoblog.File, error) {
+func (f *File) GetFilesPostsIDs(ctx context.Context, postsIDs []string) ([]infoblog.File, error) {
 	return f.fileRep.FindByPostsIDs(ctx, postsIDs)
 }
