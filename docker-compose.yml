@@ -3,6 +3,8 @@ services:
   nginx-proxy:
     container_name: "nginx-proxy"
     image: "nginxproxy/nginx-proxy"
+    networks:
+        - skynet
     ports:
       - 80:80
       - 443:443
@@ -15,6 +17,8 @@ services:
   acme:
     container_name: "acme"
     image: "nginxproxy/acme-companion"
+    networks:
+      - skynet
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -67,3 +71,8 @@ volumes:
   vhost:
   html:
   acme:
+
+networks:
+  skynet:
+    external:
+      name: skynet
