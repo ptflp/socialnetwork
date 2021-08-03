@@ -512,6 +512,36 @@
         }
       }
     },
+    "/posts/get": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Лайк поста.",
+        "operationId": "postGetRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostUUIDReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postGetResponse"
+          }
+        }
+      }
+    },
     "/posts/like": {
       "post": {
         "security": [
@@ -531,7 +561,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostLikeReq"
+              "$ref": "#/definitions/PostUUIDReq"
             }
           }
         ],
@@ -1096,7 +1126,7 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
-    "PostLikeReq": {
+    "PostUUIDReq": {
       "type": "object",
       "properties": {
         "post_id": {
@@ -1576,6 +1606,12 @@
       }
     },
     "postFileUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "postGetResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

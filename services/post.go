@@ -140,6 +140,43 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	return postDataRes, nil
 }
 
+func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDataResponse, error) {
+	var err error
+	postDataRes := request.PostDataResponse{}
+	post := infoblog.Post{}
+	post.UUID = req.UUID
+	post, err = p.post.Find(ctx, post)
+	if err != nil {
+		return postDataRes, err
+	}
+
+	filesRaw, err := p.file.GetFilesPostsIDs(ctx, []string{req.UUID})
+	if err != nil {
+		return postDataRes, err
+	}
+
+	files := make([]request.PostFileData, 0, len(filesRaw))
+
+	for i := range filesRaw {
+		file := request.PostFileData{
+			Link: "/" + path.Join(filesRaw[i].Dir, filesRaw[i].Name),
+			UUID: filesRaw[i].UUID,
+		}
+		files = append(files, file)
+	}
+	err = p.MapStructs(&postDataRes, &post.PostEntity)
+	postDataRes.Files = files
+	var u infoblog.User
+	u.UUID = post.UserUUID
+	u, err = p.services.User.userRepository.Find(ctx, u)
+	err = p.MapStructs(&postDataRes.User, &u)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	return postDataRes, nil
+}
+
 func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (request.PostsFeedData, error) {
 	posts, postIDIndexMap, postsIDs, err := p.post.FindAllRecent(ctx, req.Limit, req.Offset)
 	if err != nil {
@@ -273,7 +310,7 @@ func (p *Post) CountByUser(ctx context.Context, user infoblog.User) (int64, erro
 	return p.post.CountByUser(ctx, user)
 }
 
-func (p *Post) Like(ctx context.Context, req request.PostLikeReq) error {
+func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
 	u, ok := ctx.Value("user").(*infoblog.User)
 	if !ok {
 		return fmt.Errorf("get user from request context err")

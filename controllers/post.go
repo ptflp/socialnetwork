@@ -63,6 +63,32 @@ func (a *postsController) Create() http.HandlerFunc {
 	}
 }
 
+func (a *postsController) Get() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var postAddReq request.PostUUIDReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		post, err := a.post.Get(r.Context(), postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    post,
+		})
+	}
+}
+
 func (a *postsController) UploadFile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseMultipartForm(100 << 20)
@@ -177,7 +203,7 @@ func (a *postsController) FeedUser() http.HandlerFunc {
 
 func (a *postsController) Like() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var postLikeReq request.PostLikeReq
+		var postLikeReq request.PostUUIDReq
 		err := Decode(r, &postLikeReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
