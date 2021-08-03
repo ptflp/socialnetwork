@@ -125,8 +125,6 @@ type oauthStateParams struct {
 
 // swagger:route GET /auth/oauth2/facebook/login auth FacebookLoginRequest
 // Авторизация с помощью фэйсбук.
-// security:
-//   - Bearer: []
 // responses:
 //   200: FacebookLoginResponse
 
@@ -138,8 +136,6 @@ type facebookLoginResponse struct {
 
 // swagger:route GET /auth/oauth2/google/login auth GoogleLoginRequest
 // Авторизация с помощью гугл.
-// security:
-//   - Bearer: []
 // responses:
 //   200: GoogleLoginResponse
 
