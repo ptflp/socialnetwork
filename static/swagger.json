@@ -134,13 +134,6 @@
     },
     "/auth/oauth2/facebook/login": {
       "get": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
         "tags": [
           "auth"
         ],
@@ -155,13 +148,6 @@
     },
     "/auth/oauth2/google/login": {
       "get": {
-        "security": [
-          {
-            "Bearer": [
-              "[]"
-            ]
-          }
-        ],
         "tags": [
           "auth"
         ],
