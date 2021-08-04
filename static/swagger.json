@@ -252,7 +252,7 @@
         }
       }
     },
-    "/people/id": {
+    "/people/get": {
       "post": {
         "security": [
           {

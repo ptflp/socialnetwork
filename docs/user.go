@@ -53,7 +53,7 @@ type userListResponse struct {
 	Body request.Response
 }
 
-// swagger:route POST /people/id people peopleIDRequest
+// swagger:route POST /people/get people peopleIDRequest
 // Получить пользователя по никнейму или айди.
 // security:
 //   - Bearer: []
