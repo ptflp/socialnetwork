@@ -249,6 +249,29 @@
         }
       }
     },
+    "/expose/feed/recommends": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "summary": "Получение ленты рекомендации.",
+        "operationId": "publicFeedRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostsFeedReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/publicFeedResponse"
+          }
+        }
+      }
+    },
     "/people/get": {
       "post": {
         "security": [
@@ -837,29 +860,6 @@
         "responses": {
           "200": {
             "$ref": "#/responses/avatarUploadResponse"
-          }
-        }
-      }
-    },
-    "/public/feed/recommends": {
-      "post": {
-        "tags": [
-          "posts"
-        ],
-        "summary": "Получение ленты рекомендации.",
-        "operationId": "publicFeedRequest",
-        "parameters": [
-          {
-            "name": "Body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/PostsFeedReq"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/publicFeedResponse"
           }
         }
       }

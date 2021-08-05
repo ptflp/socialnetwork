@@ -133,7 +133,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 	})
 
-	r.Route("/public", func(r chi.Router) {
+	r.Route("/expose", func(r chi.Router) {
 		r.Route("/feed", func(r chi.Router) {
 			r.Post("/recommends", posts.FeedRecent())
 		})
