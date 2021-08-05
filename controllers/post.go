@@ -176,12 +176,7 @@ func (a *postsController) UploadFile() http.HandlerFunc {
 
 func (a *postsController) FeedRecent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := extractUser(r)
-		if err != nil {
-			a.ErrorBadRequest(w, err)
-			return
-		}
-
+		var err error
 		var postsListReq request.PostsFeedReq
 		err = Decode(r, &postsListReq)
 		if err != nil {
