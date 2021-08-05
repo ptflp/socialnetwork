@@ -453,6 +453,66 @@
         }
       }
     },
+    "/posts/feed/recommends": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Получение ленты рекомендации.",
+        "operationId": "postsFeedRecommendsRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostsFeedReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postsFeedRecommendsResponse"
+          }
+        }
+      }
+    },
+    "/posts/feed/subscribed": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Получение ленты своих подписок.",
+        "operationId": "postsFeedSubscribedRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostsFeedReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postsFeedSubscribedResponse"
+          }
+        }
+      }
+    },
     "/posts/feed/user": {
       "post": {
         "security": [
@@ -1635,7 +1695,19 @@
         "$ref": "#/definitions/PostsFeedResponse"
       }
     },
+    "postsFeedRecommendsResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostsFeedResponse"
+      }
+    },
     "postsFeedResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostsFeedResponse"
+      }
+    },
+    "postsFeedSubscribedResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/PostsFeedResponse"

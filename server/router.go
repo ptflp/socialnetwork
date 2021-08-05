@@ -127,8 +127,8 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Route("/feed", func(r chi.Router) {
 			r.Post("/my", posts.FeedMy())
 			r.Post("/recent", posts.FeedRecent())
-
 			r.Get("/subscribed", posts.FeedRecent())
+			r.Get("/recommends", posts.FeedRecent())
 			r.Post("/user", posts.FeedUser())
 		})
 	})

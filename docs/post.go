@@ -136,3 +136,41 @@ type postGetParams struct {
 	// in:body
 	Body request.PostUUIDReq
 }
+
+// swagger:route POST /posts/feed/subscribed posts postsFeedSubscribedRequest
+// Получение ленты своих подписок.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postsFeedSubscribedResponse
+
+// swagger:response postsFeedSubscribedResponse
+type postsFeedSubscribedResponse struct {
+	// in:body
+	Body request.PostsFeedResponse
+}
+
+// swagger:parameters postsFeedSubscribedRequest
+type postsFeedSubscribedParams struct {
+	// in:body
+	Body request.PostsFeedReq
+}
+
+// swagger:route POST /posts/feed/recommends posts postsFeedRecommendsRequest
+// Получение ленты рекомендации.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postsFeedRecommendsResponse
+
+// swagger:response postsFeedRecommendsResponse
+type postsFeedRecommendsResponse struct {
+	// in:body
+	Body request.PostsFeedResponse
+}
+
+// swagger:parameters postsFeedRecommendsRequest
+type postsFeedRecommendsParams struct {
+	// in:body
+	Body request.PostsFeedReq
+}
