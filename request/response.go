@@ -65,6 +65,7 @@ type PostDataResponse struct {
 	Files  []PostFileData `json:"files"`
 	User   UserData       `json:"user"`
 	Counts PostCountData  `json:"counts"`
+	Price  float64        `json:"price"`
 }
 
 type PostFileData struct {
