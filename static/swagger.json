@@ -300,6 +300,48 @@
         }
       }
     },
+    "/people/list/recommends": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "people"
+        ],
+        "summary": "Лист пользователей.",
+        "operationId": "userRecommendsRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userRecommendsResponse"
+          }
+        }
+      }
+    },
+    "/people/list/subscribed": {
+      "get": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "people"
+        ],
+        "summary": "Лист пользователей.",
+        "operationId": "userSubscribedListRequest",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userSubscribedListResponse"
+          }
+        }
+      }
+    },
     "/people/subscribe": {
       "post": {
         "security": [
@@ -1752,7 +1794,19 @@
         "$ref": "#/definitions/Response"
       }
     },
+    "userRecommendsResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
     "userSubscribeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "userSubscribedListResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

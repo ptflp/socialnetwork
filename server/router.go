@@ -127,19 +127,26 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Route("/feed", func(r chi.Router) {
 			r.Post("/my", posts.FeedMy())
 			r.Post("/recent", posts.FeedRecent())
-			r.Get("/subscribed", posts.FeedRecent())
-			r.Get("/recommends", posts.FeedRecent())
+			r.Post("/subscribed", posts.FeedRecent())
+			r.Post("/recommends", posts.FeedRecent())
 			r.Post("/user", posts.FeedUser())
 		})
 	})
 
 	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
+	// ./docs/user.go
 	r.Route("/people", func(r chi.Router) {
 		r.Use(token.Check)
 		r.Post("/subscribe", users.Subscribe())
 		r.Post("/unsubscribe", users.Unsubscribe())
-		r.Get("/list", users.List())
 		r.Post("/get", users.Get())
+		r.Get("/list", users.List())
+		r.Get("/recommends", users.List())
+		r.Route("/list", func(r chi.Router) {
+			r.Get("/", users.List())
+			r.Get("/subscribed", users.List())
+			r.Get("/recommends", users.List())
+		})
 	})
 
 	r.Route("/recover", func(r chi.Router) {

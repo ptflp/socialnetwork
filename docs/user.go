@@ -71,3 +71,29 @@ type peopleIDParams struct {
 	// in:body
 	Body request.UserIDNickRequest
 }
+
+// swagger:route GET /people/list/recommends people userRecommendsRequest
+// Лист пользователей.
+// security:
+//   - Bearer: []
+// responses:
+//   200: userRecommendsResponse
+
+// swagger:response userRecommendsResponse
+type userRecommendsResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:route GET /people/list/subscribed people userSubscribedListRequest
+// Лист пользователей.
+// security:
+//   - Bearer: []
+// responses:
+//   200: userSubscribedListResponse
+
+// swagger:response userSubscribedListResponse
+type userSubscribedListResponse struct {
+	// in:body
+	Body request.Response
+}
