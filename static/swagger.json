@@ -6,12 +6,9 @@
   "produces": [
     "application/json"
   ],
-  "schemes": [
-    "https"
-  ],
   "swagger": "2.0",
   "info": {
-    "description": "Documentation of infoblog API.",
+    "description": "Documentation of infoblog API.\n\nSchemes:\nhttp\nhttps",
     "title": "infoblog.",
     "version": "1.0.0"
   },

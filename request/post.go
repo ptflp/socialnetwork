@@ -9,6 +9,12 @@ type PostCreateReq struct {
 	Price       *float64 `json:"price"`
 }
 
+type PostUpdateReq struct {
+	Description string   `json:"description"`
+	Price       *float64 `json:"price"`
+	UUID        string   `json:"post_id"`
+}
+
 type PostsFeedReq struct {
 	Limit  int64 `json:"limit"`
 	Offset int64 `json:"offset"`
