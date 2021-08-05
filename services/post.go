@@ -140,6 +140,43 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	return postDataRes, nil
 }
 
+func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
+	u, err := extractUser(ctx)
+	var post infoblog.Post
+	post.UUID = req.UUID
+	post, err = p.post.Find(ctx, post)
+	if err != nil {
+		return err
+	}
+
+	if post.UserUUID != u.UUID {
+		return fmt.Errorf("permission denied")
+	}
+
+	if req.Price != nil {
+		post.Price = infoblog.NewNullFloat64(*req.Price)
+	}
+	post.Body = req.Body
+
+	return p.post.Update(ctx, post)
+}
+
+func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
+	u, err := extractUser(ctx)
+	var post infoblog.Post
+	post.UUID = req.UUID
+	post, err = p.post.Find(ctx, post)
+	if err != nil {
+		return err
+	}
+
+	if post.UserUUID != u.UUID {
+		return fmt.Errorf("permission denied")
+	}
+
+	return p.post.Delete(ctx, post)
+}
+
 func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDataResponse, error) {
 	var err error
 	postDataRes := request.PostDataResponse{}

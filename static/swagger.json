@@ -432,6 +432,36 @@
         }
       }
     },
+    "/posts/delete": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Удаление поста по post_id.",
+        "operationId": "postDeleteRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostUUIDReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postDeleteResponse"
+          }
+        }
+      }
+    },
     "/posts/feed/my": {
       "post": {
         "security": [
@@ -623,7 +653,7 @@
         "tags": [
           "posts"
         ],
-        "summary": "Лайк поста.",
+        "summary": "Получение поста по post_id.",
         "operationId": "postGetRequest",
         "parameters": [
           {
@@ -667,6 +697,36 @@
         "responses": {
           "200": {
             "$ref": "#/responses/postLikeResponse"
+          }
+        }
+      }
+    },
+    "/posts/update": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "posts"
+        ],
+        "summary": "Обновление данных поста по post_id.",
+        "operationId": "postUpdateRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostUpdateReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postUpdateResponse"
           }
         }
       }
@@ -1235,6 +1295,25 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "PostUpdateReq": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "x-go-name": "Body"
+        },
+        "post_id": {
+          "type": "string",
+          "x-go-name": "UUID"
+        },
+        "price": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Price"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "PostsFeedData": {
       "type": "object",
       "properties": {
@@ -1704,6 +1783,12 @@
         "$ref": "#/definitions/Response"
       }
     },
+    "postDeleteResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
     "postFileUploadResponse": {
       "description": "",
       "schema": {
@@ -1717,6 +1802,12 @@
       }
     },
     "postLikeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "postUpdateResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

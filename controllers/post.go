@@ -63,6 +63,58 @@ func (a *postsController) Create() http.HandlerFunc {
 	}
 }
 
+func (a *postsController) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var postAddReq request.PostUpdateReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = a.post.Update(r.Context(), postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Msg:     "пост успешно обновлен",
+		})
+	}
+}
+
+func (a *postsController) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var postAddReq request.PostUUIDReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = a.post.Delete(r.Context(), postAddReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Msg:     "пост успешно удален",
+		})
+	}
+}
+
 func (a *postsController) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var postAddReq request.PostUUIDReq

@@ -119,7 +119,7 @@ type postLikeParams struct {
 }
 
 // swagger:route POST /posts/get posts postGetRequest
-// Лайк поста.
+// Получение поста по post_id.
 // security:
 //   - Bearer: []
 // responses:
@@ -135,6 +135,44 @@ type postGetResponse struct {
 type postGetParams struct {
 	// in:body
 	Body request.PostUUIDReq
+}
+
+// swagger:route POST /posts/delete posts postDeleteRequest
+// Удаление поста по post_id.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postDeleteResponse
+
+// swagger:response postDeleteResponse
+type postDeleteResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters postDeleteRequest
+type postDeleteParams struct {
+	// in:body
+	Body request.PostUUIDReq
+}
+
+// swagger:route POST /posts/update posts postUpdateRequest
+// Обновление данных поста по post_id.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postUpdateResponse
+
+// swagger:response postUpdateResponse
+type postUpdateResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters postUpdateRequest
+type postUpdateParams struct {
+	// in:body
+	Body request.PostUpdateReq
 }
 
 // swagger:route POST /posts/feed/subscribed posts postsFeedSubscribedRequest

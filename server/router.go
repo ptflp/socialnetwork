@@ -120,8 +120,8 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/like", posts.Like())
 		r.Post("/create", posts.Create())
 		r.Post("/file/upload", posts.UploadFile())
-		r.Post("/update/{UUID}", posts.Create())
-		r.Post("/delete/{UUID}", posts.Create())
+		r.Post("/update", posts.Update())
+		r.Post("/delete", posts.Delete())
 		r.Post("/get", posts.Get())
 
 		r.Route("/feed", func(r chi.Router) {

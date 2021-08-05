@@ -14,8 +14,8 @@ import (
 
 const (
 	createPost     = "INSERT INTO posts (body, file_id, user_id, user_uuid, uuid, file_uuid, type, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-	updatePost     = "UPDATE posts SET body = ?, file_id = ?, active = ? WHERE id = ? AND user_id = ?"
-	deletePost     = "UPDATE posts SET active = ? WHERE id = ?"
+	updatePost     = "UPDATE posts SET body = ?, file_id = ?, active = ?, price = ? WHERE uuid = ?"
+	deletePost     = "UPDATE posts SET active = ? WHERE uuid = ?"
 	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1"
 )
 
@@ -36,7 +36,7 @@ func (pr *postsRepository) Update(ctx context.Context, p infoblog.Post) error {
 	if p.ID == 0 {
 		return errors.New("repository wrong post id")
 	}
-	_, err := pr.db.MustExecContext(ctx, updatePost, p.Body, p.FileID, p.Active, p.ID, p.UserID).RowsAffected()
+	_, err := pr.db.MustExecContext(ctx, updatePost, p.Body, p.FileID, p.Active, p.Price, p.UUID).RowsAffected()
 
 	return err
 }
@@ -45,7 +45,7 @@ func (pr *postsRepository) Delete(ctx context.Context, p infoblog.Post) error {
 	if p.ID == 0 {
 		return errors.New("repository wrong post id")
 	}
-	_, err := pr.db.MustExecContext(ctx, deletePost, p.Active, p.ID).RowsAffected()
+	_, err := pr.db.MustExecContext(ctx, deletePost, 0, p.UUID).RowsAffected()
 
 	return err
 }

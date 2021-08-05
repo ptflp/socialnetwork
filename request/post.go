@@ -10,9 +10,9 @@ type PostCreateReq struct {
 }
 
 type PostUpdateReq struct {
-	Description string   `json:"description"`
-	Price       *float64 `json:"price"`
-	UUID        string   `json:"post_id"`
+	Body  string   `json:"description"`
+	Price *float64 `json:"price"`
+	UUID  string   `json:"post_id"`
 }
 
 type PostsFeedReq struct {
