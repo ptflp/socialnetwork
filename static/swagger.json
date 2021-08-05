@@ -841,6 +841,29 @@
         }
       }
     },
+    "/public/feed/recommends": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "summary": "Получение ленты рекомендации.",
+        "operationId": "publicFeedRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostsFeedReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/publicFeedResponse"
+          }
+        }
+      }
+    },
     "/recover/check/phone": {
       "post": {
         "security": [
@@ -1264,6 +1287,11 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Type"
+        },
+        "price": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Price"
         },
         "user": {
           "$ref": "#/definitions/UserData"
@@ -1859,6 +1887,12 @@
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
+      }
+    },
+    "publicFeedResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/PostsFeedResponse"
       }
     },
     "recoverPasswordResponse": {

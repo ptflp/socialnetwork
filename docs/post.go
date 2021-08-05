@@ -212,3 +212,20 @@ type postsFeedRecommendsParams struct {
 	// in:body
 	Body request.PostsFeedReq
 }
+
+// swagger:route POST /public/feed/recommends posts publicFeedRequest
+// Получение ленты рекомендации.
+// responses:
+//   200: publicFeedResponse
+
+// swagger:response publicFeedResponse
+type publicFeedResponse struct {
+	// in:body
+	Body request.PostsFeedResponse
+}
+
+// swagger:parameters publicFeedRequest
+type publicFeedParams struct {
+	// in:body
+	Body request.PostsFeedReq
+}
