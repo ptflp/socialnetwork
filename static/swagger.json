@@ -284,7 +284,7 @@
         "tags": [
           "people"
         ],
-        "summary": "Получить пользователя по никнейму или айди.",
+        "summary": "Автозаполнение по никнейму.",
         "operationId": "peopleAutocompleteRequest",
         "parameters": [
           {
