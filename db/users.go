@@ -209,7 +209,7 @@ func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
 		return nil, err
 	}
 
-	query, _, err := sq.Select(fields...).From("users").ToSql()
+	query, _, err := sq.Select(fields...).From("users").Where(sq.NotEq{"nickname": "null"}).ToSql()
 	if err != nil {
 		return nil, err
 	}
