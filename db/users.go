@@ -209,13 +209,13 @@ func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
 		return nil, err
 	}
 
-	query, _, err := sq.Select(fields...).From("users").Where(sq.NotEq{"nickname": "null"}).ToSql()
+	query, args, err := sq.Select(fields...).From("users").Where(sq.NotEq{"nickname": "null"}).ToSql()
 	if err != nil {
 		return nil, err
 	}
 
 	var users []infoblog.User
-	if err = u.db.Select(&users, query); err != nil {
+	if err = u.db.Select(&users, query, args...); err != nil {
 		return nil, err
 	}
 
