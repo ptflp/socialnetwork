@@ -106,6 +106,15 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		return request.PostDataResponse{}, err
 	}
 
+	if len(req.FilesID) < 1 {
+		return request.PostDataResponse{}, fmt.Errorf("no files present")
+	}
+
+	_, err = p.file.fileRep.Find(ctx, infoblog.File{UUID: req.FilesID[0]})
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
 	err = p.file.UpdatePostUUID(ctx, req.FilesID, post)
 	// 1. save file to filesystem
 	filesRaw, err := p.file.GetByIDs(ctx, req.FilesID)
