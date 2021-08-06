@@ -97,3 +97,22 @@ type userSubscribedListResponse struct {
 	// in:body
 	Body request.Response
 }
+
+// swagger:route POST /people/autocomplete people peopleAutocompleteRequest
+// Получить пользователя по никнейму или айди.
+// security:
+//   - Bearer: []
+// responses:
+//   200: peopleAutocompleteResponse
+
+// swagger:response peopleAutocompleteResponse
+type peopleAutocompleteResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters peopleAutocompleteRequest
+type peopleAutocompleteParams struct {
+	// in:body
+	Body request.UserNicknameRequest
+}

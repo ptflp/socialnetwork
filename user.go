@@ -40,6 +40,7 @@ type UserRepository interface {
 	FindByPhone(ctx context.Context, user User) (User, error)
 	FindByEmail(ctx context.Context, user User) (User, error)
 	FindByNickname(ctx context.Context, user User) (User, error)
+	FindLikeNickname(ctx context.Context, nickname string) ([]User, error)
 	FindByFacebook(ctx context.Context, user User) (User, error)
 	FindByGoogle(ctx context.Context, user User) (User, error)
 

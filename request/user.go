@@ -6,6 +6,10 @@ type UserIDRequest struct {
 	UUID string `json:"user_id"`
 }
 
+type UserNicknameRequest struct {
+	Nickname string `json:"nickname"`
+}
+
 type UserIDNickRequest struct {
 	UUID     *string `json:"user_id"`
 	NickName *string `json:"nickname"`

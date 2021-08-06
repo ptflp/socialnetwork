@@ -143,6 +143,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	// ./docs/user.go
 	r.Route("/people", func(r chi.Router) {
 		r.Use(token.Check)
+		r.Post("/autocomplete", users.Autocomplete())
 		r.Post("/subscribe", users.Subscribe())
 		r.Post("/unsubscribe", users.Unsubscribe())
 		r.Post("/get", users.Get())

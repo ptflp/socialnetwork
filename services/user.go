@@ -258,6 +258,24 @@ func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.
 	return userData, nil
 }
 
+func (u *User) Autocomplete(ctx context.Context, req request.UserNicknameRequest) ([]request.UserData, error) {
+	users, err := u.userRepository.FindLikeNickname(ctx, req.Nickname)
+	if err != nil {
+		return nil, err
+	}
+	usersData := make([]request.UserData, 0, len(users))
+	for i := range users {
+		var userData request.UserData
+		err = u.MapStructs(&userData, users[i])
+		if err != nil {
+			return nil, err
+		}
+		usersData = append(usersData, userData)
+	}
+
+	return usersData, nil
+}
+
 func (u *User) PasswordRecover(ctx context.Context, req request.PasswordRecoverRequest) error {
 	user := infoblog.User{}
 

@@ -272,6 +272,36 @@
         }
       }
     },
+    "/people/autocomplete": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "people"
+        ],
+        "summary": "Получить пользователя по никнейму или айди.",
+        "operationId": "peopleAutocompleteRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserNicknameRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/peopleAutocompleteResponse"
+          }
+        }
+      }
+    },
     "/people/get": {
       "post": {
         "security": [
@@ -1718,6 +1748,16 @@
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "UserNicknameRequest": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "x-go-name": "Nickname"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     }
   },
   "responses": {
@@ -1800,6 +1840,12 @@
       }
     },
     "passwordResetResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "peopleAutocompleteResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

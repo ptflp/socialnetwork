@@ -141,6 +141,35 @@ func (u *usersController) Get() http.HandlerFunc {
 	}
 }
 
+func (u *usersController) Autocomplete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var nickNameReq request.UserNicknameRequest
+
+		err := u.Decode(r.Body, &nickNameReq)
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		userData, err := u.user.Autocomplete(r.Context(), nickNameReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+			Data: struct {
+				Users []request.UserData `json:"user"`
+			}{
+				Users: userData,
+			},
+		})
+	}
+}
+
 func (u *usersController) RecoverPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

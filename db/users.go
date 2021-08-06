@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -159,6 +160,26 @@ func (u *userRepository) FindByNickname(ctx context.Context, user infoblog.User)
 	}
 
 	return user, nil
+}
+
+func (u *userRepository) FindLikeNickname(ctx context.Context, nickname string) ([]infoblog.User, error) {
+	fields, err := infoblog.GetFields("users")
+	if err != nil {
+		return nil, err
+	}
+
+	query, args, err := sq.Select(fields...).From("users").Where(sq.Like{"nickname": strings.Join([]string{"%", nickname, "%"}, "")}).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var users []infoblog.User
+
+	if err := u.db.SelectContext(ctx, &users, query, args...); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (u *userRepository) FindByFacebook(ctx context.Context, user infoblog.User) (infoblog.User, error) {
