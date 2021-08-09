@@ -72,9 +72,17 @@ func (a *fileController) GetFile() http.HandlerFunc {
 		}
 		//Get content type of file
 		FileContentType := http.DetectContentType(FileHeader)
+		//Get the file size
+		FileStat, _ := fileRaw.Stat()
+		FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get
+		//Send the headers
+		w.Header().Set("Content-Disposition", "inline;")
+		w.Header().Set("Content-Type", FileContentType)
+		w.Header().Set("Content-Length", FileSize)
 
 		if file.Type == services.FileTypePost {
 			if a.post.CheckFilePermission(r.Context(), file) {
+				_, err = fileRaw.Seek(0, 0)
 				_, _ = io.Copy(w, fileRaw)
 				return
 			}
@@ -97,13 +105,6 @@ func (a *fileController) GetFile() http.HandlerFunc {
 
 				return
 			}
-			//Get the file size
-			FileStat, _ := fileRaw.Stat()
-			FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get
-			//Send the headers
-			w.Header().Set("Content-Disposition", "inline;")
-			w.Header().Set("Content-Type", FileContentType)
-			w.Header().Set("Content-Length", FileSize)
 			//We read 512 bytes from the file already, so we reset the offset back to 0
 			_, err = fileRaw.Seek(0, 0)
 			_, _ = io.Copy(w, fileRaw)

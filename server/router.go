@@ -71,7 +71,6 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	})
 
 	fileController := controllers.NewFileController(cmps.Responder(), services, cmps.Logger())
-	r.Get("/file/{fileID}", fileController.GetFile())
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
@@ -103,9 +102,14 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	})
 
 	token := middlewares.NewCheckToken(cmps.Responder(), cmps.JWTKeys())
+	r.Route("/file", func(r chi.Router) {
+		r.Use(token.Check)
+		r.Get("/{fileID}", fileController.GetFile())
+	})
+
 	profileController := controllers.NewProfileController(cmps.Responder(), services.User, cmps.Logger())
 	r.Route("/profile", func(r chi.Router) {
-		r.Use(token.Check)
+		r.Use(token.CheckStrict)
 		r.Post("/update", profileController.Update())
 		r.Patch("/update", profileController.Update())
 		r.Get("/get", profileController.GetProfile())
@@ -119,7 +123,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 
 	posts := controllers.NewPostsController(cmps.Responder(), services.User, services.File, services.Post, cmps.Logger())
 	r.Route("/posts", func(r chi.Router) {
-		r.Use(token.Check)
+		r.Use(token.CheckStrict)
 		r.Post("/like", posts.Like())
 		r.Post("/create", posts.Create())
 		r.Post("/file/upload", posts.UploadFile())
@@ -145,7 +149,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
 	// ./docs/user.go
 	r.Route("/people", func(r chi.Router) {
-		r.Use(token.Check)
+		r.Use(token.CheckStrict)
 		r.Post("/autocomplete", users.Autocomplete())
 		r.Post("/subscribe", users.Subscribe())
 		r.Post("/unsubscribe", users.Unsubscribe())
@@ -172,7 +176,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 
 	r.Route("/system", func(r chi.Router) {
 		r.Use(middleware.Timeout(200 * time.Millisecond))
-		r.Use(token.Check)
+		r.Use(token.CheckStrict)
 		r.Get("/config", func(w http.ResponseWriter, r *http.Request) {
 			cmps.Responder().SendJSON(w, cmps.Config())
 		})

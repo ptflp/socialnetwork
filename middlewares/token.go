@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	infoblog "gitlab.com/InfoBlogFriends/server"
+
 	"gitlab.com/InfoBlogFriends/server/session"
 
 	"gitlab.com/InfoBlogFriends/server/respond"
@@ -22,7 +24,7 @@ func NewCheckToken(responder respond.Responder, jwt *session.JWTKeys) *Token {
 	}
 }
 
-func (t *Token) Check(next http.Handler) http.Handler {
+func (t *Token) CheckStrict(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u, err := t.jwt.ExtractAccessToken(r)
 		if err != nil && (err.Error() == "token expired" || err.Error() == "Token is expired") {
@@ -32,6 +34,17 @@ func (t *Token) Check(next http.Handler) http.Handler {
 		if err != nil {
 			t.ErrorForbidden(w, err)
 			return
+		}
+		ctx := context.WithValue(r.Context(), "user", u)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (t *Token) Check(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u, err := t.jwt.ExtractAccessToken(r)
+		if err != nil {
+			u = &infoblog.User{}
 		}
 		ctx := context.WithValue(r.Context(), "user", u)
 		next.ServeHTTP(w, r.WithContext(ctx))

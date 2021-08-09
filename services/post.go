@@ -410,19 +410,19 @@ func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
 }
 
 func (p *Post) CheckFilePermission(ctx context.Context, file infoblog.File) bool {
-	subscriber, err := extractUser(ctx)
-	if err != nil {
-		return false
-	}
 	var post infoblog.Post
 	post.UUID = file.ForeignUUID
-	post, err = p.post.Find(ctx, post)
+	post, err := p.post.Find(ctx, post)
 	if err != nil {
 		return false
 	}
 
 	if post.Type == PostTypeFree {
 		return true
+	}
+	subscriber, err := extractUser(ctx)
+	if err != nil || len(subscriber.UUID) != 40 {
+		return false
 	}
 
 	if post.UserUUID == subscriber.UUID {
