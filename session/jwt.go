@@ -235,7 +235,7 @@ func (j *JWTKeys) ExtractAccessToken(r *http.Request) (*infoblog.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor, func(token *jwt.Token) (interface{}, error) {
+	token, err := request.ParseFromRequest(r, request.OAuth2Extractor, func(token *jwt.Token) (interface{}, error) {
 		return verifyKey, nil
 	})
 	if err != nil {
