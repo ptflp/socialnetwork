@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/go-chi/chi/v5 v5.0.3
 	github.com/go-chi/cors v1.2.0
 	github.com/go-redis/redis/v8 v8.10.0

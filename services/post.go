@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"path"
 	"strings"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/utils"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
@@ -17,16 +18,23 @@ import (
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
+const (
+	PostTypeFree = iota
+	PostTypeSubscribe
+	PostTypeForPrice
+)
+
 type Post struct {
-	services *Services
-	file     *File
-	post     infoblog.PostRepository
-	like     infoblog.LikeRepository
+	services   *Services
+	file       *File
+	subscribes infoblog.SubscriberRepository
+	post       infoblog.PostRepository
+	like       infoblog.LikeRepository
 	*decoder.Decoder
 }
 
 func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder, services *Services) *Post {
-	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes, services: services}
+	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes, services: services, subscribes: reps.Subscribers}
 }
 
 func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFileData, error) {
@@ -64,7 +72,7 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFil
 	}
 
 	return request.PostFileData{
-		Link: "/" + path.Join(file.Dir, file.Name),
+		Link: utils.Link(file),
 		UUID: file.UUID,
 	}, nil
 }
@@ -76,7 +84,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	}
 
 	var price infoblog.NullFloat64
-	if req.PostType == 2 {
+	if req.PostType == PostTypeForPrice {
 		if req.Price == nil {
 			return request.PostDataResponse{}, fmt.Errorf("bad price %s", req.Price)
 		}
@@ -126,7 +134,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 
 	for i := range filesRaw {
 		file := request.PostFileData{
-			Link: "/" + path.Join(filesRaw[i].Dir, filesRaw[i].Name),
+			Link: utils.Link(filesRaw[i]),
 			UUID: filesRaw[i].UUID,
 		}
 		files = append(files, file)
@@ -205,7 +213,7 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 
 	for i := range filesRaw {
 		file := request.PostFileData{
-			Link: "/" + path.Join(filesRaw[i].Dir, filesRaw[i].Name),
+			Link: utils.Link(filesRaw[i]),
 			UUID: filesRaw[i].UUID,
 		}
 		files = append(files, file)
@@ -251,7 +259,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (reques
 		postsFileData := make([]request.PostFileData, 0, req.Limit)
 		for j := range posts[i].Files {
 			postsFileData = append(postsFileData, request.PostFileData{
-				Link: "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
+				Link: utils.Link(posts[i].Files[j]),
 				UUID: posts[i].Files[j].UUID,
 			})
 		}
@@ -316,7 +324,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 		postsFileData := make([]request.PostFileData, 0, req.Limit)
 		for j := range posts[i].Files {
 			postsFileData = append(postsFileData, request.PostFileData{
-				Link: "/" + path.Join(posts[i].Files[j].Dir, posts[i].Files[j].Name),
+				Link: utils.Link(posts[i].Files[j]),
 				UUID: posts[i].Files[j].UUID,
 			})
 		}
@@ -399,4 +407,30 @@ func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
 	*pst = post
 
 	return err
+}
+
+func (p *Post) CheckFilePermission(ctx context.Context, file infoblog.File) bool {
+	subscriber, err := extractUser(ctx)
+	if err != nil {
+		return false
+	}
+	var post infoblog.Post
+	post.UUID = file.ForeignUUID
+	post, err = p.post.Find(ctx, post)
+	if err != nil {
+		return false
+	}
+
+	if post.Type == PostTypeFree {
+		return true
+	}
+
+	if post.UserUUID == subscriber.UUID {
+		return true
+	}
+
+	var user infoblog.User
+	user.UUID = post.UserUUID
+
+	return p.subscribes.CheckSubscribed(ctx, user, subscriber)
 }

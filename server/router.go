@@ -70,6 +70,9 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		http.StripPrefix("/public/", http.FileServer(http.Dir("./public"))).ServeHTTP(w, r)
 	})
 
+	fileController := controllers.NewFileController(cmps.Responder(), services, cmps.Logger())
+	r.Get("/file/{fileID}", fileController.GetFile())
+
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
 		r.Post("/email/verification", authController.EmailVerification())

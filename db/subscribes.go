@@ -56,6 +56,14 @@ func (sb *subsRepository) CountByUser(ctx context.Context, user infoblog.User) (
 	return count.Int64, err
 }
 
+func (sb *subsRepository) CheckSubscribed(ctx context.Context, user infoblog.User, subscriber infoblog.User) bool {
+	query, args, err := sq.Select("active").From("subscribes").Where(sq.Eq{"user_uuid": user.UUID, "subscriber_uuid": subscriber.UUID, "active": 1}).ToSql()
+
+	err = sb.db.QueryRowContext(ctx, query, args...).Err()
+
+	return err == nil
+}
+
 func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {
 	return &subsRepository{db: db}
 }

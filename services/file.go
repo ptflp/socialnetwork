@@ -17,6 +17,11 @@ const (
 	UploadDirectory = "./public"
 )
 
+const (
+	FileTypeNull = iota
+	FileTypePost
+)
+
 type File struct {
 	fileRep infoblog.FileRepository
 }
@@ -91,4 +96,10 @@ func (f *File) UpdatePostUUID(ctx context.Context, ids []string, p infoblog.Post
 
 func (f *File) GetFilesPostsIDs(ctx context.Context, postsIDs []string) ([]infoblog.File, error) {
 	return f.fileRep.FindByPostsIDs(ctx, postsIDs)
+}
+
+func (f *File) GetFile(ctx context.Context, fileUUID string) (infoblog.File, error) {
+	fileEnt, err := f.fileRep.Find(ctx, infoblog.File{UUID: fileUUID})
+
+	return fileEnt, err
 }
