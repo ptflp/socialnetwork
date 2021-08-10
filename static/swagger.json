@@ -261,7 +261,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostsFeedReq"
+              "$ref": "#/definitions/LimitOffsetReq"
             }
           }
         ],
@@ -354,7 +354,7 @@
       }
     },
     "/people/list/recommends": {
-      "get": {
+      "post": {
         "security": [
           {
             "Bearer": [
@@ -367,6 +367,15 @@
         ],
         "summary": "Лист пользователей.",
         "operationId": "userRecommendsRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LimitOffsetReq"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/responses/userRecommendsResponse"
@@ -374,8 +383,8 @@
         }
       }
     },
-    "/people/list/subscribed": {
-      "get": {
+    "/people/list/subscribers": {
+      "post": {
         "security": [
           {
             "Bearer": [
@@ -387,10 +396,49 @@
           "people"
         ],
         "summary": "Лист пользователей.",
-        "operationId": "userSubscribedListRequest",
+        "operationId": "userSubscribersRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LimitOffsetReq"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "$ref": "#/responses/userSubscribedListResponse"
+            "$ref": "#/responses/userSubscribersResponse"
+          }
+        }
+      }
+    },
+    "/people/list/subscribes": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "people"
+        ],
+        "summary": "Лист пользователей.",
+        "operationId": "userSubscribesRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LimitOffsetReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userSubscribesResponse"
           }
         }
       }
@@ -534,7 +582,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostsFeedReq"
+              "$ref": "#/definitions/LimitOffsetReq"
             }
           }
         ],
@@ -564,7 +612,7 @@
             "name": "FormData",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostsFeedReq"
+              "$ref": "#/definitions/LimitOffsetReq"
             }
           }
         ],
@@ -594,7 +642,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostsFeedReq"
+              "$ref": "#/definitions/LimitOffsetReq"
             }
           }
         ],
@@ -624,7 +672,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostsFeedReq"
+              "$ref": "#/definitions/LimitOffsetReq"
             }
           }
         ],
@@ -1201,6 +1249,22 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "LimitOffsetReq": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Offset"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "NicknameRequest": {
       "type": "object",
       "properties": {
@@ -1386,22 +1450,6 @@
             "$ref": "#/definitions/PostDataResponse"
           },
           "x-go-name": "Posts"
-        }
-      },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
-    },
-    "PostsFeedReq": {
-      "type": "object",
-      "properties": {
-        "limit": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Limit"
-        },
-        "offset": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Offset"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1977,7 +2025,13 @@
         "$ref": "#/definitions/Response"
       }
     },
-    "userSubscribedListResponse": {
+    "userSubscribersResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "userSubscribesResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

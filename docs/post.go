@@ -58,7 +58,7 @@ type postsFeedResponse struct {
 // swagger:parameters postsFeedRequest
 type postsFeedParams struct {
 	// in:body
-	FormData request.PostsFeedReq
+	FormData request.LimitOffsetReq
 }
 
 // swagger:route POST /posts/feed/my posts postsFeedMyRequest
@@ -77,7 +77,7 @@ type postsFeedMyResponse struct {
 // swagger:parameters postsFeedMyRequest
 type postsFeedMyParams struct {
 	// in:body
-	Body request.PostsFeedReq
+	Body request.LimitOffsetReq
 }
 
 // swagger:route POST /posts/feed/user posts postsFeedUserRequest
@@ -191,7 +191,7 @@ type postsFeedSubscribedResponse struct {
 // swagger:parameters postsFeedSubscribedRequest
 type postsFeedSubscribedParams struct {
 	// in:body
-	Body request.PostsFeedReq
+	Body request.LimitOffsetReq
 }
 
 // swagger:route POST /posts/feed/recommends posts postsFeedRecommendsRequest
@@ -210,7 +210,7 @@ type postsFeedRecommendsResponse struct {
 // swagger:parameters postsFeedRecommendsRequest
 type postsFeedRecommendsParams struct {
 	// in:body
-	Body request.PostsFeedReq
+	Body request.LimitOffsetReq
 }
 
 // swagger:route POST /expose/feed/recommends posts publicFeedRequest
@@ -227,5 +227,5 @@ type publicFeedResponse struct {
 // swagger:parameters publicFeedRequest
 type publicFeedParams struct {
 	// in:body
-	Body request.PostsFeedReq
+	Body request.LimitOffsetReq
 }

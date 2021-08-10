@@ -15,7 +15,7 @@ type PostUpdateReq struct {
 	UUID  string   `json:"post_id"`
 }
 
-type PostsFeedReq struct {
+type LimitOffsetReq struct {
 	Limit  int64 `json:"limit"`
 	Offset int64 `json:"offset"`
 }

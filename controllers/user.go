@@ -112,6 +112,31 @@ func (u *usersController) List() http.HandlerFunc {
 	}
 }
 
+func (u *usersController) TempList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var limitOffsetReq request.LimitOffsetReq
+
+		err := u.Decode(r.Body, &limitOffsetReq)
+
+		usersData, err := u.user.TempList(r.Context(), limitOffsetReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+			Data: struct {
+				Users []request.UserData `json:"users"`
+			}{
+				Users: usersData,
+			},
+		})
+	}
+}
+
 func (u *usersController) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

@@ -37,6 +37,7 @@ type UserRepository interface {
 
 	Find(ctx context.Context, user User) (User, error)
 	FindAll(ctx context.Context) ([]User, error)
+	FindLimitOffset(ctx context.Context, limit, offset uint64) ([]User, error)
 	FindByPhone(ctx context.Context, user User) (User, error)
 	FindByEmail(ctx context.Context, user User) (User, error)
 	FindByNickname(ctx context.Context, user User) (User, error)

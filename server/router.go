@@ -153,13 +153,18 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/autocomplete", users.Autocomplete())
 		r.Post("/subscribe", users.Subscribe())
 		r.Post("/unsubscribe", users.Unsubscribe())
-		r.Post("/get", users.Get())
+		r.Route("/get", func(r chi.Router) {
+			r.Post("/", users.Get())
+			r.Post("/subscribes", users.Get())
+			r.Post("/subscribers", users.Get())
+		})
 		r.Get("/list", users.List())
 		r.Get("/recommends", users.List())
 		r.Route("/list", func(r chi.Router) {
 			r.Get("/", users.List())
-			r.Get("/subscribed", users.List())
-			r.Get("/recommends", users.List())
+			r.Post("/subscribes", users.TempList())
+			r.Post("/subscribers", users.TempList())
+			r.Post("/recommends", users.TempList())
 		})
 	})
 

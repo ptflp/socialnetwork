@@ -231,6 +231,26 @@ func (u *User) List(ctx context.Context) ([]request.UserData, error) {
 	return usersData, nil
 }
 
+func (u *User) TempList(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
+	users, err := u.userRepository.FindLimitOffset(ctx, uint64(req.Limit), uint64(req.Offset))
+	if err != nil {
+		return nil, err
+	}
+
+	usersData := []request.UserData{}
+
+	for _, user := range users {
+		userData := request.UserData{}
+		err = u.MapStructs(&userData, &user)
+		if err != nil {
+			return nil, err
+		}
+		usersData = append(usersData, userData)
+	}
+
+	return usersData, nil
+}
+
 func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.UserData, error) {
 	user := infoblog.User{}
 	var err error

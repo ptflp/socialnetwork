@@ -242,3 +242,22 @@ func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
 
 	return users, nil
 }
+
+func (u *userRepository) FindLimitOffset(ctx context.Context, limit, offset uint64) ([]infoblog.User, error) {
+	fields, err := infoblog.GetFields("users")
+	if err != nil {
+		return nil, err
+	}
+
+	query, args, err := sq.Select(fields...).From("users").Limit(limit).Offset(offset).ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var users []infoblog.User
+	if err = u.db.Select(&users, query, args...); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

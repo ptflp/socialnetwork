@@ -177,7 +177,7 @@ func (a *postsController) UploadFile() http.HandlerFunc {
 func (a *postsController) FeedRecent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
-		var postsListReq request.PostsFeedReq
+		var postsListReq request.LimitOffsetReq
 		err = Decode(r, &postsListReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)

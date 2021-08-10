@@ -231,7 +231,7 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 	return postDataRes, nil
 }
 
-func (p *Post) FeedRecent(ctx context.Context, req request.PostsFeedReq) (request.PostsFeedData, error) {
+func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (request.PostsFeedData, error) {
 	posts, postIDIndexMap, postsIDs, err := p.post.FindAllRecent(ctx, req.Limit, req.Offset)
 	if err != nil {
 		return request.PostsFeedData{}, err

@@ -72,7 +72,7 @@ type peopleIDParams struct {
 	Body request.UserIDNickRequest
 }
 
-// swagger:route GET /people/list/recommends people userRecommendsRequest
+// swagger:route Post /people/list/recommends people userRecommendsRequest
 // Лист пользователей.
 // security:
 //   - Bearer: []
@@ -85,17 +85,48 @@ type userRecommendsResponse struct {
 	Body request.Response
 }
 
-// swagger:route GET /people/list/subscribed people userSubscribedListRequest
+// swagger:parameters userRecommendsRequest
+type userRecommendsParams struct {
+	// in:body
+	Body request.LimitOffsetReq
+}
+
+// swagger:route Post /people/list/subscribes people userSubscribesRequest
 // Лист пользователей.
 // security:
 //   - Bearer: []
 // responses:
-//   200: userSubscribedListResponse
+//   200: userSubscribesResponse
 
-// swagger:response userSubscribedListResponse
-type userSubscribedListResponse struct {
+// swagger:response userSubscribesResponse
+type userSubscribesResponse struct {
 	// in:body
 	Body request.Response
+}
+
+// swagger:parameters userSubscribesRequest
+type userSubscribesParams struct {
+	// in:body
+	Body request.LimitOffsetReq
+}
+
+// swagger:route Post /people/list/subscribers people userSubscribersRequest
+// Лист пользователей.
+// security:
+//   - Bearer: []
+// responses:
+//   200: userSubscribersResponse
+
+// swagger:response userSubscribersResponse
+type userSubscribersResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters userSubscribersRequest
+type userSubscribersParams struct {
+	// in:body
+	Body request.LimitOffsetReq
 }
 
 // swagger:route POST /people/autocomplete people peopleAutocompleteRequest
