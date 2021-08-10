@@ -118,6 +118,9 @@ func (u *usersController) TempList() http.HandlerFunc {
 		var limitOffsetReq request.LimitOffsetReq
 
 		err := u.Decode(r.Body, &limitOffsetReq)
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+		}
 
 		usersData, err := u.user.TempList(r.Context(), limitOffsetReq)
 

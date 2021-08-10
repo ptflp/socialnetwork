@@ -115,6 +115,5 @@ func (a *fileController) GetFile() http.HandlerFunc {
 		}
 
 		_, _ = io.Copy(w, fileRaw)
-		return
 	}
 }

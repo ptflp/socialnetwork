@@ -186,6 +186,9 @@ func (a *authController) Oauth2State() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var stateReq request.StateRequest
 		err := json.NewDecoder(r.Body).Decode(&stateReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+		}
 		token, err := a.authService.Oauth2Token(r.Context(), stateReq)
 		if err != nil {
 			a.SendJSON(w, request.Response{

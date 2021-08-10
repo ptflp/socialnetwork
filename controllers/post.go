@@ -6,7 +6,6 @@ import (
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
-	"github.com/gorilla/schema"
 	"gitlab.com/InfoBlogFriends/server/request"
 
 	"gitlab.com/InfoBlogFriends/server/services"
@@ -14,8 +13,6 @@ import (
 	"gitlab.com/InfoBlogFriends/server/respond"
 	"go.uber.org/zap"
 )
-
-var formDecoder = schema.NewDecoder()
 
 type postsController struct {
 	*decoder.Decoder
