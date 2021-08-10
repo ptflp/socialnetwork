@@ -120,6 +120,7 @@ func (u *usersController) TempList() http.HandlerFunc {
 		err := u.Decode(r.Body, &limitOffsetReq)
 		if err != nil {
 			u.ErrorBadRequest(w, err)
+			return
 		}
 
 		usersData, err := u.user.TempList(r.Context(), limitOffsetReq)
