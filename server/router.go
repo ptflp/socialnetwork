@@ -51,8 +51,8 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		msg.SetBody(b)
 		msg.SetReceiver("globallinkliberty@gmail.com")
 		msg.SetSubject("test")
-		msg.OpenFile(".gitignore")
-		msg.OpenFile(".env")
+		_ = msg.OpenFile(".gitignore")
+		_ = msg.OpenFile(".env")
 		err := cmps.Email().Send(msg)
 
 		cmps.Responder().SendJSON(w, request.Response{
@@ -90,7 +90,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 				r.Route("/login", func(r chi.Router) {
 					r.Use(oauth2.Redirect)
 					r.Get("/", func(writer http.ResponseWriter, r *http.Request) {
-						return
+
 					})
 				})
 				r.Route("/callback", func(r chi.Router) {
@@ -165,6 +165,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 			r.Post("/subscribes", users.TempList())
 			r.Post("/subscribers", users.TempList())
 			r.Post("/recommends", users.TempList())
+
 		})
 	})
 
