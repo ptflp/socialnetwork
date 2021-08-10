@@ -87,8 +87,17 @@ func (u *User) GetProfile(ctx context.Context) (request.UserData, error) {
 	}
 
 	postCount, err := u.post.CountByUser(ctx, user)
+	if err != nil {
+		return request.UserData{}, err
+	}
 	subsCount, err := u.subsRepository.CountByUser(ctx, user)
+	if err != nil {
+		return request.UserData{}, err
+	}
 	likesCount, err := u.likesRepository.CountByUser(ctx, user)
+	if err != nil {
+		return request.UserData{}, err
+	}
 
 	if err != nil {
 		return request.UserData{}, err
@@ -511,6 +520,9 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 	}
 
 	userData, err := u.GetUserData(user)
+	if err != nil {
+		return request.UserData{}, err
+	}
 
 	return userData, nil
 }

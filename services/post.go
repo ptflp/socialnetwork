@@ -124,6 +124,9 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	}
 
 	err = p.file.UpdatePostUUID(ctx, req.FilesID, post)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
 	// 1. save file to filesystem
 	filesRaw, err := p.file.GetByIDs(ctx, req.FilesID)
 	if err != nil {
@@ -159,6 +162,9 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 
 func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 	u, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
 	var post infoblog.Post
 	post.UUID = req.UUID
 	post, err = p.post.Find(ctx, post)
@@ -180,6 +186,9 @@ func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 
 func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
 	u, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
 	var post infoblog.Post
 	post.UUID = req.UUID
 	post, err = p.post.Find(ctx, post)
@@ -219,10 +228,16 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 		files = append(files, file)
 	}
 	err = p.MapStructs(&postDataRes, &post.PostEntity)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
 	postDataRes.Files = files
 	var u infoblog.User
 	u.UUID = post.UserUUID
 	u, err = p.services.User.userRepository.Find(ctx, u)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
 	err = p.MapStructs(&postDataRes.User, &u)
 	if err != nil {
 		return request.PostDataResponse{}, err
@@ -264,7 +279,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 			})
 		}
 
-		userData := request.UserData{}
+		var userData request.UserData
 
 		userData, err = p.services.User.GetUserData(posts[i].User)
 		if err != nil {
@@ -329,7 +344,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 			})
 		}
 
-		userData := request.UserData{}
+		var userData request.UserData
 
 		userData, err = p.services.User.GetUserData(posts[i].User)
 		if err != nil {
