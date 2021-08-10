@@ -41,6 +41,9 @@ const (
 	SocialsAuthKey = "socials:auth:%s"
 )
 
+type Provider struct{}
+type State struct{}
+
 type service struct {
 	*decoder.Decoder
 	smsProvider    providers.SMS
@@ -306,12 +309,13 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 }
 
 func (a *service) SocialCallback(ctx context.Context, state string) (string, error) {
-	u, err := extractUser(ctx)
-	if err != nil {
-		return "", err
+	var err error
+	u, ok := ctx.Value(infoblog.User{}).(*infoblog.User)
+	if !ok {
+		return "", errors.New("type assertion to user err")
 	}
 
-	provider, ok := ctx.Value("provider").(string)
+	provider, ok := ctx.Value(Provider{}).(string)
 	if !ok {
 		return "", fmt.Errorf("wrong provider")
 	}
@@ -319,7 +323,7 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 	var user infoblog.User
 	switch provider {
 	case "facebook":
-		user, err = a.userRepository.FindByFacebook(ctx, u)
+		user, err = a.userRepository.FindByFacebook(ctx, *u)
 		if err != nil {
 			user, err = createDefaultUser()
 			if err != nil {
@@ -333,7 +337,7 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 			}
 		}
 	case "google":
-		user, err = a.userRepository.FindByGoogle(ctx, u)
+		user, err = a.userRepository.FindByGoogle(ctx, *u)
 		if err != nil {
 			user, err = createDefaultUser()
 			if err != nil {
@@ -352,17 +356,18 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 
 	a.Cache().Set(fmt.Sprintf(SocialsAuthKey, state), &user, 10*time.Minute)
 
-	url, err := url.Parse(a.Config().App.FrontEnd)
+	uri, err := url.Parse(a.Config().App.FrontEnd)
 	if err != nil {
 		return "", err
 	}
 
-	url.Path = fmt.Sprintf("socials/%s", state)
+	uri.Path = fmt.Sprintf("socials/%s", state)
 
-	return url.String(), nil
+	return uri.String(), nil
 }
 
 func (a *service) Oauth2Token(ctx context.Context, stateRequest request.StateRequest) (*request.AuthTokenData, error) {
+	_ = ctx
 	var u infoblog.User
 	key := fmt.Sprintf(SocialsAuthKey, stateRequest.State)
 	err := a.Cache().Get(key, &u)
@@ -380,15 +385,6 @@ func (a *service) Oauth2Token(ctx context.Context, stateRequest request.StateReq
 	}
 
 	return token, err
-}
-
-func extractUser(ctx context.Context) (infoblog.User, error) {
-	u, ok := ctx.Value("user").(*infoblog.User)
-	if !ok {
-		return infoblog.User{}, errors.New("type assertion to user err")
-	}
-
-	return *u, nil
 }
 
 func genCode() int {

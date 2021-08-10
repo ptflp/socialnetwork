@@ -9,7 +9,7 @@ import (
 
 func extractUser(r *http.Request) (infoblog.User, error) {
 	ctx := r.Context()
-	u, ok := ctx.Value("user").(*infoblog.User)
+	u, ok := ctx.Value(infoblog.User{}).(*infoblog.User)
 	if !ok {
 		return infoblog.User{}, errors.New("type assertion to user err")
 	}

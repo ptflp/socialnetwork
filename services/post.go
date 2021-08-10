@@ -380,7 +380,7 @@ func (p *Post) CountByUser(ctx context.Context, user infoblog.User) (int64, erro
 }
 
 func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
-	u, ok := ctx.Value("user").(*infoblog.User)
+	u, ok := ctx.Value(infoblog.User{}).(*infoblog.User)
 	if !ok {
 		return fmt.Errorf("get user from request context err")
 	}

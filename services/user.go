@@ -537,7 +537,7 @@ func (u *User) GetUserData(user infoblog.User) (request.UserData, error) {
 }
 
 func extractUser(ctx context.Context) (infoblog.User, error) {
-	u, ok := ctx.Value("user").(*infoblog.User)
+	u, ok := ctx.Value(infoblog.User{}).(*infoblog.User)
 	if !ok {
 		return infoblog.User{}, errors.New("type assertion to user err")
 	}
