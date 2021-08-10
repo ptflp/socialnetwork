@@ -86,7 +86,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	var price infoblog.NullFloat64
 	if req.PostType == PostTypeForPrice {
 		if req.Price == nil {
-			return request.PostDataResponse{}, fmt.Errorf("bad price %s", req.Price)
+			return request.PostDataResponse{}, fmt.Errorf("bad price %d", req.Price)
 		}
 		price = infoblog.NewNullFloat64(*req.Price)
 	}
