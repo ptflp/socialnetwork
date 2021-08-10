@@ -12,13 +12,7 @@ import (
 )
 
 const (
-	createFile = "INSERT INTO files (type, foreign_id, dir, name, user_id, user_uuid, uuid, foreign_uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-	updateFile = "UPDATE files SET type = ?, foreign_id = ?, dir = ?, name = ?, user_id = ? WHERE id = ?"
 	activeFile = "UPDATE files SET active = ? WHERE uuid = ?"
-
-	selectFile     = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE active = 1 AND id = ?"
-	findAllFile    = "SELECT id, type, foreign_id, dir, name, active, user_id, created_at, updated_at FROM files WHERE active = 1 AND type = ? AND foreign_id = ?"
-	findByPostsIDs = "SELECT id, type, foreign_id, dir, name, active, user_id, uuid, created_at, updated_at FROM files WHERE active = 1 AND type = 1 AND foreign_id IN (?)"
 )
 
 type filesRepository struct {
@@ -38,6 +32,9 @@ func (f *filesRepository) Create(ctx context.Context, p *infoblog.File) (int64, 
 
 	queryRaw := sq.Insert("files").Columns(createFields...).Values(createFieldsPointers...)
 	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return 0, err
+	}
 
 	return f.db.MustExecContext(ctx, query, args...).RowsAffected()
 }
@@ -106,6 +103,9 @@ func (f *filesRepository) Find(ctx context.Context, file infoblog.File) (infoblo
 
 	queryRaw := sq.Select(fields...).From("files").Where(sq.Eq{"uuid": file.UUID})
 	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return infoblog.File{}, err
+	}
 
 	file = infoblog.File{}
 	err = f.db.QueryRowxContext(ctx, query, args...).StructScan(&file)
@@ -160,7 +160,11 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) 
 	}
 
 	queryRaw := sq.Select(fields...).From("files").Where(sq.Eq{"active": 1, "type": 1})
-	query, args, err := queryRaw.ToSql()
+	var args []interface{}
+	query, _, err := queryRaw.ToSql()
+	if err != nil {
+		return nil, err
+	}
 	query = query + " AND foreign_uuid IN (?)"
 	query, args, err = sqlx.In(query, 1, 1, postsIDs)
 

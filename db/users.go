@@ -12,13 +12,7 @@ import (
 )
 
 const (
-	updateUser  = "UPDATE users SET phone = ?, email = ?, name = ?, second_name = ?, email_verified = ? WHERE uuid = ?;"
-	setPassword = "UPDATE users SET password = ? WHERE uuid = ?"
-
-	findUserByPhone = "SELECT id, email, phone FROM users WHERE phone = ?"
-	findUserByEmail = "SELECT id, email, phone, password, email_verified FROM users WHERE email = ?"
-
-	createUserByPhone         = "INSERT INTO users (uuid, active, phone) VALUES (?, ?, ?)"
+	setPassword               = "UPDATE users SET password = ? WHERE uuid = ?"
 	createUserByEmailPassword = "INSERT INTO users (uuid, email, password, active, email_verified) VALUES (?, ?, ?, 1, 1)"
 )
 
@@ -81,6 +75,10 @@ func (u *userRepository) CreateUser(ctx context.Context, user infoblog.User) err
 
 	queryRaw := sq.Insert("users").Columns(createFields...).Values(createFieldsPointers...)
 	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return err
+	}
+
 	_, err = u.db.MustExecContext(ctx, query, args...).RowsAffected()
 
 	return err

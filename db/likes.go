@@ -42,6 +42,9 @@ func (lr *likesRepository) Find(ctx context.Context, like *infoblog.Like) (infob
 
 	queryRaw := sq.Select(fields...).From("likes").Where(sq.Eq{"type": like.Type, "foreign_uuid": like.ForeignUUID, "liker_uuid": like.LikerUUID})
 	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return infoblog.Like{}, err
+	}
 
 	likeFound := infoblog.Like{}
 	err = lr.db.QueryRowxContext(ctx, query, args...).StructScan(&likeFound)
