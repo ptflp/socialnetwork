@@ -1,35 +1,5 @@
 version: '3.3'
 services:
-  nginx-proxy:
-    container_name: "nginx-proxy"
-    image: "nginxproxy/nginx-proxy"
-    networks:
-        - skynet
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-    restart: always
-  acme:
-    container_name: "acme"
-    image: "nginxproxy/acme-companion"
-    networks:
-      - skynet
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - acme:/etc/acme.sh
-    environment:
-      - DEFAULT_EMAIL=globallinkliberty@gmail.com
-      - NGINX_PROXY_CONTAINER=nginx-proxy
-    restart: always
   api:
     container_name: "infoblogserver"
     build: "."
@@ -44,41 +14,6 @@ services:
       - VIRTUAL_PORT=8955
     volumes:
       - ./:/go/src/gitlab.com/InfoBlogFriends/server
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    container_name: "infoblogdb"
-    networks:
-      - skynet
-    ports:
-      - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
-      - MYSQL_DATABASE=${DB_SCHEME}
-    volumes:
-      - ../imakedb:/var/lib/mysql
-  redis:
-    image: redis
-    restart: always
-    container_name: "infoblogredis"
-    networks:
-      - skynet
-    ports:
-      - 127.0.0.1:6379:6379
-  adminer:
-    image: adminer
-    restart: always
-    networks:
-      - skynet
-    ports:
-      - 8888:8080
-volumes:
-  certs:
-  vhost:
-  html:
-  acme:
-
 networks:
   skynet:
     external:
