@@ -153,7 +153,7 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 	}
 	fields = append(fields, userFields...)
 
-	query, args, err := sq.Select(fields...).From("posts p").Join("users u on p.user_id = u.id").Where(sq.Eq{"p.Active": 1}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	query, args, err := sq.Select(fields...).From("posts p").LeftJoin("users u on p.user_uuid = u.uuid").Where(sq.Eq{"p.Active": 1}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
 	if err != nil {
 		return nil, nil, nil, err
 	}
