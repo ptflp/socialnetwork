@@ -40,7 +40,7 @@ func NewConfig() (*Config, error) {
 	v.SetConfigType(Type)
 	v.AddConfigPath(Path)
 	if err := v.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("error reading config file, %s\n", err)
+		return nil, fmt.Errorf("error reading config file, config %s, %s", os.Getenv(CheckEnvKey), err)
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
