@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   api:
-    container_name: "infoblogserver_"${ENV}
+    container_name: infoblogserver_${ENV}
     build: "."
     command: bash -c "go run ./cmd/server"
     restart: always
