@@ -8,9 +8,9 @@ services:
     networks:
       - skynet
     environment:
-      - DEV=${DEV}
-      - VIRTUAL_HOST=infoblog.ptflp.ru
-      - LETSENCRYPT_HOST=infoblog.ptflp.ru
+      - ENV=${ENV}
+      - VIRTUAL_HOST=${ENDPOINT}
+      - LETSENCRYPT_HOST=${ENDPOINT}
       - VIRTUAL_PORT=8955
     volumes:
       - ./:/go/src/gitlab.com/InfoBlogFriends/server
