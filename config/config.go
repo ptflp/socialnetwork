@@ -18,37 +18,36 @@ type Config struct {
 }
 
 const (
-	ProductionConfigName = "prod"
-	DevConfigName        = "dev"
-	Type                 = "yaml"
-	Path                 = "./config"
+	ProductionKey = "production"
+	DevKey        = "dev"
+	StageKey      = "stage"
+	Type          = "yaml"
+	Path          = "./config"
 
-	CheckEnvKey = "DEV"
+	CheckEnvKey = "ENV"
 )
 
 func NewConfig() (*Config, error) {
 
 	var config *Config
 
-	viper.SetConfigName(ProductionConfigName)
+	viper.SetConfigName(ProductionKey)
 	viper.SetConfigType(Type)
 	viper.AddConfigPath(Path)
 
 	v := viper.New()
-	if os.Getenv(CheckEnvKey) == "true" {
-		v.SetConfigName(DevConfigName)
-		v.SetConfigType(Type)
-		v.AddConfigPath(Path)
-		if err := v.ReadInConfig(); err != nil {
-			return nil, fmt.Errorf("error reading config file, %s\n", err)
-		}
+	v.SetConfigName(os.Getenv(CheckEnvKey))
+	v.SetConfigType(Type)
+	v.AddConfigPath(Path)
+	if err := v.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("error reading config file, %s\n", err)
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("error reading config file, %s\n", err)
 	}
 
-	if os.Getenv(CheckEnvKey) == "true" {
+	if os.Getenv(CheckEnvKey) != "production" {
 		if err := viper.MergeConfigMap(v.AllSettings()); err != nil {
 			return nil, fmt.Errorf("error merge dev config file, %s\n", err)
 		}
