@@ -54,12 +54,12 @@ deploy_production:
   only:
     - main
 
-deploy_dev:
+deploy_stage:
   stage: deploy
   script:
     - echo "Deploy to production server"
   environment:
-    name: production
+    name: stage
     url: https://infoblog.ptflp.ru
   when: manual
   only:
