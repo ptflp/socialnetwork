@@ -51,6 +51,16 @@ deploy_production:
   environment:
     name: production
     url: https://infoblog.ptflp.ru
-  when: manual
   only:
     - main
+
+deploy_dev:
+  stage: deploy
+  script:
+    - echo "Deploy to production server"
+  environment:
+    name: production
+    url: https://infoblog.ptflp.ru
+  when: manual
+  only:
+    - dev
