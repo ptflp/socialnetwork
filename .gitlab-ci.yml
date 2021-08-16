@@ -24,8 +24,17 @@ stages:
   - build
   - deploy
 
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  before_script:
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
 lint:
   stage: lint
+  extends: .go-cache
   script:
     - go fmt $(go list ./... | grep -v /vendor/)
     - go vet $(go list ./... | grep -v /vendor/)
@@ -33,11 +42,13 @@ lint:
 
 test:
   stage: test
+  extends: .go-cache
   script:
     - go test -race $(go list ./... | grep -v /vendor/)
 
 compile:
   stage: build
+  extends: .go-cache
   script:
     - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/app
   artifacts:
@@ -45,6 +56,7 @@ compile:
       - app
 
 deploy_production:
+  image: alpine:3
   stage: deploy
   script:
     - echo "Deploy to production server"
@@ -55,6 +67,7 @@ deploy_production:
     - main
 
 deploy_stage:
+  image: alpine:3
   stage: deploy
   script:
     - echo "Deploy to production server"
