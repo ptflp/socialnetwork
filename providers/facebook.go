@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	"gitlab.com/InfoBlogFriends/server/decoder"
 	"gitlab.com/InfoBlogFriends/server/request"
 
@@ -68,7 +70,7 @@ func (f *Facebook) Callback(r *http.Request) (infoblog.User, error) {
 	}
 
 	return infoblog.User{
-		FacebookID: infoblog.NewNullInt64(int64(facebookID)),
-		Name:       infoblog.NewNullString(req.Name),
+		FacebookID: types.NewNullInt64(int64(facebookID)),
+		Name:       types.NewNullString(req.Name),
 	}, nil
 }

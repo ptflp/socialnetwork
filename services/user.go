@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/email"
+	"gitlab.com/InfoBlogFriends/server/types"
 
 	"gitlab.com/InfoBlogFriends/server/utils"
 
@@ -63,7 +64,7 @@ func (u *User) CreateByEmailPassword(ctx context.Context, user infoblog.User) er
 		return err
 	}
 
-	user.Password = infoblog.NewNullString(passHash)
+	user.Password = types.NewNullString(passHash)
 	return u.userRepository.CreateUser(ctx, user)
 }
 
@@ -123,7 +124,7 @@ func (u *User) UpdateProfile(ctx context.Context, profileUpdateReq request.Profi
 		return request.UserData{}, err
 	}
 
-	user.Active = infoblog.NewNullBool(true)
+	user.Active = types.NewNullBool(true)
 	err = u.userRepository.Update(ctx, user)
 	if err != nil {
 		return request.UserData{}, err
@@ -160,7 +161,7 @@ func (u *User) SetPassword(ctx context.Context, setPasswordReq request.SetPasswo
 	if err != nil {
 		return err
 	}
-	user.Password = infoblog.NewNullString(passHash)
+	user.Password = types.NewNullString(passHash)
 
 	return u.userRepository.SetPassword(ctx, user)
 }
@@ -183,7 +184,7 @@ func (u *User) prepareRecoveryTemplate(recoverUrl string) (bytes.Buffer, error) 
 }
 
 func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
-	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: infoblog.NewNullUUID(subscribeRequest.UUID)})
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: types.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
 	}
@@ -193,15 +194,15 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 
 	_, err = u.subsRepository.Create(ctx, infoblog.Subscriber{
 		UserUUID:       user.UUID,
-		SubscriberUUID: infoblog.NewNullUUID(subscribeRequest.UUID),
-		Active:         infoblog.NewNullBool(true),
+		SubscriberUUID: types.NewNullUUID(subscribeRequest.UUID),
+		Active:         types.NewNullBool(true),
 	})
 
 	return err
 }
 
 func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
-	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: infoblog.NewNullUUID(subscribeRequest.UUID)})
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: types.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
 	}
@@ -211,8 +212,8 @@ func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeReq
 
 	err = u.subsRepository.Delete(ctx, infoblog.Subscriber{
 		UserUUID:       user.UUID,
-		SubscriberUUID: infoblog.NewNullUUID(subscribeRequest.UUID),
-		Active:         infoblog.NewNullBool(false),
+		SubscriberUUID: types.NewNullUUID(subscribeRequest.UUID),
+		Active:         types.NewNullBool(false),
 	})
 
 	return err
@@ -261,14 +262,14 @@ func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.
 	user := infoblog.User{}
 	var err error
 	if req.UUID != nil {
-		user.UUID = infoblog.NewNullUUID(*req.UUID)
+		user.UUID = types.NewNullUUID(*req.UUID)
 		user, err = u.userRepository.Find(ctx, user)
 		if err != nil {
 			return request.UserData{}, err
 		}
 	}
 	if req.NickName != nil {
-		user.NickName = infoblog.NewNullString(*req.NickName)
+		user.NickName = types.NewNullString(*req.NickName)
 		user, err = u.userRepository.FindByNickname(ctx, user)
 		if err != nil {
 			return request.UserData{}, err
@@ -384,7 +385,7 @@ func (u *User) CheckPhoneCode(ctx context.Context, req request.CheckPhoneCodeReq
 	if code != req.Code {
 		return request.RecoverChekPhoneResponse{}, errors.New("user code error")
 	}
-	user.Phone = infoblog.NewNullString(req.Phone)
+	user.Phone = types.NewNullString(req.Phone)
 	user, err = u.userRepository.FindByPhone(ctx, user)
 	if err != nil {
 		return request.RecoverChekPhoneResponse{}, err
@@ -427,7 +428,7 @@ func (u *User) PasswordReset(ctx context.Context, req request.PasswordResetReque
 	if err != nil {
 		return err
 	}
-	user.Password = infoblog.NewNullString(passHash)
+	user.Password = types.NewNullString(passHash)
 	err = u.userRepository.SetPassword(ctx, user)
 	if err != nil {
 		return err
@@ -438,7 +439,7 @@ func (u *User) PasswordReset(ctx context.Context, req request.PasswordResetReque
 
 func (u *User) EmailExist(ctx context.Context, req request.EmailRequest) error {
 	var user infoblog.User
-	user.Email = infoblog.NewNullString(req.Email)
+	user.Email = types.NewNullString(req.Email)
 	_, err := u.userRepository.FindByEmail(ctx, user)
 
 	return err
@@ -446,7 +447,7 @@ func (u *User) EmailExist(ctx context.Context, req request.EmailRequest) error {
 
 func (u *User) NicknameExist(ctx context.Context, req request.NicknameRequest) error {
 	var user infoblog.User
-	user.NickName = infoblog.NewNullString(req.Nickname)
+	user.NickName = types.NewNullString(req.Nickname)
 	_, err := u.userRepository.FindByNickname(ctx, user)
 
 	return err
@@ -475,7 +476,7 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 		return request.UserData{}, err
 	}
 
-	fileUUID := infoblog.NewNullUUID()
+	fileUUID := types.NewNullUUID()
 
 	file, err := u.file.SaveFileSystem(formFile, user, fileUUID)
 	if err != nil {
@@ -486,7 +487,7 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 
 	// 3. update file info, save to db
 	file.Active = 1
-	file.Type = infoblog.FileAvatar
+	file.Type = types.FileAvatar
 	file.UserUUID = user.UUID
 
 	err = u.file.SaveDB(ctx, &file)
@@ -501,7 +502,7 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 		return request.UserData{}, err
 	}
 
-	user.Avatar = infoblog.NewNullString(link)
+	user.Avatar = types.NewNullString(link)
 
 	err = u.userRepository.Update(ctx, user)
 	if err != nil {

@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
 	"gitlab.com/InfoBlogFriends/server/components"
@@ -60,7 +62,7 @@ func NewAuthService(
 func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivationRequest) error {
 	// 1. Check user existance
 	u := infoblog.User{
-		Email: infoblog.NewNullString(req.Email),
+		Email: types.NewNullString(req.Email),
 	}
 	u, err := a.userRepository.FindByEmail(ctx, u)
 	if err == nil && !u.UUID.Valid {
@@ -112,7 +114,7 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 		return nil, err
 	}
 
-	u.EmailVerified = infoblog.NewNullBool(true)
+	u.EmailVerified = types.NewNullBool(true)
 	err = a.userRepository.CreateUser(ctx, u)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
@@ -175,7 +177,7 @@ func (a *service) RefreshToken(ctx context.Context, req *request.RefreshTokenReq
 
 func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest) (*request.AuthTokenData, error) {
 	var u infoblog.User
-	u.Email = infoblog.NewNullString(req.Email)
+	u.Email = types.NewNullString(req.Email)
 
 	u, err := a.userRepository.FindByEmail(ctx, u)
 	if err != nil {
@@ -259,21 +261,23 @@ func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) b
 }
 
 func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) (*request.AuthTokenData, error) {
-	var code int
 	phone, err := validators.CheckPhoneFormat(req.Phone)
 	if err != nil {
 		return nil, err
 	}
-	err = a.Cache().Get(fmt.Sprintf(PhoneRegistrationKey, phone), &code)
-	if err != nil {
-		return nil, err
+	code := 3455
+	if !a.Config().SMSC.Dev {
+		err = a.Cache().Get(fmt.Sprintf(PhoneRegistrationKey, phone), &code)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if code != req.Code {
 		return nil, errors.New("phone code mismatch")
 	}
 
-	phoneEnt := infoblog.NewNullString(phone)
+	phoneEnt := types.NewNullString(phone)
 	u := infoblog.User{
 		Phone: phoneEnt,
 	}
@@ -396,9 +400,9 @@ func genCode() int {
 
 func createDefaultUser() (infoblog.User, error) {
 	return infoblog.User{
-		UUID:        infoblog.NewNullUUID(),
-		Trial:       infoblog.NewNullBool(true),
-		NotifyEmail: infoblog.NewNullBool(true),
-		Language:    infoblog.NewNullInt64(1),
+		UUID:        types.NewNullUUID(),
+		Trial:       types.NewNullBool(true),
+		NotifyEmail: types.NewNullBool(true),
+		Language:    types.NewNullInt64(1),
 	}, nil
 }

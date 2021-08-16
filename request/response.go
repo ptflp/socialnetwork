@@ -1,6 +1,10 @@
 package request
 
-import "time"
+import (
+	"time"
+
+	"gitlab.com/InfoBlogFriends/server/types"
+)
 
 //go:generate easytags $GOFILE
 type Response struct {
@@ -22,25 +26,25 @@ type AuthTokenData struct {
 }
 
 type UserData struct {
-	UUID           string    `json:"user_id" db:"uuid" ops:"create"`
-	Phone          string    `json:"phone" db:"phone" ops:"update,create"`
-	Email          string    `json:"email" db:"email" ops:"update,create"`
-	Avatar         string    `json:"profile_image" db:"avatar" ops:"update"`
-	Active         bool      `json:"active" db:"active" ops:"create"`
-	Name           string    `json:"name" db:"name" ops:"update,create"`
-	SecondName     string    `json:"second_name" db:"second_name" ops:"update,create"`
-	EmailVerified  bool      `json:"email_verified" db:"email_verified"`
-	Description    string    `json:"description" db:"description" ops:"update,create"`
-	NickName       string    `json:"nickname" db:"nickname" ops:"update,create"`
-	ShowSubs       bool      `json:"show_subs" db:"show_subs" ops:"update,create"`
-	Cost           float64   `json:"cost" db:"cost" ops:"update,create"`
-	Trial          bool      `json:"trial" db:"trial" ops:"update,create"`
-	NotifyEmail    bool      `json:"notify_email" db:"notify_email" ops:"update,create"`
-	NotifyTelegram bool      `json:"notify_telegram" db:"notify_telegram" ops:"update,create"`
-	NotifyPush     bool      `json:"notify_push" db:"notify_push" ops:"update,create"`
-	Language       int64     `json:"language" db:"language" ops:"update,create"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
+	UUID           types.NullUUID    `json:"user_id" db:"uuid" ops:"create"`
+	Phone          types.NullString  `json:"phone" db:"phone" ops:"update,create"`
+	Email          types.NullString  `json:"email" db:"email" ops:"update,create"`
+	Avatar         types.NullString  `json:"profile_image" db:"avatar" ops:"update"`
+	Active         types.NullBool    `json:"active" db:"active" ops:"create"`
+	Name           types.NullString  `json:"name" db:"name" ops:"update,create"`
+	SecondName     types.NullString  `json:"second_name" db:"second_name" ops:"update,create"`
+	EmailVerified  types.NullBool    `json:"email_verified" db:"email_verified"`
+	Description    types.NullString  `json:"description" db:"description" ops:"update,create"`
+	NickName       types.NullString  `json:"nickname" db:"nickname" ops:"update,create"`
+	ShowSubs       types.NullBool    `json:"show_subs" db:"show_subs" ops:"update,create"`
+	Cost           types.NullFloat64 `json:"cost" db:"cost" ops:"update,create"`
+	Trial          types.NullBool    `json:"trial" db:"trial" ops:"update,create"`
+	NotifyEmail    types.NullBool    `json:"notify_email" db:"notify_email" ops:"update,create"`
+	NotifyTelegram types.NullBool    `json:"notify_telegram" db:"notify_telegram" ops:"update,create"`
+	NotifyPush     types.NullBool    `json:"notify_push" db:"notify_push" ops:"update,create"`
+	Language       int64             `json:"language" db:"language" ops:"update,create"`
+	CreatedAt      time.Time         `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time         `json:"updated_at" db:"updated_at"`
 
 	IsFriends    bool `json:"is_friends"`
 	IsSubscriber bool `json:"is_subscriber"`

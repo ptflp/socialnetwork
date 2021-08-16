@@ -3,17 +3,19 @@ package infoblog
 import (
 	"context"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/types"
 )
 
 //go:generate easytags $GOFILE
 
 type Subscriber struct {
-	ID             int64     `json:"id" db:"id"`
-	UserUUID       NullUUID  `json:"user_uuid" db:"user_uuid"`
-	SubscriberUUID NullUUID  `json:"subscriber_uuid" db:"subscriber_uuid"`
-	Active         NullBool  `json:"active" db:"active"`
-	CreatedAt      time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
+	ID             int64          `json:"id" db:"id"`
+	UserUUID       types.NullUUID `json:"user_uuid" db:"user_uuid"`
+	SubscriberUUID types.NullUUID `json:"subscriber_uuid" db:"subscriber_uuid"`
+	Active         types.NullBool `json:"active" db:"active"`
+	CreatedAt      time.Time      `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at" db:"updated_at"`
 }
 
 type SubscriberRepository interface {
