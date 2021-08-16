@@ -33,7 +33,7 @@ func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, 
 }
 
 func (pr *postsRepository) Update(ctx context.Context, p infoblog.Post) error {
-	if p.ID == 0 {
+	if !p.UUID.Valid {
 		return errors.New("repository wrong post id")
 	}
 	_, err := pr.db.MustExecContext(ctx, updatePost, p.Body, p.Active, p.Price, p.UUID).RowsAffected()
@@ -42,7 +42,7 @@ func (pr *postsRepository) Update(ctx context.Context, p infoblog.Post) error {
 }
 
 func (pr *postsRepository) Delete(ctx context.Context, p infoblog.Post) error {
-	if p.ID == 0 {
+	if !p.UUID.Valid {
 		return errors.New("repository wrong post id")
 	}
 	_, err := pr.db.MustExecContext(ctx, deletePost, 0, p.UUID).RowsAffected()
@@ -96,7 +96,7 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 	}
 	fields = append(fields, userFields...)
 
-	query, args, err := sq.Select(fields...).From("posts p").LeftJoin("users u on p.user_uuid = u.uuid").Where(sq.Eq{"p.active": 1, "p.user_uuid": user.UUID}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	query, args, err := sq.Select(fields...).From("posts p").LeftJoin("users u on p.user_uuid = u.uuid").Where(sq.Eq{"p.active": 1, "p.user_uuid": user.UUID}).OrderBy("p.created_at DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -153,7 +153,7 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 	}
 	fields = append(fields, userFields...)
 
-	query, args, err := sq.Select(fields...).From("posts p").LeftJoin("users u on p.user_uuid = u.uuid").Where(sq.Eq{"p.Active": 1}).OrderBy("p.id DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
+	query, args, err := sq.Select(fields...).From("posts p").LeftJoin("users u on p.user_uuid = u.uuid").Where(sq.Eq{"p.Active": 1}).OrderBy("p.created_at DESC").Limit(uint64(limit)).Offset(uint64(offset)).ToSql()
 	if err != nil {
 		return nil, nil, nil, err
 	}
