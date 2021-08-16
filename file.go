@@ -6,14 +6,13 @@ import (
 )
 
 type File struct {
-	ID          int64     `json:"-" db:"id"`
+	UUID        NullUUID  `json:"file_id" db:"uuid" ops:"create"`
 	Type        int64     `json:"type" db:"type" ops:"create,update"`
+	ForeignUUID NullUUID  `json:"foreign_uuid" db:"foreign_uuid" ops:"create,update"`
+	UserUUID    NullUUID  `json:"user_id" db:"user_uuid" ops:"create"`
 	Dir         string    `json:"dir" db:"dir" ops:"create,update"`
 	Name        string    `json:"name" db:"name" ops:"create"`
 	Active      int64     `json:"active" db:"active" ops:"create,update"`
-	UserUUID    string    `json:"user_id" db:"user_uuid" ops:"create"`
-	UUID        string    `json:"file_id" db:"uuid" ops:"create"`
-	ForeignUUID string    `json:"foreign_uuid" db:"foreign_uuid" ops:"create,update"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }

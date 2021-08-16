@@ -8,7 +8,6 @@ import (
 	"html/template"
 	"math/rand"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -64,7 +63,7 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 		Email: infoblog.NewNullString(req.Email),
 	}
 	u, err := a.userRepository.FindByEmail(ctx, u)
-	if err == nil && u.ID > 0 {
+	if err == nil && !u.UUID.Valid {
 		return errors.New("user with specified email already exist")
 	}
 
@@ -133,8 +132,8 @@ func (a *service) EmailVerification(ctx context.Context, req *request.EmailVerif
 	if err != nil {
 		return nil, err
 	}
-	if u.ID == 0 {
-		return nil, errors.New("email verification wrong user.ID")
+	if !u.UUID.Valid {
+		return nil, errors.New("email verification wrong user.UUID")
 	}
 
 	authTokens, err := a.JWTKeys().GenerateAuthTokens(&u)
@@ -152,7 +151,7 @@ func (a *service) RefreshToken(ctx context.Context, req *request.RefreshTokenReq
 		return nil, err
 	}
 
-	key := strings.Join([]string{session.RefreshTokenKey, strconv.Itoa(int(refreshToken.UID)), refreshToken.Token}, ":")
+	key := strings.Join([]string{session.RefreshTokenKey, refreshToken.UUID, refreshToken.Token}, ":")
 	err = a.Cache().Get(key, &u)
 	if err != nil {
 		return nil, err
@@ -182,7 +181,7 @@ func (a *service) EmailLogin(ctx context.Context, req *request.EmailLoginRequest
 	if err != nil {
 		return nil, err
 	}
-	if u.ID == 0 {
+	if !u.UUID.Valid {
 		return nil, errors.New("wrong user.ID")
 	}
 	if !u.Password.Valid {
@@ -395,18 +394,8 @@ func genCode() int {
 }
 
 func createDefaultUser() (infoblog.User, error) {
-	rand.Seed(time.Now().UnixNano())
-	id := rand.Intn(89) + 10
-
-	uUUID, err := uuid.NewUUID()
-	if err != nil {
-		return infoblog.User{}, err
-	}
-
-	UUID := strings.Join([]string{uUUID.String(), fmt.Sprintf("-u%d", id)}, "")
-
 	return infoblog.User{
-		UUID:        UUID,
+		UUID:        infoblog.NewNullUUID(),
 		Trial:       infoblog.NewNullBool(true),
 		NotifyEmail: infoblog.NewNullBool(true),
 		Language:    infoblog.NewNullInt64(1),

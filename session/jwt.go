@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -121,7 +120,7 @@ type RefreshToken struct {
 }
 
 func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, error) {
-	if len(u.UUID) < 40 {
+	if !u.UUID.Valid {
 		return nil, errors.New("wrong user")
 	}
 	access, err := j.CreateAccessToken(*u)
@@ -149,8 +148,7 @@ func (j *JWTKeys) GenerateAuthTokens(u *infoblog.User) (*req.AuthTokenData, erro
 func (j *JWTKeys) CreateAccessToken(u infoblog.User) (string, error) {
 	token, err := j.GenerateToken(jwt.MapClaims{
 		"exp":  time.Now().UTC().Add(time.Hour * 50).Unix(),
-		"uid":  u.ID,
-		"uuid": u.UUID,
+		"uuid": u.UUID.String,
 	})
 
 	return token, err
@@ -159,14 +157,13 @@ func (j *JWTKeys) CreateAccessToken(u infoblog.User) (string, error) {
 func (j *JWTKeys) CreateRefreshToken(accessToken string, u *infoblog.User) (string, error) {
 	refreshToken := hasher.NewSHA256([]byte(accessToken))
 
-	key := strings.Join([]string{RefreshTokenKey, strconv.Itoa(int(u.ID)), refreshToken}, ":")
+	key := strings.Join([]string{RefreshTokenKey, u.UUID.String, refreshToken}, ":")
 	j.cache.Set(key, u, 2*Month)
 
 	return j.GenerateToken(jwt.MapClaims{
 		"refresh_token": refreshToken,
 		"exp":           time.Now().UTC().Add(2 * Month).Unix(),
-		"uid":           u.ID,
-		"uuid":          u.UUID,
+		"uuid":          u.UUID.String,
 	})
 }
 
@@ -247,7 +244,7 @@ func (j *JWTKeys) ExtractAccessToken(r *http.Request) (*infoblog.User, error) {
 	}
 
 	c := token.Claims.(jwt.MapClaims)
-	var uid, exp int64
+	var exp int64
 
 	if v, ok := c["ExpiresAt"]; ok {
 		exp = int64(v.(float64))
@@ -261,20 +258,12 @@ func (j *JWTKeys) ExtractAccessToken(r *http.Request) (*infoblog.User, error) {
 		return nil, errors.New("token expired")
 	}
 
-	if v, ok := c["ID"]; ok {
-		uid = int64(v.(float64))
-	}
 	var uuid string
 	if v, ok := c["uuid"]; ok {
 		uuid = v.(string)
 	}
-
-	if v, ok := c["uid"]; ok {
-		uid = int64(v.(float64))
-	}
 	u := &infoblog.User{
-		ID:   uid,
-		UUID: uuid,
+		UUID: infoblog.NewNullUUID(uuid),
 	}
 
 	return u, nil

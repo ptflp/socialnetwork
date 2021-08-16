@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -63,10 +62,6 @@ func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (i
 }
 
 func (u *userRepository) CreateUser(ctx context.Context, user infoblog.User) error {
-	if len(user.UUID) != 40 {
-		return fmt.Errorf("create user by phone wrong uuid length %s", user.UUID)
-	}
-
 	createFields, err := infoblog.GetCreateFields("users")
 	if err != nil {
 		return err
@@ -91,9 +86,6 @@ func (u *userRepository) CreateUserByEmailPassword(ctx context.Context, user inf
 }
 
 func (u *userRepository) Update(ctx context.Context, user infoblog.User) error {
-	if len(user.UUID) != 40 {
-		return errors.New("wrong user uuid on update")
-	}
 	updateFields, err := infoblog.GetUpdateFields("users")
 	if err != nil {
 		return err

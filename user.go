@@ -6,8 +6,7 @@ import (
 )
 
 type User struct {
-	ID             int64       `json:"-" db:"id"`
-	UUID           string      `json:"user_id" db:"uuid" ops:"create"`
+	UUID           NullUUID    `json:"user_id" db:"uuid" ops:"create"`
 	Phone          NullString  `json:"phone" db:"phone" ops:"update,create"`
 	Email          NullString  `json:"email" db:"email" ops:"update,create"`
 	Avatar         NullString  `json:"profile_image" db:"avatar" ops:"update"`

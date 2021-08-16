@@ -9,10 +9,7 @@ import (
 	"math/rand"
 	"net/url"
 	"path"
-	"strings"
 	"time"
-
-	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/email"
 
@@ -186,17 +183,17 @@ func (u *User) prepareRecoveryTemplate(recoverUrl string) (bytes.Buffer, error) 
 }
 
 func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
-	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: infoblog.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
 	}
-	if sub.ID < 1 {
+	if !sub.UUID.Valid {
 		return errors.New("user with specified id not found")
 	}
 
 	_, err = u.subsRepository.Create(ctx, infoblog.Subscriber{
 		UserUUID:       user.UUID,
-		SubscriberUUID: subscribeRequest.UUID,
+		SubscriberUUID: infoblog.NewNullUUID(subscribeRequest.UUID),
 		Active:         infoblog.NewNullBool(true),
 	})
 
@@ -204,17 +201,17 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 }
 
 func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
-	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: subscribeRequest.UUID})
+	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: infoblog.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
 	}
-	if sub.ID < 1 {
+	if !sub.UUID.Valid {
 		return errors.New("user with specified id not found")
 	}
 
 	err = u.subsRepository.Delete(ctx, infoblog.Subscriber{
 		UserUUID:       user.UUID,
-		SubscriberUUID: subscribeRequest.UUID,
+		SubscriberUUID: infoblog.NewNullUUID(subscribeRequest.UUID),
 		Active:         infoblog.NewNullBool(false),
 	})
 
@@ -264,7 +261,7 @@ func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.
 	user := infoblog.User{}
 	var err error
 	if req.UUID != nil {
-		user.UUID = *req.UUID
+		user.UUID = infoblog.NewNullUUID(*req.UUID)
 		user, err = u.userRepository.Find(ctx, user)
 		if err != nil {
 			return request.UserData{}, err
@@ -478,17 +475,9 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 		return request.UserData{}, err
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	id := rand.Intn(89) + 10
+	fileUUID := infoblog.NewNullUUID()
 
-	fUUID, err := uuid.NewUUID()
-	if err != nil {
-		return request.UserData{}, err
-	}
-
-	fileUUID := strings.Join([]string{fUUID.String(), fmt.Sprintf("-f%d", id)}, "")
-
-	file, err := u.file.SaveFileSystem(formFile, user.ID, fileUUID)
+	file, err := u.file.SaveFileSystem(formFile, user, fileUUID)
 	if err != nil {
 		return request.UserData{}, err
 	}
