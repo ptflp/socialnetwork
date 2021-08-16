@@ -20,13 +20,11 @@ stages:
   - deploy
 
 .go-cache:
-  variables:
-    GOPATH: $CI_PROJECT_DIR/.go
-    PATH: $PATH:$CI_PROJECT_DIR/.go/bin
   before_script:
     - mkdir -p .go
     - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
     - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+    - ln -svf $GOPATH $CI_PROJECT_DIR/.go
     - cd $GOPATH/src/$REPO_NAME
     - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.30.0
     - golangci-lint --version
