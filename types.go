@@ -195,6 +195,7 @@ func (x *NullUUID) Scan(value interface{}) error {
 		return err
 	}
 	x.Binary = source
+	x.Valid = true
 
 	x.String = uuidRaw.String()
 
