@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	createPost     = "INSERT INTO posts (body, file_id, user_id, user_uuid, uuid, file_uuid, type, price, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	updatePost     = "UPDATE posts SET body = ?, file_id = ?, active = ?, price = ? WHERE uuid = ?"
+	createPost     = "INSERT INTO posts (body, user_uuid, uuid, file_uuid, type, price, active) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	updatePost     = "UPDATE posts SET body = ?, active = ?, price = ? WHERE uuid = ?"
 	deletePost     = "UPDATE posts SET active = ? WHERE uuid = ?"
-	countAllRecent = "SELECT COUNT(p.id) FROM posts p WHERE p.active = 1"
+	countAllRecent = "SELECT COUNT(p.uuid) FROM posts p WHERE p.active = 1"
 )
 
 type postsRepository struct {
@@ -24,7 +24,7 @@ type postsRepository struct {
 }
 
 func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, error) {
-	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.FileID, p.UserID, p.UserUUID, p.UUID, p.FileUUID, p.Type, p.Price, p.Active)
+	res, err := pr.db.ExecContext(ctx, createPost, p.Body, p.UserUUID, p.UUID, p.FileUUID, p.Type, p.Price, p.Active)
 	if err != nil {
 		return 0, err
 	}
@@ -36,7 +36,7 @@ func (pr *postsRepository) Update(ctx context.Context, p infoblog.Post) error {
 	if p.ID == 0 {
 		return errors.New("repository wrong post id")
 	}
-	_, err := pr.db.MustExecContext(ctx, updatePost, p.Body, p.FileID, p.Active, p.Price, p.UUID).RowsAffected()
+	_, err := pr.db.MustExecContext(ctx, updatePost, p.Body, p.Active, p.Price, p.UUID).RowsAffected()
 
 	return err
 }
@@ -51,7 +51,7 @@ func (pr *postsRepository) Delete(ctx context.Context, p infoblog.Post) error {
 }
 
 func (pr *postsRepository) Find(ctx context.Context, p infoblog.Post) (infoblog.Post, error) {
-	if len(p.UUID) != 40 {
+	if !p.UUID.Valid {
 		return infoblog.Post{}, errors.New("repository wrong post uuid")
 	}
 
@@ -123,9 +123,9 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 			return nil, nil, nil, err
 		}
 
-		postsIDs = append(postsIDs, post.UUID)
+		postsIDs = append(postsIDs, post.UUID.String)
 		postDataRes = append(postDataRes, post)
-		postIdIndexMap[post.UUID] = len(postDataRes) - 1
+		postIdIndexMap[post.UUID.String] = len(postDataRes) - 1
 	}
 
 	return postDataRes, postIdIndexMap, postsIDs, nil
@@ -180,9 +180,9 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 			return nil, nil, nil, err
 		}
 
-		postsUUID = append(postsUUID, post.UUID)
+		postsUUID = append(postsUUID, post.UUID.String)
 		postDataRes = append(postDataRes, post)
-		postUUIDIndexMap[post.UUID] = len(postDataRes) - 1
+		postUUIDIndexMap[post.UUID.String] = len(postDataRes) - 1
 	}
 
 	return postDataRes, postUUIDIndexMap, postsUUID, nil

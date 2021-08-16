@@ -8,14 +8,12 @@ import (
 type PostEntity struct {
 	ID        int64       `json:"-" db:"id"`
 	Type      int64       `json:"post_type" db:"type"`
-	UUID      string      `json:"post_id" db:"uuid"`
+	UUID      NullUUID    `json:"post_id" db:"uuid"`
 	Body      string      `json:"description" db:"body"`
-	FileID    int64       `json:"-" db:"file_id"`
-	UserID    int64       `json:"-" db:"user_id"`
-	UserUUID  string      `json:"user_id" db:"user_uuid"`
+	UserUUID  NullUUID    `json:"user_id" db:"user_uuid"`
 	Active    int64       `json:"active" db:"active"`
 	Price     NullFloat64 `json:"price" db:"price"`
-	FileUUID  string      `json:"file_id" db:"file_uuid"`
+	FileUUID  NullUUID    `json:"file_id" db:"file_uuid"`
 	CreatedAt time.Time   `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at" db:"updated_at"`
 }

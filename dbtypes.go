@@ -2,6 +2,8 @@ package infoblog
 
 import (
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 func NewNullString(s string) NullString {
@@ -50,4 +52,34 @@ func NewNullBool(b bool) NullBool {
 			Valid: true,
 		},
 	}
+}
+
+func NewNullUUID(s ...string) NullUUID {
+	var uuidRaw uuid.UUID
+	var err error
+	uuidRaw, err = uuid.NewUUID()
+	if len(s) > 0 {
+		if len(s[0]) > 0 {
+			uuidRaw, err = uuid.Parse(s[0])
+			if err != nil {
+				return NullUUID{}
+			}
+		}
+	}
+	if err != nil {
+		return NullUUID{}
+	}
+
+	var nullUUID NullUUID
+
+	nullUUID.Binary, err = uuidRaw.MarshalBinary()
+	if err != nil {
+		return NullUUID{}
+	}
+
+	nullUUID.String = uuidRaw.String()
+
+	nullUUID.Valid = true
+
+	return nullUUID
 }

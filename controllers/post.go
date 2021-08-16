@@ -208,7 +208,7 @@ func (a *postsController) FeedMy() http.HandlerFunc {
 			a.ErrorBadRequest(w, err)
 			return
 		}
-		req.UUID = u.UUID
+		req.UUID = u.UUID.String
 
 		feed, err := a.post.FeedByUser(r.Context(), req)
 		if err != nil {

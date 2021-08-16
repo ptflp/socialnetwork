@@ -3,15 +3,10 @@ package services
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	"strings"
-	"time"
 
 	"gitlab.com/InfoBlogFriends/server/utils"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
-
-	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/request"
 
@@ -44,17 +39,9 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFil
 		return request.PostFileData{}, err
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	id := rand.Intn(89) + 10
+	fileUUID := infoblog.NewNullUUID()
 
-	fUUID, err := uuid.NewUUID()
-	if err != nil {
-		return request.PostFileData{}, err
-	}
-
-	fileUUID := strings.Join([]string{fUUID.String(), fmt.Sprintf("-f%d", id)}, "")
-
-	file, err := p.file.SaveFileSystem(formFile, u.ID, fileUUID)
+	file, err := p.file.SaveFileSystem(formFile, u, fileUUID)
 	if err != nil {
 		return request.PostFileData{}, err
 	}
@@ -73,7 +60,7 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFil
 
 	return request.PostFileData{
 		Link: utils.Link(file),
-		UUID: file.UUID,
+		UUID: file.UUID.String,
 	}, nil
 }
 
@@ -91,19 +78,11 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		price = infoblog.NewNullFloat64(*req.Price)
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	id := rand.Intn(89) + 10
-	pUUID, err := uuid.NewUUID()
-	if err != nil {
-		return request.PostDataResponse{}, err
-	}
-	postUUID := strings.Join([]string{pUUID.String(), fmt.Sprintf("-p%d", id)}, "")
 	post := infoblog.Post{
 		PostEntity: infoblog.PostEntity{
 			Body:     req.Description,
-			UserID:   u.ID,
 			Type:     req.PostType,
-			UUID:     postUUID,
+			UUID:     infoblog.NewNullUUID(),
 			UserUUID: u.UUID,
 			Active:   1,
 			Price:    price,
@@ -118,7 +97,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		return request.PostDataResponse{}, fmt.Errorf("no files present")
 	}
 
-	_, err = p.file.fileRep.Find(ctx, infoblog.File{UUID: req.FilesID[0]})
+	_, err = p.file.fileRep.Find(ctx, infoblog.File{UUID: infoblog.NewNullUUID(req.FilesID[0])})
 	if err != nil {
 		return request.PostDataResponse{}, err
 	}
@@ -138,7 +117,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 	for i := range filesRaw {
 		file := request.PostFileData{
 			Link: utils.Link(filesRaw[i]),
-			UUID: filesRaw[i].UUID,
+			UUID: filesRaw[i].UUID.String,
 		}
 		files = append(files, file)
 	}
@@ -166,13 +145,13 @@ func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 		return err
 	}
 	var post infoblog.Post
-	post.UUID = req.UUID
+	post.UUID = infoblog.NewNullUUID(req.UUID)
 	post, err = p.post.Find(ctx, post)
 	if err != nil {
 		return err
 	}
 
-	if post.UserUUID != u.UUID {
+	if post.UserUUID.String != u.UUID.String {
 		return fmt.Errorf("permission denied")
 	}
 
@@ -190,13 +169,13 @@ func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
 		return err
 	}
 	var post infoblog.Post
-	post.UUID = req.UUID
+	post.UUID = infoblog.NewNullUUID(req.UUID)
 	post, err = p.post.Find(ctx, post)
 	if err != nil {
 		return err
 	}
 
-	if post.UserUUID != u.UUID {
+	if post.UserUUID.String != u.UUID.String {
 		return fmt.Errorf("permission denied")
 	}
 
@@ -207,13 +186,13 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 	var err error
 	postDataRes := request.PostDataResponse{}
 	post := infoblog.Post{}
-	post.UUID = req.UUID
+	post.UUID = infoblog.NewNullUUID(req.UUID)
 	post, err = p.post.Find(ctx, post)
 	if err != nil {
 		return postDataRes, err
 	}
 
-	filesRaw, err := p.file.GetFilesPostsIDs(ctx, []string{req.UUID})
+	filesRaw, err := p.file.GetFilesByPostUUIDs(ctx, []string{req.UUID})
 	if err != nil {
 		return postDataRes, err
 	}
@@ -223,7 +202,7 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 	for i := range filesRaw {
 		file := request.PostFileData{
 			Link: utils.Link(filesRaw[i]),
-			UUID: filesRaw[i].UUID,
+			UUID: filesRaw[i].UUID.String,
 		}
 		files = append(files, file)
 	}
@@ -254,7 +233,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 	if len(posts) < 1 {
 		return request.PostsFeedData{}, nil
 	}
-	files, err := p.file.GetFilesPostsIDs(ctx, postsIDs)
+	files, err := p.file.GetFilesByPostUUIDs(ctx, postsIDs)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
@@ -264,7 +243,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 	}
 
 	for i := range files {
-		id := postIDIndexMap[files[i].ForeignUUID]
+		id := postIDIndexMap[files[i].ForeignUUID.String]
 		posts[id].Files = append(posts[id].Files, files[i])
 	}
 
@@ -275,7 +254,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 		for j := range posts[i].Files {
 			postsFileData = append(postsFileData, request.PostFileData{
 				Link: utils.Link(posts[i].Files[j]),
-				UUID: posts[i].Files[j].UUID,
+				UUID: posts[i].Files[j].UUID.String,
 			})
 		}
 
@@ -296,7 +275,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 			return request.PostsFeedData{}, err
 		}
 
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: infoblog.NewNullUUID(pdr.UUID)})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -311,7 +290,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 }
 
 func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (request.PostsFeedData, error) {
-	u := infoblog.User{UUID: req.UUID}
+	u := infoblog.User{UUID: infoblog.NewNullUUID(req.UUID)}
 	posts, postIDIndexMap, postsIDs, err := p.post.FindAll(ctx, u, req.Limit, req.Offset)
 	if err != nil {
 		return request.PostsFeedData{}, err
@@ -319,7 +298,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 	if len(posts) < 1 {
 		return request.PostsFeedData{}, nil
 	}
-	files, err := p.file.GetFilesPostsIDs(ctx, postsIDs)
+	files, err := p.file.GetFilesByPostUUIDs(ctx, postsIDs)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
@@ -329,7 +308,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 	}
 
 	for i := range files {
-		id := postIDIndexMap[files[i].ForeignUUID]
+		id := postIDIndexMap[files[i].ForeignUUID.String]
 		posts[id].Files = append(posts[id].Files, files[i])
 	}
 
@@ -340,7 +319,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 		for j := range posts[i].Files {
 			postsFileData = append(postsFileData, request.PostFileData{
 				Link: utils.Link(posts[i].Files[j]),
-				UUID: posts[i].Files[j].UUID,
+				UUID: posts[i].Files[j].UUID.String,
 			})
 		}
 
@@ -361,7 +340,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 			return request.PostsFeedData{}, err
 		}
 
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: infoblog.NewNullUUID(pdr.UUID)})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -386,7 +365,7 @@ func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
 	}
 
 	post, err := p.post.Find(ctx, infoblog.Post{
-		PostEntity: infoblog.PostEntity{UUID: req.UUID},
+		PostEntity: infoblog.PostEntity{UUID: infoblog.NewNullUUID(req.UUID)},
 	})
 
 	if err != nil {
@@ -436,11 +415,11 @@ func (p *Post) CheckFilePermission(ctx context.Context, file infoblog.File) bool
 		return true
 	}
 	subscriber, err := extractUser(ctx)
-	if err != nil || len(subscriber.UUID) != 40 {
+	if err != nil || !subscriber.UUID.Valid {
 		return false
 	}
 
-	if post.UserUUID == subscriber.UUID {
+	if post.UserUUID.String == subscriber.UUID.String {
 		return true
 	}
 

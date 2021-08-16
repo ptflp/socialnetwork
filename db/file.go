@@ -40,9 +40,10 @@ func (f *filesRepository) Create(ctx context.Context, p *infoblog.File) (int64, 
 }
 
 func (f *filesRepository) Update(ctx context.Context, file infoblog.File) error {
-	if len(file.UUID) != 40 {
+	if !file.UUID.Valid {
 		return errors.New("wrong file uuid on update")
 	}
+
 	updateFields, err := infoblog.GetUpdateFields("files")
 	if err != nil {
 		return err
@@ -89,7 +90,7 @@ func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post
 }
 
 func (f *filesRepository) Delete(ctx context.Context, p infoblog.File) error {
-	if p.ID < 1 {
+	if !p.UUID.Valid {
 		return errors.New("repository delete wrong file id")
 	}
 	return f.db.QueryRowContext(ctx, activeFile, 0, p.UUID).Err()
@@ -154,6 +155,8 @@ func (f *filesRepository) FindByTypeFUUID(ctx context.Context, typeID int64, for
 }
 
 func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) ([]infoblog.File, error) {
+	uuids := make([]infoblog.NullUUID, 0, len(postsIDs))
+
 	fields, err := infoblog.GetFields("files")
 	if err != nil {
 		return nil, err
@@ -166,14 +169,15 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) 
 		return nil, err
 	}
 	query = query + " AND foreign_uuid IN (?)"
-	query, args, err = sqlx.In(query, 1, 1, postsIDs)
+	query, args, err = sqlx.In(query, 1, 1, uuids)
 
 	if err != nil {
 		return nil, err
 	}
 	// sqlx.In returns queries with the `?` bindvar, we can rebind it for our backend
 	query = f.db.Rebind(query)
-	rows, err := f.db.Queryx(query, args...)
+
+	rows, err := f.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

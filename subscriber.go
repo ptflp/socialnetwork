@@ -9,8 +9,8 @@ import (
 
 type Subscriber struct {
 	ID             int64     `json:"id" db:"id"`
-	UserUUID       string    `json:"user_uuid" db:"user_uuid"`
-	SubscriberUUID string    `json:"subscriber_uuid" db:"subscriber_uuid"`
+	UserUUID       NullUUID  `json:"user_uuid" db:"user_uuid"`
+	SubscriberUUID NullUUID  `json:"subscriber_uuid" db:"subscriber_uuid"`
 	Active         NullBool  `json:"active" db:"active"`
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at" db:"updated_at"`
