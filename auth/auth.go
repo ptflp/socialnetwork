@@ -362,6 +362,7 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 
 	uri.Path = fmt.Sprintf("socials/%s", state)
 
+	a.Logger().Info(uri.String())
 	return uri.String(), nil
 }
 
