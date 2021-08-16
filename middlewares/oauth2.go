@@ -52,7 +52,7 @@ func (a *AuthSocials) Callback(next http.Handler) http.Handler {
 			return
 		}
 		state := r.FormValue("state")
-		ctx := context.WithValue(r.Context(), infoblog.User{}, &u)
+		ctx := context.WithValue(r.Context(), &infoblog.User{}, &u)
 		ctx = context.WithValue(ctx, auth.State{}, state)
 		ctx = context.WithValue(ctx, auth.Provider{}, providerName)
 
