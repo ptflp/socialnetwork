@@ -1,6 +1,6 @@
 app:
   dev: true
-  FrontEnd: "http://localhost:3000"
+  FrontEnd: "http://stagefront.ptflp.ru"
 
 db:
   net: "tcp"
