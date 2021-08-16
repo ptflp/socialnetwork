@@ -3,16 +3,18 @@ package infoblog
 import (
 	"context"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/types"
 )
 
 type Like struct {
-	Type        int64     `json:"type" db:"type" ops:"create"`
-	ForeignUUID NullUUID  `json:"foreign_id" db:"foreign_uuid" ops:"create"`
-	UserUUID    NullUUID  `json:"user_id" db:"user_uuid" ops:"create"`
-	LikerUUID   NullUUID  `json:"liker_id" db:"liker_uuid" ops:"create"`
-	Active      NullBool  `json:"active" db:"active" ops:"create"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	Type        int64          `json:"type" db:"type" ops:"create"`
+	ForeignUUID types.NullUUID `json:"foreign_id" db:"foreign_uuid" ops:"create"`
+	UserUUID    types.NullUUID `json:"user_id" db:"user_uuid" ops:"create"`
+	LikerUUID   types.NullUUID `json:"liker_id" db:"liker_uuid" ops:"create"`
+	Active      types.NullBool `json:"active" db:"active" ops:"create"`
+	CreatedAt   time.Time      `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at" db:"updated_at"`
 }
 
 type LikeRepository interface {

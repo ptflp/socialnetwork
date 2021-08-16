@@ -1,4 +1,4 @@
-package infoblog
+package types
 
 import (
 	"database/sql"

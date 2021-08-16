@@ -1,4 +1,4 @@
-package infoblog
+package types
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 
@@ -28,7 +29,7 @@ func (x *NullString) MarshalJSON() ([]byte, error) {
 	if !x.Valid {
 		return []byte("null"), nil
 	}
-	return []byte(x.String), nil
+	return []byte(fmt.Sprintf("\"%s\"", x.String)), nil
 }
 
 func (x *NullString) UnmarshalJSON(data []byte) error {
@@ -146,7 +147,7 @@ func (x *NullUUID) MarshalJSON() ([]byte, error) {
 	if !x.Valid {
 		return []byte("null"), nil
 	}
-	return []byte(x.String), nil
+	return []byte(fmt.Sprintf("\"%s\"", x.String)), nil
 }
 
 func (x *NullUUID) UnmarshalJSON(data []byte) error {

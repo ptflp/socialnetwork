@@ -26,6 +26,8 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
+	proxy := middlewares.NewReverseProxy()
+	r.Use(proxy.ReverseProxy)
 
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing

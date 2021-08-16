@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/InfoBlogFriends/server/types"
 	"gitlab.com/InfoBlogFriends/server/utils"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -39,7 +40,7 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFil
 		return request.PostFileData{}, err
 	}
 
-	fileUUID := infoblog.NewNullUUID()
+	fileUUID := types.NewNullUUID()
 
 	file, err := p.file.SaveFileSystem(formFile, u, fileUUID)
 	if err != nil {
@@ -70,19 +71,19 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		return request.PostDataResponse{}, err
 	}
 
-	var price infoblog.NullFloat64
+	var price types.NullFloat64
 	if req.PostType == PostTypeForPrice {
 		if req.Price == nil {
 			return request.PostDataResponse{}, fmt.Errorf("bad price %d", req.Price)
 		}
-		price = infoblog.NewNullFloat64(*req.Price)
+		price = types.NewNullFloat64(*req.Price)
 	}
 
 	post := infoblog.Post{
 		PostEntity: infoblog.PostEntity{
 			Body:     req.Description,
 			Type:     req.PostType,
-			UUID:     infoblog.NewNullUUID(),
+			UUID:     types.NewNullUUID(),
 			UserUUID: u.UUID,
 			Active:   1,
 			Price:    price,
@@ -97,7 +98,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		return request.PostDataResponse{}, fmt.Errorf("no files present")
 	}
 
-	_, err = p.file.fileRep.Find(ctx, infoblog.File{UUID: infoblog.NewNullUUID(req.FilesID[0])})
+	_, err = p.file.fileRep.Find(ctx, infoblog.File{UUID: types.NewNullUUID(req.FilesID[0])})
 	if err != nil {
 		return request.PostDataResponse{}, err
 	}
@@ -145,7 +146,7 @@ func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 		return err
 	}
 	var post infoblog.Post
-	post.UUID = infoblog.NewNullUUID(req.UUID)
+	post.UUID = types.NewNullUUID(req.UUID)
 	post, err = p.post.Find(ctx, post)
 	if err != nil {
 		return err
@@ -156,7 +157,7 @@ func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 	}
 
 	if req.Price != nil {
-		post.Price = infoblog.NewNullFloat64(*req.Price)
+		post.Price = types.NewNullFloat64(*req.Price)
 	}
 	post.Body = req.Body
 
@@ -169,7 +170,7 @@ func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
 		return err
 	}
 	var post infoblog.Post
-	post.UUID = infoblog.NewNullUUID(req.UUID)
+	post.UUID = types.NewNullUUID(req.UUID)
 	post, err = p.post.Find(ctx, post)
 	if err != nil {
 		return err
@@ -186,7 +187,7 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 	var err error
 	postDataRes := request.PostDataResponse{}
 	post := infoblog.Post{}
-	post.UUID = infoblog.NewNullUUID(req.UUID)
+	post.UUID = types.NewNullUUID(req.UUID)
 	post, err = p.post.Find(ctx, post)
 	if err != nil {
 		return postDataRes, err
@@ -275,7 +276,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 			return request.PostsFeedData{}, err
 		}
 
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: infoblog.NewNullUUID(pdr.UUID)})
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: types.NewNullUUID(pdr.UUID)})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -290,7 +291,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 }
 
 func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (request.PostsFeedData, error) {
-	u := infoblog.User{UUID: infoblog.NewNullUUID(req.UUID)}
+	u := infoblog.User{UUID: types.NewNullUUID(req.UUID)}
 	posts, postIDIndexMap, postsIDs, err := p.post.FindAll(ctx, u, req.Limit, req.Offset)
 	if err != nil {
 		return request.PostsFeedData{}, err
@@ -340,7 +341,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 			return request.PostsFeedData{}, err
 		}
 
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: infoblog.NewNullUUID(pdr.UUID)})
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: types.NewNullUUID(pdr.UUID)})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -365,7 +366,7 @@ func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
 	}
 
 	post, err := p.post.Find(ctx, infoblog.Post{
-		PostEntity: infoblog.PostEntity{UUID: infoblog.NewNullUUID(req.UUID)},
+		PostEntity: infoblog.PostEntity{UUID: types.NewNullUUID(req.UUID)},
 	})
 
 	if err != nil {
@@ -380,10 +381,10 @@ func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
 
 	likeFound, err := p.like.Find(ctx, &like)
 	if err != nil {
-		like.Active = infoblog.NewNullBool(true)
+		like.Active = types.NewNullBool(true)
 		return p.like.Upsert(ctx, like)
 	}
-	likeFound.Active = infoblog.NewNullBool(!likeFound.Active.Bool)
+	likeFound.Active = types.NewNullBool(!likeFound.Active.Bool)
 
 	return p.like.Upsert(ctx, likeFound)
 }

@@ -3,18 +3,20 @@ package infoblog
 import (
 	"context"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/types"
 )
 
 type PostEntity struct {
-	UUID      NullUUID    `json:"post_id" db:"uuid"`
-	Type      int64       `json:"post_type" db:"type"`
-	Body      string      `json:"description" db:"body"`
-	UserUUID  NullUUID    `json:"user_id" db:"user_uuid"`
-	Active    int64       `json:"active" db:"active"`
-	Price     NullFloat64 `json:"price" db:"price"`
-	FileUUID  NullUUID    `json:"file_id" db:"file_uuid"`
-	CreatedAt time.Time   `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at" db:"updated_at"`
+	UUID      types.NullUUID    `json:"post_id" db:"uuid"`
+	Type      int64             `json:"post_type" db:"type"`
+	Body      string            `json:"description" db:"body"`
+	UserUUID  types.NullUUID    `json:"user_id" db:"user_uuid"`
+	Active    int64             `json:"active" db:"active"`
+	Price     types.NullFloat64 `json:"price" db:"price"`
+	FileUUID  types.NullUUID    `json:"file_id" db:"file_uuid"`
+	CreatedAt time.Time         `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at" db:"updated_at"`
 }
 
 type Post struct {

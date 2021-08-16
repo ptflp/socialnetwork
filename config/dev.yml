@@ -20,7 +20,7 @@ server:
 
 
 SMSC:
-  dev: false
+  dev: true
 
 
 oauth2:

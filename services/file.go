@@ -9,6 +9,8 @@ import (
 	"path"
 	"strings"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
@@ -34,7 +36,7 @@ func NewFileService(fileRep infoblog.FileRepository) *File {
 	return &File{fileRep: fileRep}
 }
 
-func (f *File) SaveFileSystem(formFile FormFile, user infoblog.User, fileUUID infoblog.NullUUID) (infoblog.File, error) {
+func (f *File) SaveFileSystem(formFile FormFile, user infoblog.User, fileUUID types.NullUUID) (infoblog.File, error) {
 	if _, err := os.Stat(UploadDirectory); os.IsNotExist(err) {
 		err = os.Mkdir(UploadDirectory, 0755)
 		if err != nil {
@@ -97,7 +99,7 @@ func (f *File) GetFilesByPostUUIDs(ctx context.Context, postUUIDs []string) ([]i
 }
 
 func (f *File) GetFile(ctx context.Context, fileUUID string) (infoblog.File, error) {
-	fileEnt, err := f.fileRep.Find(ctx, infoblog.File{UUID: infoblog.NewNullUUID(fileUUID)})
+	fileEnt, err := f.fileRep.Find(ctx, infoblog.File{UUID: types.NewNullUUID(fileUUID)})
 
 	return fileEnt, err
 }

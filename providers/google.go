@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/types"
 	"gitlab.com/InfoBlogFriends/server/utils"
 
 	"golang.org/x/oauth2/google"
@@ -65,7 +66,7 @@ func (f *Google) Callback(r *http.Request) (infoblog.User, error) {
 	}
 
 	return infoblog.User{
-		GoogleID: infoblog.NewNullString(req.GoogleID),
-		Name:     infoblog.NewNullString(req.Name),
+		GoogleID: types.NewNullString(req.GoogleID),
+		Name:     types.NewNullString(req.Name),
 	}, nil
 }

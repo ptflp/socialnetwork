@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
+	"gitlab.com/InfoBlogFriends/server/types"
 
 	"gitlab.com/InfoBlogFriends/server/cache"
 
@@ -263,7 +264,7 @@ func (j *JWTKeys) ExtractAccessToken(r *http.Request) (*infoblog.User, error) {
 		uuid = v.(string)
 	}
 	u := &infoblog.User{
-		UUID: infoblog.NewNullUUID(uuid),
+		UUID: types.NewNullUUID(uuid),
 	}
 
 	return u, nil

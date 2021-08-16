@@ -9,6 +9,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	infoblog "gitlab.com/InfoBlogFriends/server"
+	"gitlab.com/InfoBlogFriends/server/types"
 )
 
 const (
@@ -155,7 +156,7 @@ func (f *filesRepository) FindByTypeFUUID(ctx context.Context, typeID int64, for
 }
 
 func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) ([]infoblog.File, error) {
-	uuids := make([]infoblog.NullUUID, 0, len(postsIDs))
+	uuids := make([]types.NullUUID, 0, len(postsIDs))
 
 	fields, err := infoblog.GetFields("files")
 	if err != nil {
