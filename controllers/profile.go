@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	"gitlab.com/InfoBlogFriends/server/request"
 
 	infoblog "gitlab.com/InfoBlogFriends/server"
@@ -32,7 +34,7 @@ func NewProfileController(responder respond.Responder, user *services.User, logg
 func (a *profileController) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		u, ok := ctx.Value(infoblog.User{}).(*infoblog.User)
+		u, ok := ctx.Value(types.User{}).(*infoblog.User)
 		if !ok {
 			a.ErrorInternal(w, errors.New("type assertion to user err"))
 			return

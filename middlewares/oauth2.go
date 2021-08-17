@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	infoblog "gitlab.com/InfoBlogFriends/server"
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	"gitlab.com/InfoBlogFriends/server/auth"
 
 	"gitlab.com/InfoBlogFriends/server/providers"
@@ -52,7 +53,7 @@ func (a *AuthSocials) Callback(next http.Handler) http.Handler {
 			return
 		}
 		state := r.FormValue("state")
-		ctx := context.WithValue(r.Context(), &infoblog.User{}, &u)
+		ctx := context.WithValue(r.Context(), types.User{}, &u)
 		ctx = context.WithValue(ctx, auth.State{}, state)
 		ctx = context.WithValue(ctx, auth.Provider{}, providerName)
 

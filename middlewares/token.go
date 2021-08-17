@@ -5,6 +5,8 @@ import (
 	"errors"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	infoblog "gitlab.com/InfoBlogFriends/server"
 
 	"gitlab.com/InfoBlogFriends/server/session"
@@ -35,7 +37,7 @@ func (t *Token) CheckStrict(next http.Handler) http.Handler {
 			t.ErrorForbidden(w, err)
 			return
 		}
-		ctx := context.WithValue(r.Context(), &infoblog.User{}, u)
+		ctx := context.WithValue(r.Context(), types.User{}, u)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -46,7 +48,7 @@ func (t *Token) Check(next http.Handler) http.Handler {
 		if err != nil {
 			u = &infoblog.User{}
 		}
-		ctx := context.WithValue(r.Context(), &infoblog.User{}, u)
+		ctx := context.WithValue(r.Context(), infoblog.User{}, u)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

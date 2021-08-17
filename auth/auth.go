@@ -313,7 +313,7 @@ func (a *service) CheckCode(ctx context.Context, req *request.CheckCodeRequest) 
 
 func (a *service) SocialCallback(ctx context.Context, state string) (string, error) {
 	var err error
-	u, ok := ctx.Value(infoblog.User{}).(*infoblog.User)
+	u, ok := ctx.Value(types.User{}).(*infoblog.User)
 	if !ok {
 		return "", errors.New("type assertion to user err")
 	}
@@ -366,7 +366,6 @@ func (a *service) SocialCallback(ctx context.Context, state string) (string, err
 
 	uri.Path = fmt.Sprintf("socials/%s", state)
 
-	fmt.Println(uri.String())
 	return uri.String(), nil
 }
 
