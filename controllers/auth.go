@@ -178,9 +178,6 @@ func (a *authController) Oauth2Callback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		state := r.FormValue("state")
 		url, _ := a.authService.SocialCallback(r.Context(), state)
-		a.logger.Info(url, zap.String("url", url))
-		a.logger.Error(url, zap.String("url", url))
-		fmt.Println(url)
 		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	}
 }

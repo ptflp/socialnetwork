@@ -211,3 +211,5 @@ func (x NullUUID) Value() (driver.Value, error) {
 
 	return x.Binary, nil
 }
+
+type User struct{}
