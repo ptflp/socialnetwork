@@ -48,7 +48,7 @@ func (t *Token) Check(next http.Handler) http.Handler {
 		if err != nil {
 			u = &infoblog.User{}
 		}
-		ctx := context.WithValue(r.Context(), infoblog.User{}, u)
+		ctx := context.WithValue(r.Context(), types.User{}, u)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
