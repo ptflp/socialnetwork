@@ -56,7 +56,7 @@ func (lr *likesRepository) CountByUser(ctx context.Context, user infoblog.User) 
 
 	var count sql.NullInt64
 
-	query, args, err := sq.Select("COUNT(id)").From("likes").Where(sq.Eq{"user_uuid": user.UUID, "active": 1}).ToSql()
+	query, args, err := sq.Select("COUNT(user_uuid)").From("likes").Where(sq.Eq{"user_uuid": user.UUID, "active": 1}).ToSql()
 	if err != nil {
 		return count.Int64, err
 	}
@@ -70,7 +70,7 @@ func (lr *likesRepository) CountByPost(ctx context.Context, like infoblog.Like) 
 
 	var count sql.NullInt64
 
-	query, args, err := sq.Select("COUNT(id)").From("likes").Where(sq.Eq{"type": 1, "foreign_uuid": like.ForeignUUID, "active": 1}).ToSql()
+	query, args, err := sq.Select("COUNT(type)").From("likes").Where(sq.Eq{"type": 1, "foreign_uuid": like.ForeignUUID, "active": 1}).ToSql()
 	if err != nil {
 		return count.Int64, err
 	}

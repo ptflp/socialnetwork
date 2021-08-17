@@ -14,7 +14,6 @@ type PostEntity struct {
 	UserUUID  types.NullUUID    `json:"user_id" db:"user_uuid"`
 	Active    int64             `json:"active" db:"active"`
 	Price     types.NullFloat64 `json:"price" db:"price"`
-	FileUUID  types.NullUUID    `json:"file_id" db:"file_uuid"`
 	CreatedAt time.Time         `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at" db:"updated_at"`
 }
