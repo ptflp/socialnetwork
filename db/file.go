@@ -75,9 +75,13 @@ func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post
 		return err
 	}
 
-	queryIn := strings.Join([]string{"SELECT * WHERE uuid IN (?)"}, "")
+	queryIn := "SELECT * FROM files WHERE uuid IN (?)"
 
-	queryIn, args2, err := sqlx.In(queryIn, ids)
+	uuids := make([]types.NullUUID, 0, len(ids))
+	for i := range ids {
+		uuids = append(uuids, types.NewNullUUID(ids[i]))
+	}
+	queryIn, args2, err := sqlx.In(queryIn, uuids)
 	if err != nil {
 		return err
 	}
