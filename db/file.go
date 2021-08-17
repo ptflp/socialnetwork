@@ -157,6 +157,9 @@ func (f *filesRepository) FindByTypeFUUID(ctx context.Context, typeID int64, for
 
 func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) ([]infoblog.File, error) {
 	uuids := make([]types.NullUUID, 0, len(postsIDs))
+	for i := range postsIDs {
+		uuids = append(uuids, types.NewNullUUID(postsIDs[i]))
+	}
 
 	fields, err := infoblog.GetFields("files")
 	if err != nil {

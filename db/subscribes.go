@@ -46,7 +46,7 @@ func (sb *subsRepository) CountByUser(ctx context.Context, user infoblog.User) (
 
 	var count sql.NullInt64
 
-	query, args, err := sq.Select("COUNT(id)").From("subscribes").Where(sq.Eq{"user_uuid": user.UUID}).ToSql()
+	query, args, err := sq.Select("COUNT(user_uuid)").From("subscribes").Where(sq.Eq{"user_uuid": user.UUID}).ToSql()
 	if err != nil {
 		return count.Int64, err
 	}
