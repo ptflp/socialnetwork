@@ -57,7 +57,7 @@ type service struct {
 
 func emailBody(emailTo, subject, data string) []byte {
 	address := "friends@22byte.com"
-	name := "Petr"
+	name := "friends@22byte.com"
 	from := mail.NewEmail(name, address)
 	address = emailTo
 	name = emailTo
@@ -99,10 +99,11 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 	sendEmailReq.Method = "POST"
 	body := emailBody(req.Email, "Активация учетной записи", html.String())
 	sendEmailReq.Body = body
-	_, err = sendgrid.API(sendEmailReq)
+	response, err := sendgrid.API(sendEmailReq)
 	if err != nil {
 		return err
 	}
+	_ = response
 
 	data := req
 	hashPass, err := hasher.HashPassword(req.Password)
