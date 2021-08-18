@@ -43,7 +43,7 @@ func (r *ReverseProxy) ReverseProxy(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		r.Header.Set("ReverseProxy", "true")
+		r.Header.Set("Reverse-Proxy", "true")
 
 		proxy := httputil.ReverseProxy{Director: func(r *http.Request) {
 			r.URL.Scheme = uri.Scheme
