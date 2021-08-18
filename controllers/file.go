@@ -4,7 +4,6 @@ import (
 	"image"
 	"image/jpeg"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -49,7 +48,7 @@ func (a *fileController) GetFile() http.HandlerFunc {
 		defer func() {
 			err = fileRaw.Close() //Close after function return
 			if err != nil {
-				log.Printf("Ошибка при: %v\n", err)
+				a.logger.Error("file close", zap.Error(err))
 			}
 		}()
 		if err != nil {
@@ -57,7 +56,7 @@ func (a *fileController) GetFile() http.HandlerFunc {
 			w.WriteHeader(http.StatusNotFound)
 			_, err = w.Write([]byte("Файл не найден на сервере"))
 			if err != nil {
-				log.Printf("Ошибка при: %v\n", err)
+				a.logger.Error("file open", zap.Error(err))
 			}
 
 			return
@@ -68,7 +67,7 @@ func (a *fileController) GetFile() http.HandlerFunc {
 		//Copy the headers into the FileHeader buffer
 		_, err = fileRaw.Read(FileHeader)
 		if err != nil {
-			log.Printf("Ошибка при: %v\n", err)
+			a.logger.Error("file read", zap.Error(err))
 		}
 		//Get content type of file
 		FileContentType := http.DetectContentType(FileHeader)
@@ -100,7 +99,7 @@ func (a *fileController) GetFile() http.HandlerFunc {
 				}
 				dstImage := imaging.Blur(m, 21)
 				if err := jpeg.Encode(w, dstImage, nil); err != nil {
-					log.Printf("failed to encode: %v", err)
+					a.logger.Error("jpeg encode", zap.Error(err))
 				}
 
 				return
