@@ -74,7 +74,7 @@ func (u *userRepository) CreateUser(ctx context.Context, user infoblog.User) err
 		return err
 	}
 
-	_, err = u.db.MustExecContext(ctx, query, args...).RowsAffected()
+	_, err = u.db.QueryxContext(ctx, query, args...)
 
 	return err
 }
