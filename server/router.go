@@ -24,6 +24,8 @@ import (
 func NewRouter(services *services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
+	proxy := middlewares.NewReverseProxy()
+	r.Use(proxy.ReverseProxy)
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
 	r.Use(
@@ -43,8 +45,6 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
-	proxy := middlewares.NewReverseProxy()
-	r.Use(proxy.ReverseProxy)
 
 	authController := controllers.NewAuth(cmps.Responder(), services.AuthService, cmps.Logger())
 
