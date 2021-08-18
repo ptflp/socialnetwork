@@ -26,29 +26,20 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	r.Use(middleware.Recoverer)
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
-	r.Use(func(handler http.Handler) http.Handler {
-
-		var corOpts cors.Options
-
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			if r.Header.Get("ReverseProxy") == "" {
-				corOpts = cors.Options{
-					// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-					AllowedOrigins: []string{"https://*", "http://*"},
-					// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-					AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-					AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-					ExposedHeaders:   []string{"Link"},
-					AllowCredentials: false,
-					MaxAge:           300, // Maximum value not ignored by any of major browsers
-				}
-			}
-
-			handler.ServeHTTP(w, r)
-		}
-
-		return cors.Handler(corOpts)(http.HandlerFunc(fn))
-	})
+	r.Use(
+		cors.Handler(
+			cors.Options{
+				// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+				AllowedOrigins: []string{"https://*", "http://*"},
+				// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+				AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+				AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+				ExposedHeaders:   []string{"Link"},
+				AllowCredentials: false,
+				MaxAge:           300, // Maximum value not ignored by any of major browsers
+			},
+		),
+	)
 
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
