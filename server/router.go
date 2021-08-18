@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/cors"
+
 	"gitlab.com/InfoBlogFriends/server/components"
 	"gitlab.com/InfoBlogFriends/server/services"
 
 	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/request"
-
-	"github.com/go-chi/cors"
 
 	"gitlab.com/InfoBlogFriends/server/controllers"
 
@@ -24,11 +24,6 @@ import (
 func NewRouter(services *services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.RequestID)
-	proxy := middlewares.NewReverseProxy()
-	r.Use(proxy.ReverseProxy)
-
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
 	r.Use(cors.Handler(cors.Options{
@@ -41,6 +36,10 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+	r.Use(middleware.RealIP)
+	r.Use(middleware.RequestID)
+	proxy := middlewares.NewReverseProxy()
+	r.Use(proxy.ReverseProxy)
 
 	authController := controllers.NewAuth(cmps.Responder(), services.AuthService, cmps.Logger())
 
