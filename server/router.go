@@ -5,13 +5,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"gitlab.com/InfoBlogFriends/server/request"
+
 	"github.com/go-chi/cors"
 
 	"gitlab.com/InfoBlogFriends/server/components"
 	"gitlab.com/InfoBlogFriends/server/services"
 
 	"gitlab.com/InfoBlogFriends/server/email"
-	"gitlab.com/InfoBlogFriends/server/request"
 
 	"gitlab.com/InfoBlogFriends/server/controllers"
 
@@ -20,6 +22,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
+
+func helloEmail() []byte {
+	address := "friends@22byte.com"
+	name := "Petr"
+	from := mail.NewEmail(name, address)
+	subject := "Hello World from the SendGrid Go Library"
+	address = "globallinkliberty@gmail.com"
+	name = "Example User"
+	to := mail.NewEmail(name, address)
+	content := mail.NewContent("text/plain", "some text here")
+	m := mail.NewV3MailInit(from, subject, to, content)
+
+	return mail.GetRequestBody(m)
+}
 
 func NewRouter(services *services.Services, cmps components.Componenter) (*chi.Mux, error) {
 	r := chi.NewRouter()
@@ -49,6 +65,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	authController := controllers.NewAuth(cmps.Responder(), services.AuthService, cmps.Logger())
 
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+
 		msg := email.NewMessage()
 		var b bytes.Buffer
 

@@ -11,6 +11,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+
 	"gitlab.com/InfoBlogFriends/server/types"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -52,6 +55,19 @@ type service struct {
 	components.Componenter
 }
 
+func emailBody(emailTo, subject, data string) []byte {
+	address := "friends@22byte.com"
+	name := "Petr"
+	from := mail.NewEmail(name, address)
+	address = emailTo
+	name = emailTo
+	to := mail.NewEmail(name, address)
+	content := mail.NewContent(email.TypeHtml, data)
+	m := mail.NewV3MailInit(from, subject, to, content)
+
+	return mail.GetRequestBody(m)
+}
+
 func NewAuthService(
 	repositories infoblog.Repositories,
 	cmps components.Componenter,
@@ -74,18 +90,16 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 		return err
 	}
 
-	body, err := a.prepareEmailTemplate(activationUrl)
+	html, err := a.prepareEmailTemplate(activationUrl)
 	if err != nil {
 		return err
 	}
 
-	msg := email.NewMessage()
-	msg.SetSubject("Активация учетной записи")
-	msg.SetType(email.TypeHtml)
-	msg.SetReceiver(req.Email)
-	msg.SetBody(body)
-
-	err = a.Email().Send(msg)
+	sendEmailReq := sendgrid.GetRequest("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", "/v3/mail/send", "https://api.sendgrid.com")
+	sendEmailReq.Method = "POST"
+	body := emailBody(req.Email, "Активация учетной записи", html.String())
+	sendEmailReq.Body = body
+	_, err = sendgrid.API(sendEmailReq)
 	if err != nil {
 		return err
 	}
