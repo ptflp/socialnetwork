@@ -43,6 +43,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 					MaxAge:           300, // Maximum value not ignored by any of major browsers
 				}
 			}
+
 			handler.ServeHTTP(w, r)
 		}
 
