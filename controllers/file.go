@@ -43,8 +43,8 @@ func (a *fileController) GetFile() http.HandlerFunc {
 			a.ErrorInternal(w, err)
 			return
 		}
-		path := strings.Join([]string{".", file.Dir, file.Name}, "/")
-		fileRaw, err := os.Open(path)
+		filePath := strings.Join([]string{".", file.Dir, file.Name}, "/")
+		fileRaw, err := os.Open(filePath)
 		defer func() {
 			err = fileRaw.Close() //Close after function return
 			if err != nil {
@@ -52,14 +52,17 @@ func (a *fileController) GetFile() http.HandlerFunc {
 			}
 		}()
 		if err != nil {
+			fileRaw, err = os.Open("./templates/unnamed.png")
 			//File not found, send 404
-			w.WriteHeader(http.StatusNotFound)
-			_, err = w.Write([]byte("Файл не найден на сервере"))
 			if err != nil {
-				a.logger.Error("file open", zap.Error(err))
-			}
+				w.WriteHeader(http.StatusNotFound)
+				_, err = w.Write([]byte("Файл не найден на сервере"))
+				if err != nil {
+					a.logger.Error("file open", zap.Error(err))
+				}
 
-			return
+				return
+			}
 		}
 
 		//Create a buffer to store the header of the file in
