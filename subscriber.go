@@ -18,6 +18,10 @@ type Subscriber struct {
 	UpdatedAt      time.Time      `json:"updated_at" db:"updated_at"`
 }
 
+func (s Subscriber) TableName() string {
+	panic("implement me")
+}
+
 type SubscriberRepository interface {
 	Create(ctx context.Context, sub Subscriber) (int64, error)
 	FindByUser(ctx context.Context, user User) ([]Subscriber, error)

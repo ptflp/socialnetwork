@@ -32,6 +32,10 @@ type User struct {
 	UpdatedAt      time.Time         `json:"updated_at" db:"updated_at"`
 }
 
+func (u *User) TableName() string {
+	return "users"
+}
+
 type UserRepository interface {
 	Update(ctx context.Context, user User) error
 	SetPassword(ctx context.Context, user User) error

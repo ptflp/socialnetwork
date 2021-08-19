@@ -7,3 +7,7 @@ type Repositories struct {
 	Subscribers SubscriberRepository
 	Likes       LikeRepository
 }
+
+type Entity interface {
+	TableName() string
+}

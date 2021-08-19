@@ -85,7 +85,7 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 			Type:     req.PostType,
 			UUID:     types.NewNullUUID(),
 			UserUUID: u.UUID,
-			Active:   1,
+			Active:   types.NewNullBool(true),
 			Price:    price,
 		},
 	}

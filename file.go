@@ -19,6 +19,10 @@ type File struct {
 	UpdatedAt   time.Time      `json:"updated_at" db:"updated_at"`
 }
 
+func (f File) TableName() string {
+	return "files"
+}
+
 type FileRepository interface {
 	Create(ctx context.Context, p *File) (int64, error)
 	Update(ctx context.Context, p File) error

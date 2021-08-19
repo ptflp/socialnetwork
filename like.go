@@ -17,6 +17,10 @@ type Like struct {
 	UpdatedAt   time.Time      `json:"updated_at" db:"updated_at"`
 }
 
+func (l *Like) TableName() string {
+	return "likes"
+}
+
 type LikeRepository interface {
 	Upsert(ctx context.Context, like Like) error
 	Find(ctx context.Context, like *Like) (Like, error)
