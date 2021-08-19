@@ -25,7 +25,7 @@ func NewUserRepository(db *sqlx.DB) infoblog.UserRepository {
 
 func (u *userRepository) FindByEmail(ctx context.Context, user infoblog.User) (infoblog.User, error) {
 
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -44,7 +44,7 @@ func (u *userRepository) FindByEmail(ctx context.Context, user infoblog.User) (i
 
 func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (infoblog.User, error) {
 
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -62,7 +62,7 @@ func (u *userRepository) FindByPhone(ctx context.Context, user infoblog.User) (i
 }
 
 func (u *userRepository) CreateUser(ctx context.Context, user infoblog.User) error {
-	createFields, err := infoblog.GetCreateFields("users")
+	createFields, err := infoblog.GetFields(&infoblog.User{}, "create")
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func (u *userRepository) SetPassword(ctx context.Context, user infoblog.User) er
 }
 
 func (u *userRepository) Find(ctx context.Context, user infoblog.User) (infoblog.User, error) {
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -135,7 +135,7 @@ func (u *userRepository) Find(ctx context.Context, user infoblog.User) (infoblog
 }
 
 func (u *userRepository) FindByNickname(ctx context.Context, user infoblog.User) (infoblog.User, error) {
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -153,7 +153,7 @@ func (u *userRepository) FindByNickname(ctx context.Context, user infoblog.User)
 }
 
 func (u *userRepository) FindLikeNickname(ctx context.Context, nickname string) ([]infoblog.User, error) {
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func (u *userRepository) FindByFacebook(ctx context.Context, user infoblog.User)
 	if !user.FacebookID.Valid {
 		return infoblog.User{}, fmt.Errorf("invalid facebook_id %d", user.FacebookID.Int64)
 	}
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -197,7 +197,7 @@ func (u *userRepository) FindByGoogle(ctx context.Context, user infoblog.User) (
 	if !user.GoogleID.Valid {
 		return infoblog.User{}, fmt.Errorf("invalid facebook_id %s", user.GoogleID.String)
 	}
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return infoblog.User{}, err
 	}
@@ -215,7 +215,7 @@ func (u *userRepository) FindByGoogle(ctx context.Context, user infoblog.User) (
 }
 
 func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (u *userRepository) FindAll(ctx context.Context) ([]infoblog.User, error) {
 }
 
 func (u *userRepository) FindLimitOffset(ctx context.Context, limit, offset uint64) ([]infoblog.User, error) {
-	fields, err := infoblog.GetFields("users")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return nil, err
 	}

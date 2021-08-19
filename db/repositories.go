@@ -3,6 +3,7 @@ package db
 import (
 	infoblog "gitlab.com/InfoBlogFriends/server"
 	"gitlab.com/InfoBlogFriends/server/components"
+	"gitlab.com/InfoBlogFriends/server/migration"
 	"go.uber.org/zap"
 )
 
@@ -12,6 +13,8 @@ func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 	if err != nil {
 		cmps.Logger().Fatal("db initialization error", zap.Error(err))
 	}
+	migrator := migration.NewMigrator(mainDB)
+	err = migrator.Migrate()
 
 	r := infoblog.Repositories{
 		Files:       NewFilesRepository(mainDB),

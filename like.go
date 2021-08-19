@@ -17,7 +17,7 @@ type Like struct {
 	UpdatedAt   time.Time      `json:"updated_at" db:"updated_at"`
 }
 
-func (l *Like) TableName() string {
+func (l Like) TableName() string {
 	return "likes"
 }
 
