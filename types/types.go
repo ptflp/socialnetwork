@@ -178,7 +178,8 @@ func (x *NullUUID) Scan(value interface{}) error {
 	var source []byte
 	switch t := value.(type) {
 	case string:
-		source = []byte(t)
+		*x = NewNullUUID(t)
+		return nil
 	case []byte:
 		if len(t) == 0 {
 			source = nil
