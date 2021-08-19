@@ -4,13 +4,18 @@ import (
 	"fmt"
 	"time"
 
+	infoblog "gitlab.com/InfoBlogFriends/server"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/InfoBlogFriends/server/config"
 	"go.uber.org/zap"
+	gormMysql "gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func NewDB(logger *zap.Logger, dbConf config.DB) (*sqlx.DB, error) {
+
 	cfg := mysql.NewConfig()
 	cfg.Net = dbConf.Net
 	cfg.Addr = dbConf.Host
@@ -33,8 +38,16 @@ func NewDB(logger *zap.Logger, dbConf config.DB) (*sqlx.DB, error) {
 		case <-ticker.C:
 			db, err := connectDB(dbConf.Driver, dsn)
 			if err == nil {
-				return db, nil
+				gormClient, _ := gorm.Open(gormMysql.New(gormMysql.Config{
+					Conn: db,
+				}), &gorm.Config{})
+				err = gormClient.AutoMigrate(
+					infoblog.PostEntity{},
+				)
+
+				return db, err
 			}
+
 			logger.Error("failed to connect to database", zap.String("dsn", dsn), zap.Error(err))
 		}
 	}

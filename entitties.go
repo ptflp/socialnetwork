@@ -6,24 +6,56 @@ import (
 	"strings"
 )
 
-var entityFields = map[string][]string{}
-var entityUpdateFields = map[string][]string{}
-var entityCreateFields = map[string][]string{}
-var entityDeleteFields = map[string][]string{}
+var (
+	entityFields       map[string][]string
+	entityUpdateFields map[string][]string
+	entityCreateFields map[string][]string
+	entityDeleteFields map[string][]string
+	tables             map[string]Table
+)
+
+type Table struct {
+	Name   string
+	Fields []Field
+}
+
+type Field struct {
+	Name       string
+	Type       string
+	Default    string
+	Constraint string
+}
+
+type Constraints struct {
+	Name string
+	Type string
+}
 
 // register entities
 func init() {
+	RegisterEntities(
+		&User{},
+		&Like{},
+		&HashTag{},
+		&Subscriber{},
+		&File{},
+		&PostEntity{},
+	)
+}
 
-	entities := map[string]interface{}{
-		"users":      User{},
-		"likes":      Like{},
-		"hashtags":   HashTag{},
-		"subscribes": Subscriber{},
-		"files":      File{},
-		"posts":      PostEntity{},
+// register entities
+func RegisterEntities(entities ...Entity) {
+	tableEntities := make(map[string]interface{}, len(entities))
+	for i := range entities {
+		tableEntities[entities[i].TableName()] = entities[i]
 	}
 
-	for name, entity := range entities {
+	tables = make(map[string]Table, len(entities))
+
+	for name, entity := range tableEntities {
+		table := Table{
+			Name: name,
+		}
 		t := reflect.TypeOf(entity)
 
 		var allFields []string
@@ -45,31 +77,35 @@ func init() {
 				createFields = make([]string, 0, t.NumField())
 			}
 
-			if deleteFields == nil {
-				deleteFields = make([]string, 0, t.NumField())
-			}
-
 			// Get the field, returns https://golang.org/pkg/reflect/#StructField
-			field := t.Field(i)
+			structField := t.Field(i)
+			// Get the structField tag value
+			fieldName := structField.Tag.Get("db")
 
-			// Get the field tag value
-			filedName := field.Tag.Get("db")
-			if filedName == "" || filedName == "-" {
+			if fieldName == "" || fieldName == "-" {
 				continue
 			}
-			allFields = append(allFields, filedName)
+			allFields = append(allFields, fieldName)
 
-			tagsString := field.Tag.Get("ops")
+			field := Field{
+				Name:       fieldName,
+				Type:       structField.Tag.Get("orm_type"),
+				Default:    structField.Tag.Get("orm_default"),
+				Constraint: structField.Tag.Get("orm_constraint"),
+			}
+			table.Fields = append(table.Fields, field)
+
+			tagsString := structField.Tag.Get("ops")
 			tags := strings.Split(tagsString, ",")
 			if tagsString != "" {
 				for i := range tags {
 					switch tags[i] {
 					case "update":
-						updateFields = append(updateFields, filedName)
+						updateFields = append(updateFields, fieldName)
 					case "create":
-						createFields = append(createFields, filedName)
+						createFields = append(createFields, fieldName)
 					case "delete":
-						deleteFields = append(deleteFields, filedName)
+						deleteFields = append(deleteFields, fieldName)
 					}
 				}
 			}
@@ -81,11 +117,25 @@ func init() {
 
 		entityCreateFields[name] = createFields
 
-		entityDeleteFields[name] = deleteFields
+		tables[name] = table
 	}
 }
 
-func GetFields(tableName string, args ...string) ([]string, error) {
+func GetFields(entity Entity, args ...string) ([]string, error) {
+	if len(args) < 1 {
+		return GetAllFields(entity.TableName())
+	}
+	switch args[0] {
+	case "create":
+		return GetCreateFields(entity.TableName())
+	case "update":
+		return GetUpdateFields(entity.TableName())
+	default:
+		return GetAllFields(entity.TableName())
+	}
+}
+
+func GetAllFields(tableName string, args ...string) ([]string, error) {
 	v, ok := entityFields[tableName]
 	if !ok {
 		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
@@ -121,18 +171,6 @@ func GetCreateFields(tableName string) ([]string, error) {
 	return b, nil
 }
 
-func GetDeleteFields(tableName string) ([]string, error) {
-	v, ok := entityDeleteFields[tableName]
-	if !ok {
-		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
-	}
-
-	b := make([]string, len(v))
-	copy(b, v)
-
-	return b, nil
-}
-
 func GetFieldsPointers(u interface{}, args ...string) []interface{} {
 	val := reflect.ValueOf(u).Elem()
 	v := make([]interface{}, 0, val.NumField())
@@ -154,5 +192,6 @@ func GetFieldsPointers(u interface{}, args ...string) []interface{} {
 		valueField := val.Field(i)
 		v = append(v, valueField.Addr().Interface())
 	}
+
 	return v
 }
