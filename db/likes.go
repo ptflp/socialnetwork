@@ -35,7 +35,7 @@ func (lr *likesRepository) Upsert(ctx context.Context, like infoblog.Like) error
 }
 
 func (lr *likesRepository) Find(ctx context.Context, like *infoblog.Like) (infoblog.Like, error) {
-	fields, err := infoblog.GetFields("likes")
+	fields, err := infoblog.GetFields(&infoblog.Like{})
 	if err != nil {
 		return infoblog.Like{}, err
 	}

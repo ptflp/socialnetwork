@@ -55,7 +55,7 @@ func (pr *postsRepository) Find(ctx context.Context, p infoblog.Post) (infoblog.
 		return infoblog.Post{}, errors.New("repository wrong post uuid")
 	}
 
-	fields, err := infoblog.GetFields("posts")
+	fields, err := infoblog.GetFields(&p)
 	if err != nil {
 		return infoblog.Post{}, err
 	}
@@ -75,7 +75,7 @@ func (pr *postsRepository) Find(ctx context.Context, p infoblog.Post) (infoblog.
 }
 
 func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limit int64, offset int64) ([]infoblog.Post, map[string]int, []string, error) {
-	fields, err := infoblog.GetFields("posts")
+	fields, err := infoblog.GetFields(&infoblog.PostEntity{})
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -85,7 +85,7 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 		fields[i] = s
 	}
 
-	userFields, err := infoblog.GetFields("users")
+	userFields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -132,7 +132,7 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 }
 
 func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[string]int, []string, error) {
-	fields, err := infoblog.GetFields("posts")
+	fields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -142,7 +142,7 @@ func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int6
 		fields[i] = s
 	}
 
-	userFields, err := infoblog.GetFields("users")
+	userFields, err := infoblog.GetFields(&infoblog.User{})
 	if err != nil {
 		return nil, nil, nil, err
 	}

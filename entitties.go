@@ -6,24 +6,37 @@ import (
 	"strings"
 )
 
+//go:generate go get -u github.com/valyala/quicktemplate/qtc
+//go:generate qtc -dir=migration
+
 var (
 	entityFields       map[string][]string
 	entityUpdateFields map[string][]string
 	entityCreateFields map[string][]string
-	entityDeleteFields map[string][]string
 	tables             map[string]Table
 )
 
 type Table struct {
-	Name   string
-	Fields []Field
+	Name        string
+	Fields      []Field
+	Constraints []Constraint
+}
+
+func (t Table) CreateQuery() string {
+	return ""
 }
 
 type Field struct {
 	Name       string
 	Type       string
 	Default    string
-	Constraint string
+	Constraint Constraint
+}
+
+type Constraint struct {
+	Index     bool
+	Unique    bool
+	FieldName string
 }
 
 type Constraints struct {
@@ -34,12 +47,12 @@ type Constraints struct {
 // register entities
 func init() {
 	RegisterEntities(
-		&User{},
-		&Like{},
-		&HashTag{},
-		&Subscriber{},
-		&File{},
-		&PostEntity{},
+		User{},
+		Like{},
+		HashTag{},
+		Subscriber{},
+		File{},
+		PostEntity{},
 	)
 }
 
@@ -51,6 +64,9 @@ func RegisterEntities(entities ...Entity) {
 	}
 
 	tables = make(map[string]Table, len(entities))
+	entityFields = make(map[string][]string, len(entities))
+	entityUpdateFields = make(map[string][]string, len(entities))
+	entityCreateFields = make(map[string][]string, len(entities))
 
 	for name, entity := range tableEntities {
 		table := Table{
@@ -61,7 +77,6 @@ func RegisterEntities(entities ...Entity) {
 		var allFields []string
 		var updateFields []string
 		var createFields []string
-		var deleteFields []string
 
 		for i := 0; i < t.NumField(); i++ {
 
@@ -88,24 +103,40 @@ func RegisterEntities(entities ...Entity) {
 			allFields = append(allFields, fieldName)
 
 			field := Field{
-				Name:       fieldName,
-				Type:       structField.Tag.Get("orm_type"),
-				Default:    structField.Tag.Get("orm_default"),
-				Constraint: structField.Tag.Get("orm_constraint"),
+				Name:    fieldName,
+				Type:    structField.Tag.Get("orm_type"),
+				Default: structField.Tag.Get("orm_default"),
+			}
+			constraintRaw := structField.Tag.Get("orm_index")
+			constraintPieces := strings.Split(constraintRaw, ",")
+			if len(constraintPieces) < 1 {
+				field.Constraint = Constraint{}
+			}
+			if len(constraintPieces) > 0 {
+				for i := range constraintPieces {
+					switch constraintPieces[i] {
+					case "index":
+						field.Constraint.Index = true
+					case "unique":
+						field.Constraint.Unique = true
+					}
+				}
+			}
+			if field.Constraint.Index {
+				field.Constraint.FieldName = field.Name
+				table.Constraints = append(table.Constraints, field.Constraint)
 			}
 			table.Fields = append(table.Fields, field)
 
-			tagsString := structField.Tag.Get("ops")
-			tags := strings.Split(tagsString, ",")
-			if tagsString != "" {
-				for i := range tags {
-					switch tags[i] {
+			opsRaw := structField.Tag.Get("ops")
+			ops := strings.Split(opsRaw, ",")
+			if opsRaw != "" {
+				for i := range ops {
+					switch ops[i] {
 					case "update":
 						updateFields = append(updateFields, fieldName)
 					case "create":
 						createFields = append(createFields, fieldName)
-					case "delete":
-						deleteFields = append(deleteFields, fieldName)
 					}
 				}
 			}
@@ -194,4 +225,8 @@ func GetFieldsPointers(u interface{}, args ...string) []interface{} {
 	}
 
 	return v
+}
+
+func GetTables() map[string]Table {
+	return tables
 }

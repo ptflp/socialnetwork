@@ -151,4 +151,3 @@ create table subscribes
     constraint subscribes_user_uuid_subscriber_uuid_uindex
         unique (user_uuid, subscriber_uuid)
 );
-

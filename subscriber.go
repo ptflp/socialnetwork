@@ -19,7 +19,7 @@ type Subscriber struct {
 }
 
 func (s Subscriber) TableName() string {
-	panic("implement me")
+	return "subscribes"
 }
 
 type SubscriberRepository interface {

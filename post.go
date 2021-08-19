@@ -9,19 +9,19 @@ import (
 )
 
 type PostEntity struct {
-	UUID      types.NullUUID    `json:"post_id" db:"uuid" gorm:"primaryKey,type:binary(16)"`
-	Type      int64             `json:"post_type" db:"type" gorm:"default:1"`
-	Body      string            `json:"description" db:"body" gorm:"type:varchar(100)"`
-	UserUUID  types.NullUUID    `json:"user_id" db:"user_uuid" gorm:"type:binary(16),index"`
-	Active    types.NullBool    `json:"active" db:"active"`
-	Price     types.NullFloat64 `json:"price" db:"price" gorm:"type:decimal(13,4)"`
-	Likes     types.NullInt64   `json:"likes" db:"likes" gorm:"index"`
-	CreatedAt time.Time         `json:"created_at" db:"created_at" gorm:"index,type:timestamp"`
-	UpdatedAt time.Time         `json:"updated_at" db:"updated_at" gorm:"index,type:timestamp"`
-	DeletedAt sql.NullTime      `json:"deleted_at" db:"deleted_at" gorm:"index"`
+	UUID      types.NullUUID    `json:"post_id" db:"uuid" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Type      int64             `json:"post_type" db:"type" orm_type:"int" orm_default:"default 1 not null"`
+	Body      string            `json:"description" db:"body" orm_type:"varchar(100)" orm_default:"not null"`
+	UserUUID  types.NullUUID    `json:"user_id" db:"user_uuid" orm_type:"binary(16)" orm_default:"null" orm_index:"index"`
+	Active    types.NullBool    `json:"active" db:"active" orm_type:"boolean" orm_default:"null"`
+	Price     types.NullFloat64 `json:"price" db:"price" orm_type:"decimal(13,4)" orm_default:"null" orm_index:"index"`
+	Likes     types.NullInt64   `json:"likes" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index"`
+	CreatedAt time.Time         `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
+	UpdatedAt time.Time         `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
+	DeletedAt sql.NullTime      `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
 }
 
-func (p *PostEntity) TableName() string {
+func (p PostEntity) TableName() string {
 	return "posts"
 }
 

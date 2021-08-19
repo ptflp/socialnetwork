@@ -5,14 +5,13 @@ import (
 	"net/http"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/request"
 
 	"github.com/go-chi/cors"
 
 	"gitlab.com/InfoBlogFriends/server/components"
 	"gitlab.com/InfoBlogFriends/server/services"
-
-	"gitlab.com/InfoBlogFriends/server/email"
 
 	"gitlab.com/InfoBlogFriends/server/controllers"
 

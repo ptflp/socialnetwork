@@ -102,7 +102,7 @@ func (f *filesRepository) Delete(ctx context.Context, p infoblog.File) error {
 }
 
 func (f *filesRepository) Find(ctx context.Context, file infoblog.File) (infoblog.File, error) {
-	fields, err := infoblog.GetFields("files")
+	fields, err := infoblog.GetFields(&infoblog.File{})
 	if err != nil {
 		return infoblog.File{}, err
 	}
@@ -125,7 +125,7 @@ func (f *filesRepository) FindAll(ctx context.Context, postUUID string) ([]infob
 
 func (f *filesRepository) FindByTypeFUUID(ctx context.Context, typeID int64, foreignUUID string) ([]infoblog.File, error) {
 
-	fields, err := infoblog.GetFields("files")
+	fields, err := infoblog.GetFields(&infoblog.File{})
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) 
 		uuids = append(uuids, types.NewNullUUID(postsIDs[i]))
 	}
 
-	fields, err := infoblog.GetFields("files")
+	fields, err := infoblog.GetFields(&infoblog.File{})
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (f filesRepository) FindByPostsIDs(ctx context.Context, postsIDs []string) 
 }
 
 func (f *filesRepository) FindByIDs(ctx context.Context, ids []string) ([]infoblog.File, error) {
-	fields, err := infoblog.GetFields("files")
+	fields, err := infoblog.GetFields(&infoblog.File{})
 	if err != nil {
 		return nil, err
 	}
