@@ -19,7 +19,9 @@ var (
 type Table struct {
 	Name        string
 	Fields      []Field
+	FieldsMap   map[string]Field
 	Constraints []Constraint
+	Entity      interface{}
 }
 
 func (t Table) CreateQuery() string {
@@ -31,6 +33,7 @@ type Field struct {
 	Type       string
 	Default    string
 	Constraint Constraint
+	TableName  string
 }
 
 type Constraint struct {
@@ -70,7 +73,8 @@ func RegisterEntities(entities ...Entity) {
 
 	for name, entity := range tableEntities {
 		table := Table{
-			Name: name,
+			Name:   name,
+			Entity: entity,
 		}
 		t := reflect.TypeOf(entity)
 
@@ -92,6 +96,10 @@ func RegisterEntities(entities ...Entity) {
 				createFields = make([]string, 0, t.NumField())
 			}
 
+			if table.FieldsMap == nil {
+				table.FieldsMap = make(map[string]Field, t.NumField())
+			}
+
 			// Get the field, returns https://golang.org/pkg/reflect/#StructField
 			structField := t.Field(i)
 			// Get the structField tag value
@@ -103,9 +111,10 @@ func RegisterEntities(entities ...Entity) {
 			allFields = append(allFields, fieldName)
 
 			field := Field{
-				Name:    fieldName,
-				Type:    structField.Tag.Get("orm_type"),
-				Default: structField.Tag.Get("orm_default"),
+				Name:      fieldName,
+				Type:      structField.Tag.Get("orm_type"),
+				Default:   structField.Tag.Get("orm_default"),
+				TableName: table.Name,
 			}
 			constraintRaw := structField.Tag.Get("orm_index")
 			constraintPieces := strings.Split(constraintRaw, ",")
@@ -127,6 +136,7 @@ func RegisterEntities(entities ...Entity) {
 				table.Constraints = append(table.Constraints, field.Constraint)
 			}
 			table.Fields = append(table.Fields, field)
+			table.FieldsMap[field.Name] = field
 
 			opsRaw := structField.Tag.Get("ops")
 			ops := strings.Split(opsRaw, ",")

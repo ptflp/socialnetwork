@@ -9,7 +9,7 @@ import (
 
 //go:generate qtc -dir=./
 
-const tableFields = "SELECT COLUMN_NAME  FROM INFORMATION_SCHEMA.COLUMNS  WHERE  TABLE_SCHEMA = ? AND TABLE_NAME = ?"
+const selectTableFields = "SELECT COLUMN_NAME  FROM INFORMATION_SCHEMA.COLUMNS  WHERE  TABLE_SCHEMA = ? AND TABLE_NAME = ?"
 
 type Migrator struct {
 	db *sqlx.DB
@@ -24,12 +24,16 @@ func (m *Migrator) Migrate() error {
 	var err error
 	for name := range tables {
 		table := tables[name]
-		var fields []string
-		err = m.db.Select(&fields, tableFields, "infoblog", table.Name)
+		var tableFields []string
+		err = m.db.Select(&tableFields, selectTableFields, "infoblog", table.Name)
 		if err != nil {
 			return err
 		}
-		if len(fields) < 1 {
+		tableFieldsMap := make(map[string]string, len(tableFields))
+		for i := range tableFields {
+			tableFieldsMap[tableFields[i]] = tableFields[i]
+		}
+		if len(tableFields) < 1 {
 			createQuery := CreateTable(table)
 			queries := strings.Split(createQuery, ";")
 			for i := range queries {
@@ -40,6 +44,35 @@ func (m *Migrator) Migrate() error {
 				_, err = m.db.Queryx(queries[i])
 				if err != nil {
 					return err
+				}
+			}
+		}
+		if len(tableFields) > 0 {
+			entityFields, _ := infoblog.GetFields(table.Entity.(infoblog.Entity))
+			var diff map[string]infoblog.Field
+			for i := range entityFields {
+				if _, ok := tableFieldsMap[entityFields[i]]; !ok {
+					if diff == nil {
+						diff = make(map[string]infoblog.Field, len(entityFields))
+					}
+					diff[entityFields[i]] = table.FieldsMap[entityFields[i]]
+				}
+			}
+			for fieldName := range diff {
+				if fieldName == "" {
+					continue
+				}
+				alterQuery := AlterTable(diff[fieldName])
+				queries := strings.Split(alterQuery, ";")
+				for i := range queries {
+					if queries[i] == "" {
+						continue
+					}
+					queries[i] = strings.TrimSpace(queries[i])
+					_, err = m.db.Queryx(queries[i])
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
