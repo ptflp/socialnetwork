@@ -16,7 +16,7 @@ type ChatMessages struct {
 	Message   types.NullString `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)"  orm_default:"not null"`
 }
 
-func (u ChatMessages) TableName() string {
+func (c ChatMessages) TableName() string {
 	return "chatMessages"
 }
 
