@@ -13,7 +13,7 @@ type ChatParticipants struct {
 	JoinedAt time.Time      `json:"joined_at" db:"joined_at" orm_type:"timestamp" orm_default:"CURRENT_TIMESTAMP not null" orm_index:"index"`
 }
 
-func (u ChatParticipants) TableName() string {
+func (c ChatParticipants) TableName() string {
 	return "chatParticipants"
 }
 
