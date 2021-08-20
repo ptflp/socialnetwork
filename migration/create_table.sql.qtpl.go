@@ -81,13 +81,15 @@ create table `)
 		for _, constraint := range table.Constraints {
 //line create_table.sql.qtpl:14
 			qw422016.N().S(`
-    create index `)
+    create `)
 //line create_table.sql.qtpl:15
 			if constraint.Unique {
 //line create_table.sql.qtpl:15
 				qw422016.N().S(`unique `)
 //line create_table.sql.qtpl:15
 			}
+//line create_table.sql.qtpl:15
+			qw422016.N().S(`index `)
 //line create_table.sql.qtpl:15
 			qw422016.E().S(table.Name)
 //line create_table.sql.qtpl:15
