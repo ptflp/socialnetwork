@@ -8,8 +8,8 @@ import (
 )
 
 type ChatParticipants struct {
-	ChatUUID types.NullUUID `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)"`
-	UserUUID types.NullUUID `json:"user_id" db:"uuid" ops:"create" orm_type:"binary(16)"`
+	ChatUUID types.NullUUID `json:"chat_id" db:"chat_uuid" ops:"create" orm_type:"binary(16)"`
+	UserUUID types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)"`
 	JoinedAt time.Time      `json:"joined_at" db:"joined_at" orm_type:"timestamp" orm_default:"CURRENT_TIMESTAMP not null" orm_index:"index"`
 }
 
