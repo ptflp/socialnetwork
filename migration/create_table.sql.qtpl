@@ -12,5 +12,5 @@ create table {%s table.Name %}
 
 {% if len(table.Constraints) > 0 %}
     {% for _, constraint := range table.Constraints %}
-    create index {% if constraint.Unique %}unique {% endif %}{%s table.Name %}_{%s constraint.FieldName %}_idx
+    create {% if constraint.Unique %}unique {% endif %}index {%s table.Name %}_{%s constraint.FieldName %}_idx
      on {%s table.Name %} ({%s constraint.FieldName %});{% endfor %}{% endif %}{% endfunc %}

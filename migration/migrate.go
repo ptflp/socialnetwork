@@ -9,7 +9,7 @@ import (
 
 //go:generate qtc -dir=./
 
-const tableFields = "SELECT COLUMN_NAME  FROM INFORMATION_SCHEMA.COLUMNS  WHERE TABLE_NAME = ?"
+const tableFields = "SELECT COLUMN_NAME  FROM INFORMATION_SCHEMA.COLUMNS  WHERE  TABLE_SCHEMA = ? AND TABLE_NAME = ?"
 
 type Migrator struct {
 	db *sqlx.DB
@@ -25,7 +25,7 @@ func (m *Migrator) Migrate() error {
 	for name := range tables {
 		table := tables[name]
 		var fields []string
-		err = m.db.Select(&fields, tableFields, table.Name)
+		err = m.db.Select(&fields, tableFields, "infoblog", table.Name)
 		if err != nil {
 			return err
 		}
@@ -36,6 +36,7 @@ func (m *Migrator) Migrate() error {
 				if queries[i] == "" {
 					continue
 				}
+				queries[i] = strings.TrimSpace(queries[i])
 				_, err = m.db.Queryx(queries[i])
 				if err != nil {
 					return err
