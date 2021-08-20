@@ -24,6 +24,7 @@ func (c Comments) TableName() string {
 
 type CommentsRepository interface {
 	Update(ctx context.Context, comments Comments) error
+	Delete(ctx context.Context, comments Comments) error
 	Find(ctx context.Context, comments Comments) (Comments, error)
 	FindAll(ctx context.Context) ([]Comments, error)
 	FindLimitOffset(ctx context.Context, limit, offset uint64) ([]Comments, error)

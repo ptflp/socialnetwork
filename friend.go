@@ -23,6 +23,7 @@ func (f Friends) TableName() string {
 
 type FriendsRepository interface {
 	Update(ctx context.Context, friends Friends) error
+	Delete(ctx context.Context, friends Friends) error
 	Find(ctx context.Context, friends Friends) (Friends, error)
 	FindAll(ctx context.Context) ([]Friends, error)
 	FindLimitOffset(ctx context.Context, limit, offset uint64) ([]Friends, error)
