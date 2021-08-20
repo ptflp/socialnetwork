@@ -8,9 +8,9 @@ import (
 )
 
 type ChatMessages struct {
-	UUID      types.NullUUID `json:"uuid" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
-	ChatUUID  types.NullUUID `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)"`
-	UserUUID  types.NullUUID `json:"user_id" db:"uuid" ops:"create" orm_type:"binary(16)"`
+	UUID      types.NullUUID `json:"message_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	ChatUUID  types.NullUUID `json:"chat_id" db:"chat_uuid" ops:"create" orm_type:"binary(16)"`
+	UserUUID  types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)"`
 	CreatedAt time.Time      `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt time.Time      `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 	Message   string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)"`

@@ -8,7 +8,7 @@ import (
 )
 
 type Comments struct {
-	UUID        types.NullUUID   `json:"uuid" db:"uuid" ops:"create" orm_type:"binary(16)"`
+	UUID        types.NullUUID   `json:"comment_id" db:"uuid" ops:"create" orm_type:"binary(16)"`
 	ID          int64            `json:"id" db:"id" ops:"update,create" orm_type:"int"`
 	Body        types.NullString `json:"body" db:"body" ops:"update,create" orm_type:"varchar(511)"`
 	Type        int64            `json:"type" db:"type" ops:"update,create" orm_type:"int"`
