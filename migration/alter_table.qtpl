@@ -1,0 +1,11 @@
+{% import (
+    infoblog "gitlab.com/InfoBlogFriends/server"
+) %}
+
+{% func AlterTable(field infoblog.Field) %}
+alter table {%s field.TableName %}
+	add {%s field.Name %} {%s field.Type %} {%s field.Default %};
+
+{% if field.Constraint.Index %}
+    create {% if field.Constraint.Unique %}unique {% endif %}index {%s field.TableName %}_{%s field.Constraint.FieldName %}_idx
+     on {%s field.TableName %} ({%s field.Constraint.FieldName %});{% endif %}{% endfunc %}

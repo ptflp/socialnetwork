@@ -15,6 +15,9 @@ func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 	}
 	migrator := migration.NewMigrator(mainDB)
 	err = migrator.Migrate()
+	if err != nil {
+		cmps.Logger().Fatal("error on migration apply", zap.Error(err))
+	}
 
 	r := infoblog.Repositories{
 		Files:       NewFilesRepository(mainDB),
