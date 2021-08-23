@@ -8,7 +8,7 @@ import (
 )
 
 type Like struct {
-	Type        int64          `json:"type" db:"type" ops:"create"`
+	Type        int64          `json:"type" db:"type" ops:"create" orm_type:"int"`
 	ForeignUUID types.NullUUID `json:"foreign_id" db:"foreign_uuid" ops:"create" orm_type:"binary(16)"`
 	UserUUID    types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)"`
 	LikerUUID   types.NullUUID `json:"liker_id" db:"liker_uuid" ops:"create" orm_type:"binary(16)"`
