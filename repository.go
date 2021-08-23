@@ -11,6 +11,7 @@ type Repositories struct {
 	ChatParticipant ChatParticipantRepository
 	Comments        CommentsRepository
 	Events          EventRepository
+	Friends         FriendRepository
 }
 
 type Entity interface {
