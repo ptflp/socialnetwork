@@ -20,12 +20,12 @@ func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 	}
 
 	r := infoblog.Repositories{
-		Files:       NewFilesRepository(mainDB),
-		Posts:       NewPostsRepository(mainDB),
-		Users:       NewUserRepository(mainDB),
-		Subscribers: NewSubscribeRepository(mainDB),
-		Likes:       NewLikesRepository(mainDB),
-
+		Files:        NewFilesRepository(mainDB),
+		Posts:        NewPostsRepository(mainDB),
+		Users:        NewUserRepository(mainDB),
+		Subscribers:  NewSubscribeRepository(mainDB),
+		Likes:        NewLikesRepository(mainDB),
+		Event:        NewEventRepository(mainDB),
 		ChatMessages: NewChatMessagesRepository(mainDB),
 	}
 

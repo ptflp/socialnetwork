@@ -8,6 +8,7 @@ type Repositories struct {
 	Likes        LikeRepository
 	Chats        ChatRepository
 	ChatMessages ChatMessagesRepository
+	Event        EventRepository
 }
 
 type Entity interface {
