@@ -6,14 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
 	"gitlab.com/InfoBlogFriends/server/types"
 
@@ -23,7 +20,6 @@ import (
 
 	"github.com/google/uuid"
 
-	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/hasher"
 
 	"gitlab.com/InfoBlogFriends/server/validators"
@@ -54,19 +50,6 @@ type service struct {
 	smsProvider    providers.SMS
 	userRepository infoblog.UserRepository
 	components.Componenter
-}
-
-func emailBody(emailTo, subject, data string) []byte {
-	address := "friends@22byte.com"
-	name := "friends@22byte.com"
-	from := mail.NewEmail(name, address)
-	address = emailTo
-	name = emailTo
-	to := mail.NewEmail(name, address)
-	content := mail.NewContent(email.TypeHtml, data)
-	m := mail.NewV3MailInit(from, subject, to, content)
-
-	return mail.GetRequestBody(m)
 }
 
 func NewAuthService(
@@ -225,23 +208,6 @@ func (a *service) generateActivationUrl(email string) (string, string, error) {
 	u.Path = fmt.Sprintf("email/%s", hash)
 
 	return u.String(), hash, err
-}
-
-func (a *service) prepareEmailTemplate(activationUrl string) (bytes.Buffer, error) {
-	tmpl, err := template.ParseFiles("./templates/email.html")
-	if err != nil {
-		a.Logger().Error("email template parse", zap.Error(err))
-		return bytes.Buffer{}, err
-	}
-	type EmailActivation struct {
-		ActivationUrl string
-	}
-
-	b := bytes.Buffer{}
-
-	err = tmpl.Execute(&b, EmailActivation{ActivationUrl: activationUrl})
-
-	return b, err
 }
 
 func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) bool {
