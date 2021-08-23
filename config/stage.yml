@@ -8,12 +8,11 @@ db:
   dbname: "infoblog"
   username: "root"
   password: "jxtymCkj;ysGfhjkm"
-  host: "157.245.249.1"
+  host: "infoblogdb_stage"
   timeout: 10
 
 server:
   port: 8955
-
 
 SMSC:
   dev: true
