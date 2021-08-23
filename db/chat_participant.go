@@ -13,23 +13,23 @@ type ChatParticipantRepository struct {
 	crud
 }
 
-func (c *ChatParticipantRepository) Create(ctx context.Context, chatMessage infoblog.ChatParticipant) error {
-	return c.create(ctx, &chatMessage)
+func (c *ChatParticipantRepository) Create(ctx context.Context, chatParticipant infoblog.ChatParticipant) error {
+	return c.create(ctx, &chatParticipant)
 }
 
-func (c *ChatParticipantRepository) Find(ctx context.Context, chatMessage infoblog.ChatParticipant) (infoblog.ChatParticipant, error) {
-	err := c.find(ctx, &chatMessage, &chatMessage)
+func (c *ChatParticipantRepository) Find(ctx context.Context, chatParticipant infoblog.ChatParticipant) (infoblog.ChatParticipant, error) {
+	err := c.find(ctx, &chatParticipant, &chatParticipant)
 
-	return chatMessage, err
+	return chatParticipant, err
 }
 
-func (c *ChatParticipantRepository) Update(ctx context.Context, chatMessage infoblog.ChatParticipant) error {
-	return c.update(ctx, &chatMessage)
+func (c *ChatParticipantRepository) Update(ctx context.Context, chatParticipant infoblog.ChatParticipant) error {
+	return c.update(ctx, &chatParticipant)
 }
 
-func (c *ChatParticipantRepository) Delete(ctx context.Context, chatMessage infoblog.ChatParticipant) error {
-	chatMessage.Active = types.NullBool{}
-	return c.update(ctx, &chatMessage)
+func (c *ChatParticipantRepository) Delete(ctx context.Context, chatParticipant infoblog.ChatParticipant) error {
+	chatParticipant.Active = types.NullBool{}
+	return c.update(ctx, &chatParticipant)
 }
 
 func (c *ChatParticipantRepository) List(ctx context.Context, limit, offset uint64) ([]infoblog.ChatParticipant, error) {
