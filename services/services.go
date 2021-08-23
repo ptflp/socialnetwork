@@ -12,7 +12,6 @@ type Services struct {
 	User *User
 	Post *Post
 	File *File
-	Chat *Chat
 }
 
 func NewServices(cmps components.Componenter, repositories infoblog.Repositories) *Services {
@@ -20,13 +19,11 @@ func NewServices(cmps components.Componenter, repositories infoblog.Repositories
 	file := NewFileService(repositories.Files)
 	post := NewPostService(repositories, file, cmps.Decoder(), &services)
 	user := NewUserService(repositories, post, cmps, file)
-	chat := NewChatService(repositories)
 
 	services.AuthService = auth.NewAuthService(repositories, cmps)
 	services.User = user
 	services.Post = post
 	services.File = file
-	services.Chat = chat
 
 	return &services
 }
