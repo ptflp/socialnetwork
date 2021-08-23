@@ -3,16 +3,14 @@ package auth
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"math/rand"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 
 	"gitlab.com/InfoBlogFriends/server/types"
 
@@ -22,7 +20,6 @@ import (
 
 	"github.com/google/uuid"
 
-	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/hasher"
 
 	"gitlab.com/InfoBlogFriends/server/validators"
@@ -55,19 +52,6 @@ type service struct {
 	components.Componenter
 }
 
-func emailBody(emailTo, subject, data string) []byte {
-	address := "friends@22byte.com"
-	name := "friends@22byte.com"
-	from := mail.NewEmail(name, address)
-	address = emailTo
-	name = emailTo
-	to := mail.NewEmail(name, address)
-	content := mail.NewContent(email.TypeHtml, data)
-	m := mail.NewV3MailInit(from, subject, to, content)
-
-	return mail.GetRequestBody(m)
-}
-
 func NewAuthService(
 	repositories infoblog.Repositories,
 	cmps components.Componenter,
@@ -90,16 +74,7 @@ func (a *service) EmailActivation(ctx context.Context, req *request.EmailActivat
 		return err
 	}
 
-	html, err := a.prepareEmailTemplate(activationUrl)
-	if err != nil {
-		return err
-	}
-
-	sendEmailReq := sendgrid.GetRequest("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", "/v3/mail/send", "https://api.sendgrid.com")
-	sendEmailReq.Method = "POST"
-	body := emailBody(req.Email, "Активация учетной записи", html.String())
-	sendEmailReq.Body = body
-	_, err = sendgrid.API(sendEmailReq)
+	err = sendEmail(req.Email, activationUrl)
 	if err != nil {
 		return err
 	}
@@ -233,23 +208,6 @@ func (a *service) generateActivationUrl(email string) (string, string, error) {
 	u.Path = fmt.Sprintf("email/%s", hash)
 
 	return u.String(), hash, err
-}
-
-func (a *service) prepareEmailTemplate(activationUrl string) (bytes.Buffer, error) {
-	tmpl, err := template.ParseFiles("./templates/email.html")
-	if err != nil {
-		a.Logger().Error("email template parse", zap.Error(err))
-		return bytes.Buffer{}, err
-	}
-	type EmailActivation struct {
-		ActivationUrl string
-	}
-
-	b := bytes.Buffer{}
-
-	err = tmpl.Execute(&b, EmailActivation{ActivationUrl: activationUrl})
-
-	return b, err
 }
 
 func (a *service) SendCode(ctx context.Context, req *request.PhoneCodeRequest) bool {
@@ -418,4 +376,38 @@ func createDefaultUser() (infoblog.User, error) {
 		NotifyEmail: types.NewNullBool(true),
 		Language:    types.NewNullInt64(1),
 	}, nil
+}
+
+type Payload struct {
+	Accesstoken    string `json:"accessToken"`
+	Email          string `json:"email"`
+	Activationlink string `json:"activationLink"`
+}
+
+func sendEmail(email, link string) error {
+	data := Payload{
+		Accesstoken:    "FV7V65wCkUcE09oDHorwGteBu0020FpUWGWN1RWKFoaaWHVG5ZF5PYj6Sx4o",
+		Email:          email,
+		Activationlink: link,
+	}
+
+	payloadBytes, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	body := bytes.NewReader(payloadBytes)
+
+	req, err := http.NewRequest("POST", "http://207.154.213.11:10100/api/v1/activation", body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }
