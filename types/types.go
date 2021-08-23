@@ -214,3 +214,5 @@ func (x NullUUID) Value() (driver.Value, error) {
 }
 
 type User struct{}
+
+type Chat struct{}

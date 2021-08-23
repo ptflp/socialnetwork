@@ -195,5 +195,19 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 	})
 
+	chats := controllers.NewChatsController(cmps.Responder(), services.Chat, cmps.Logger())
+	// ./docs/chat.go
+	r.Route("/chat", func(r chi.Router) {
+		r.Use(token.CheckStrict)
+		r.Route("/get", func(r chi.Router) {
+			r.Post("/", chats.Get())
+		})
+		r.Get("/list", chats.List())
+		r.Route("/list", func(r chi.Router) {
+			r.Get("/", chats.List())
+
+		})
+	})
+
 	return r, nil
 }

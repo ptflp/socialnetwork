@@ -19,7 +19,7 @@ require (
 	github.com/sendgrid/sendgrid-go v3.10.0+incompatible
 	github.com/spf13/viper v1.8.0
 	github.com/subosito/gotenv v1.2.0
-	github.com/valyala/quicktemplate v1.6.3 // indirect
+	github.com/valyala/quicktemplate v1.6.3
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
