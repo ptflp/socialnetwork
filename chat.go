@@ -10,6 +10,7 @@ import (
 type Chat struct {
 	UUID      types.NullUUID  `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
 	Type      types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int" `
+	Active    types.NullBool  `json:"active" db:"active" ops:"create,update" orm_type:"boolean" orm_default:"null"`
 	CreatedAt time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 }
 
@@ -18,11 +19,9 @@ func (c Chat) TableName() string {
 }
 
 type ChatRepository interface {
-	Create(ctx context.Context, c Chat) (int64, error)
-	Update(ctx context.Context, c Chat) error
-	Delete(ctx context.Context, c Chat) error
-
-	Find(ctx context.Context, c Chat) (Chat, error)
-	FindAll(ctx context.Context) ([]Chat, error)
-	FindLimitOffset(ctx context.Context, limit, offset uint64) ([]Chat, error)
+	Create(ctx context.Context, chat Chat) error
+	Find(ctx context.Context, chat Chat) (Chat, error)
+	Update(ctx context.Context, chat Chat) error
+	Delete(ctx context.Context, chat Chat) error
+	List(ctx context.Context, limit, offset uint64) ([]Chat, error)
 }
