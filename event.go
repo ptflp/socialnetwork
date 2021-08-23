@@ -1,9 +1,9 @@
 package infoblog
 
 import (
-	"time"
-
+	"context"
 	"gitlab.com/InfoBlogFriends/server/types"
+	"time"
 )
 
 type Event struct {
@@ -17,4 +17,15 @@ type Event struct {
 	Price       types.NullFloat64 `json:"price" db:"price" orm_type:"decimal(13,4)" orm_default:"null" orm_index:"index"`
 	CreatedAt   time.Time         `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt   time.Time         `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
+}
+
+func (e Event) TableName() string {
+	return "event"
+}
+
+type EventRepository interface {
+	Create(ctx context.Context, event Event) error
+	Find(ctx context.Context, event Event) (Event, error)
+	Update(ctx context.Context, event Event) error
+	List(ctx context.Context, limit, offset uint64) ([]Event, error)
 }
