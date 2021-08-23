@@ -211,8 +211,8 @@ func (pr *postsRepository) CountByUser(ctx context.Context, user infoblog.User) 
 	return count.Int64, err
 }
 
-func (pr *postsRepository) Increment(ctx context.Context, p infoblog.Post, field string) (infoblog.Post, error) {
-	err := pr.count(ctx, &p.PostEntity, field, "decr")
+func (pr *postsRepository) Count(ctx context.Context, p infoblog.Post, field, ops string) (infoblog.Post, error) {
+	err := pr.count(ctx, &p.PostEntity, field, ops)
 	if err != nil {
 		return infoblog.Post{}, err
 	}

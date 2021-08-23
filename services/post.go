@@ -395,7 +395,7 @@ func (p *Post) Increment(ctx context.Context) (infoblog.Post, error) {
 		return post, err
 	}
 
-	post, err = p.post.Increment(ctx, post, "likes")
+	post, err = p.post.Count(ctx, post, "likes", "incr")
 	if err != nil {
 		return post, err
 	}
