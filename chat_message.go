@@ -22,10 +22,9 @@ func (c ChatMessages) TableName() string {
 }
 
 type ChatMessagesRepository interface {
+	Create(ctx context.Context, chatMessages ChatMessages) error
+	Find(ctx context.Context, chatMessages ChatMessages) (ChatMessages, error)
 	Update(ctx context.Context, chatMessages ChatMessages) error
 	Delete(ctx context.Context, chatMessages ChatMessages) error
-	Find(ctx context.Context, chatMessages ChatMessages) (ChatMessages, error)
-	FindAll(ctx context.Context) ([]ChatMessages, error)
-	FindLimitOffset(ctx context.Context, limit, offset uint64) ([]ChatMessages, error)
-	CreateChatMessages(ctx context.Context, chatMessages ChatMessages) error
+	List(ctx context.Context, limit, offset uint64) ([]ChatMessages, error)
 }
