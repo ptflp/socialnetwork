@@ -102,3 +102,9 @@ type RecoverChekPhoneResponse struct {
 type RecoverCheckPhoneData struct {
 	RecoverID string `json:"recover_id"`
 }
+
+type ChatData struct {
+	UUID      types.NullUUID  `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Type      types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int"`
+	CreatedAt time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
+}
