@@ -15,7 +15,7 @@ type ChatParticipant struct {
 }
 
 func (c ChatParticipant) TableName() string {
-	return "chatParticipants"
+	return "chat_participants"
 }
 
 type ChatParticipantRepository interface {

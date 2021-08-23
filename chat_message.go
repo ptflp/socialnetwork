@@ -18,7 +18,7 @@ type ChatMessages struct {
 }
 
 func (c ChatMessages) TableName() string {
-	return "chatMessages"
+	return "chat_messages"
 }
 
 type ChatMessagesRepository interface {
