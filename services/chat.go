@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+
 	"gitlab.com/InfoBlogFriends/server/types"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -21,7 +22,7 @@ func NewChatService(rs infoblog.Repositories) *Chat {
 }
 
 func (c *Chat) saveChatDB(ctx context.Context, cht *infoblog.Chat) error {
-	_, err := c.chatRepository.Create(ctx, *cht)
+	err := c.chatRepository.Create(ctx, *cht)
 	if err != nil {
 		return err
 	}
@@ -76,25 +77,6 @@ func (c *Chat) UpdateChat(ctx context.Context, profileUpdateReq request.ChatUpda
 	}
 
 	return chatData, nil
-}
-
-func (c *Chat) List(ctx context.Context) ([]request.ChatData, error) {
-	chats, err := c.chatRepository.FindAll(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	chatsData := []request.ChatData{}
-	for _, chat := range chats {
-		chatData := request.ChatData{}
-		err = c.MapStructs(&chatData, &chat)
-		if err != nil {
-			return nil, err
-		}
-		chatsData = append(chatsData, chatData)
-	}
-
-	return chatsData, nil
 }
 
 func (c *Chat) Get(ctx context.Context, req request.ChatIDRequest) (request.ChatData, error) {
