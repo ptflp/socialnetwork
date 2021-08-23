@@ -37,7 +37,7 @@ type PostRepository interface {
 	Create(ctx context.Context, p Post) (int64, error)
 	Update(ctx context.Context, p Post) error
 	Delete(ctx context.Context, p Post) error
-	Increment(ctx context.Context, p Post, field string) (Post, error)
+	Count(ctx context.Context, p Post, field, ops string) (Post, error)
 	First(ctx context.Context) (Post, error)
 
 	Find(ctx context.Context, p Post) (Post, error)
