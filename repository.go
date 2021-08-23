@@ -6,6 +6,7 @@ type Repositories struct {
 	Users       UserRepository
 	Subscribers SubscriberRepository
 	Likes       LikeRepository
+	Chats       ChatRepository
 }
 
 type Entity interface {
