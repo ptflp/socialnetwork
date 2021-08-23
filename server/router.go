@@ -151,6 +151,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Route("/feed", func(r chi.Router) {
 			r.Post("/recommends", posts.FeedRecent())
 		})
+		r.Get("/test", posts.TestIncrement())
 	})
 
 	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())

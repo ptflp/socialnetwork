@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strings"
+
+	"gitlab.com/InfoBlogFriends/server/types"
 
 	infoblog "gitlab.com/InfoBlogFriends/server"
 
@@ -51,7 +54,7 @@ func (c *crud) update(ctx context.Context, entity interface{}) error {
 	updateFieldsPointers := infoblog.GetFieldsPointers(entity, "update")
 
 	val := reflect.ValueOf(entity).Elem()
-	uuid := val.FieldByName("UUID").Interface().([]byte)
+	uuid := val.FieldByName("UUID").Interface().(types.NullUUID)
 	queryRaw := sq.Update(ent.TableName()).Where(sq.Eq{"uuid": uuid})
 	for i := range updateFields {
 		queryRaw = queryRaw.Set(updateFields[i], updateFieldsPointers[i])
@@ -81,8 +84,29 @@ func (c *crud) find(ctx context.Context, entity interface{}, dest interface{}) e
 	}
 
 	val := reflect.ValueOf(entity).Elem()
-	uuid := val.FieldByName("UUID").Interface().([]byte)
+	uuid := val.FieldByName("UUID").Interface().(types.NullUUID)
 	queryRaw := sq.Select(fields...).From(ent.TableName()).Where(sq.Eq{"uuid": uuid})
+	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return err
+	}
+
+	err = c.db.QueryRowxContext(ctx, query, args...).StructScan(dest)
+
+	return err
+}
+
+func (c *crud) first(ctx context.Context, dest interface{}) error {
+	ent, ok := dest.(infoblog.Entity)
+	if !ok {
+		return fmt.Errorf("wrong entity")
+	}
+	fields, err := infoblog.GetFields(ent)
+	if err != nil {
+		return err
+	}
+
+	queryRaw := sq.Select(fields...).From(ent.TableName()).Limit(1)
 	query, args, err := queryRaw.ToSql()
 	if err != nil {
 		return err
@@ -115,46 +139,93 @@ func (c *crud) list(ctx context.Context, dest interface{}, entity interface{}, l
 	return nil
 }
 
-//func (c *crud) increment(ctx context.Context, entity interface{}, field string) error {
-//	ent, ok := entity.(infoblog.Entity)
-//	if !ok {
-//		return fmt.Errorf("wrong entity")
-//	}
-//	fields, err := infoblog.GetFields(ent)
-//	if err != nil {
-//		return err
-//	}
-//
-//	val := reflect.ValueOf(entity).Elem()
-//	uuid := val.FieldByName("UUID").Interface().([]byte)
-//
-//	queryRaw := sq.Select(fields...).From(ent.TableName()).Where(sq.Eq{"uuid": uuid})
-//	query, args, err := queryRaw.ToSql()
-//	if err != nil {
-//		return err
-//	}
-//	query = strings.Join([]string{query, "FOR UPDATE"}, " ")
-//	tx, err := c.db.Beginx()
-//	defer func() {
-//		if err != nil {
-//			_ = tx.Rollback()
-//		} else {
-//			_ = tx.Commit()
-//		}
-//	}()
-//
-//	if err != nil {
-//		return err
-//	}
-//
-//	err = tx.QueryRowxContext(ctx, query, args...).StructScan(entity)
-//	if err != nil {
-//		return err
-//	}
-//
-//	count := val.FieldByName(field).Interface().(uint64)
-//
-//	reflect.ValueOf(entity).Elem().FieldByName(field).SetUint(count + 1)
-//
-//	return err
-//}
+func (c *crud) count(ctx context.Context, entity interface{}, field, ops string) error {
+	switch ops {
+	case "decr":
+	case "incr":
+		break
+	default:
+		return fmt.Errorf("bad count operation")
+	}
+
+	ent, ok := entity.(infoblog.Entity)
+	if !ok {
+		return fmt.Errorf("wrong entity")
+	}
+	fields, err := infoblog.GetFields(ent)
+	if err != nil {
+		return err
+	}
+
+	val := reflect.ValueOf(entity).Elem()
+	uuid := val.FieldByName("UUID").Interface().(types.NullUUID)
+
+	queryRaw := sq.Select(fields...).From(ent.TableName()).Where(sq.Eq{"uuid": uuid})
+	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return err
+	}
+	query = strings.Join([]string{query, "FOR UPDATE"}, " ")
+	tx, err := c.db.Beginx()
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		} else {
+			_ = tx.Commit()
+		}
+	}()
+
+	if err != nil {
+		return err
+	}
+
+	err = tx.QueryRowxContext(ctx, query, args...).StructScan(entity)
+	if err != nil {
+		return err
+	}
+	field = strings.Title(field)
+
+	count := val.FieldByName(field).Interface().(types.NullUint64)
+
+	switch ops {
+	case "decr":
+		if count.Uint64.Uint64 < 1 {
+			count = types.NullUint64{}
+		} else {
+			count.Uint64.Uint64--
+			count.Valid = true
+		}
+	case "incr":
+		count.Uint64.Uint64++
+		count.Valid = true
+	default:
+		return fmt.Errorf("bad count operation %s", ops)
+	}
+
+	v := reflect.ValueOf(count)
+
+	reflect.ValueOf(entity).Elem().FieldByName(field).Set(v)
+
+	updateFields, err := infoblog.GetFields(ent, "update")
+	if err != nil {
+		return err
+	}
+	updateFieldsPointers := infoblog.GetFieldsPointers(entity, "update")
+
+	updateRaw := sq.Update(ent.TableName()).Where(sq.Eq{"uuid": uuid})
+	for i := range updateFields {
+		updateRaw = updateRaw.Set(updateFields[i], updateFieldsPointers[i])
+	}
+
+	query, args, err = updateRaw.ToSql()
+	if err != nil {
+		return err
+	}
+	res, err := tx.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	_, err = res.RowsAffected()
+
+	return err
+}
