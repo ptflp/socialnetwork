@@ -56,6 +56,11 @@ func init() {
 		Subscriber{},
 		File{},
 		PostEntity{},
+		Chat{},
+		ChatMessages{},
+		ChatParticipant{},
+		Comments{},
+		Friend{},
 	)
 }
 
