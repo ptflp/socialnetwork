@@ -13,23 +13,23 @@ type ChatRepository struct {
 	crud
 }
 
-func (c *ChatRepository) Create(ctx context.Context, chatMessage infoblog.Chat) error {
-	return c.create(ctx, &chatMessage)
+func (c *ChatRepository) Create(ctx context.Context, chat infoblog.Chat) error {
+	return c.create(ctx, &chat)
 }
 
-func (c *ChatRepository) Find(ctx context.Context, chatMessage infoblog.Chat) (infoblog.Chat, error) {
-	err := c.find(ctx, &chatMessage, &chatMessage)
+func (c *ChatRepository) Find(ctx context.Context, chat infoblog.Chat) (infoblog.Chat, error) {
+	err := c.find(ctx, &chat, &chat)
 
-	return chatMessage, err
+	return chat, err
 }
 
-func (c *ChatRepository) Update(ctx context.Context, chatMessage infoblog.Chat) error {
-	return c.update(ctx, &chatMessage)
+func (c *ChatRepository) Update(ctx context.Context, chat infoblog.Chat) error {
+	return c.update(ctx, &chat)
 }
 
-func (c *ChatRepository) Delete(ctx context.Context, chatMessage infoblog.Chat) error {
-	chatMessage.Active = types.NullBool{}
-	return c.update(ctx, &chatMessage)
+func (c *ChatRepository) Delete(ctx context.Context, chat infoblog.Chat) error {
+	chat.Active = types.NullBool{}
+	return c.update(ctx, &chat)
 }
 
 func (c *ChatRepository) List(ctx context.Context, limit, offset uint64) ([]infoblog.Chat, error) {
