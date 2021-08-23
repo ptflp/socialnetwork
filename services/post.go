@@ -389,6 +389,20 @@ func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
 	return p.like.Upsert(ctx, likeFound)
 }
 
+func (p *Post) Increment(ctx context.Context) (infoblog.Post, error) {
+	post, err := p.post.First(ctx)
+	if err != nil {
+		return post, err
+	}
+
+	post, err = p.post.Increment(ctx, post, "likes")
+	if err != nil {
+		return post, err
+	}
+
+	return post, nil
+}
+
 func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
 	_, err := p.post.Create(ctx, *pst)
 	if err != nil {

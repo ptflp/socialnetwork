@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/volatiletech/null/v8"
+
 	"github.com/google/uuid"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -211,6 +213,10 @@ func (x NullUUID) Value() (driver.Value, error) {
 	}
 
 	return x.Binary, nil
+}
+
+type NullUint64 struct {
+	null.Uint64
 }
 
 type User struct{}

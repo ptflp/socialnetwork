@@ -245,6 +245,22 @@ func (a *postsController) FeedUser() http.HandlerFunc {
 	}
 }
 
+func (a *postsController) TestIncrement() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		feed, err := a.post.Increment(r.Context())
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    feed,
+		})
+	}
+}
+
 func (a *postsController) Like() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var postLikeReq request.PostUUIDReq

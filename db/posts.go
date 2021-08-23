@@ -21,6 +21,7 @@ const (
 
 type postsRepository struct {
 	db *sqlx.DB
+	crud
 }
 
 func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, error) {
@@ -210,6 +211,25 @@ func (pr *postsRepository) CountByUser(ctx context.Context, user infoblog.User) 
 	return count.Int64, err
 }
 
+func (pr *postsRepository) Increment(ctx context.Context, p infoblog.Post, field string) (infoblog.Post, error) {
+	err := pr.count(ctx, &p.PostEntity, field, "decr")
+	if err != nil {
+		return infoblog.Post{}, err
+	}
+
+	return p, nil
+}
+
+func (pr *postsRepository) First(ctx context.Context) (infoblog.Post, error) {
+	var p infoblog.Post
+	err := pr.first(ctx, &p.PostEntity)
+	if err != nil {
+		return infoblog.Post{}, err
+	}
+
+	return p, nil
+}
+
 func NewPostsRepository(db *sqlx.DB) infoblog.PostRepository {
-	return &postsRepository{db: db}
+	return &postsRepository{db: db, crud: crud{db: db}}
 }
