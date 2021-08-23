@@ -132,7 +132,7 @@ func (pr *postsRepository) FindAll(ctx context.Context, user infoblog.User, limi
 }
 
 func (pr *postsRepository) FindAllRecent(ctx context.Context, limit, offset int64) ([]infoblog.Post, map[string]int, []string, error) {
-	fields, err := infoblog.GetFields(&infoblog.User{})
+	fields, err := infoblog.GetFields(&infoblog.PostEntity{})
 	if err != nil {
 		return nil, nil, nil, err
 	}
