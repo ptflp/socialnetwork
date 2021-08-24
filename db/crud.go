@@ -206,11 +206,11 @@ func (c *crud) count(ctx context.Context, entity interface{}, field, ops string)
 
 	reflect.ValueOf(entity).Elem().FieldByName(field).Set(v)
 
-	updateFields, err := infoblog.GetFields(ent, "update")
+	updateFields, err := infoblog.GetFields(ent, "count")
 	if err != nil {
 		return err
 	}
-	updateFieldsPointers := infoblog.GetFieldsPointers(entity, "update")
+	updateFieldsPointers := infoblog.GetFieldsPointers(entity, "count")
 
 	updateRaw := sq.Update(ent.TableName()).Where(sq.Eq{"uuid": uuid})
 	for i := range updateFields {
