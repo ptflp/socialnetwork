@@ -401,6 +401,9 @@ func (p *Post) Like(ctx context.Context, req request.LikeReq) (request.PostDataR
 	}
 
 	user, err := p.services.User.Count(ctx, infoblog.User{UUID: post.UserUUID}, "likes", ops)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
 	_ = user
 
 	postDataRes := request.PostDataResponse{}
