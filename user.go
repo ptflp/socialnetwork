@@ -30,8 +30,8 @@ type User struct {
 	FacebookID     types.NullInt64   `json:"facebook_id" db:"facebook_id" ops:"update,create" orm_type:"bigint unsigned"`
 	GoogleID       types.NullString  `json:"google_id" db:"google_id" ops:"update,create" orm_type:"varchar(21)"`
 	Likes          types.NullUint64  `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index"`
-	Subscribes     types.NullUint64  `json:"subscribes_count" db:"subscribes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index"`
-	Subscribers    types.NullUint64  `json:"subscribers_count" db:"subscribers" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index"`
+	Subscribes     types.NullUint64  `json:"subscribes_count" db:"subscribes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Subscribers    types.NullUint64  `json:"subscribers_count" db:"subscribers" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 	CreatedAt      time.Time         `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt      time.Time         `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 	DeletedAt      sql.NullTime      `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`

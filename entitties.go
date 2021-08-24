@@ -13,6 +13,7 @@ var (
 	entityFields       map[string][]string
 	entityUpdateFields map[string][]string
 	entityCreateFields map[string][]string
+	entityCountFields  map[string][]string
 	tables             map[string]Table
 )
 
@@ -75,6 +76,7 @@ func RegisterEntities(entities ...Tabler) {
 	entityFields = make(map[string][]string, len(entities))
 	entityUpdateFields = make(map[string][]string, len(entities))
 	entityCreateFields = make(map[string][]string, len(entities))
+	entityCountFields = make(map[string][]string, len(entities))
 
 	for name, entity := range tableEntities {
 		table := Table{
@@ -86,6 +88,7 @@ func RegisterEntities(entities ...Tabler) {
 		var allFields []string
 		var updateFields []string
 		var createFields []string
+		var countFields []string
 
 		for i := 0; i < t.NumField(); i++ {
 
@@ -99,6 +102,10 @@ func RegisterEntities(entities ...Tabler) {
 
 			if createFields == nil {
 				createFields = make([]string, 0, t.NumField())
+			}
+
+			if countFields == nil {
+				countFields = make([]string, 0, t.NumField())
 			}
 
 			if table.FieldsMap == nil {
@@ -152,6 +159,8 @@ func RegisterEntities(entities ...Tabler) {
 						updateFields = append(updateFields, fieldName)
 					case "create":
 						createFields = append(createFields, fieldName)
+					case "count":
+						countFields = append(countFields, fieldName)
 					}
 				}
 			}
@@ -162,6 +171,8 @@ func RegisterEntities(entities ...Tabler) {
 		entityFields[name] = allFields
 
 		entityCreateFields[name] = createFields
+
+		entityCountFields[name] = countFields
 
 		tables[name] = table
 	}
@@ -176,6 +187,8 @@ func GetFields(entity Tabler, args ...string) ([]string, error) {
 		return GetCreateFields(entity.TableName())
 	case "update":
 		return GetUpdateFields(entity.TableName())
+	case "count":
+		return GetCountFields(entity.TableName())
 	default:
 		return GetAllFields(entity.TableName())
 	}
@@ -195,6 +208,18 @@ func GetAllFields(tableName string, args ...string) ([]string, error) {
 
 func GetUpdateFields(tableName string) ([]string, error) {
 	v, ok := entityUpdateFields[tableName]
+	if !ok {
+		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
+	}
+
+	b := make([]string, len(v))
+	copy(b, v)
+
+	return b, nil
+}
+
+func GetCountFields(tableName string) ([]string, error) {
+	v, ok := entityCountFields[tableName]
 	if !ok {
 		return nil, fmt.Errorf("entity with specified table name %s not exist", tableName)
 	}
