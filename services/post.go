@@ -359,10 +359,10 @@ func (p *Post) CountByUser(ctx context.Context, user infoblog.User) (int64, erro
 	return p.post.CountByUser(ctx, user)
 }
 
-func (p *Post) Like(ctx context.Context, req request.LikeReq) error {
+func (p *Post) Like(ctx context.Context, req request.LikeReq) (request.PostDataResponse, error) {
 	u, ok := ctx.Value(types.User{}).(*infoblog.User)
 	if !ok {
-		return fmt.Errorf("get user from request context err")
+		return request.PostDataResponse{}, fmt.Errorf("get user from request context err")
 	}
 
 	post, err := p.post.Find(ctx, infoblog.Post{
@@ -370,24 +370,53 @@ func (p *Post) Like(ctx context.Context, req request.LikeReq) error {
 	})
 
 	if err != nil {
-		return err
+		return request.PostDataResponse{}, err
 	}
 	like := infoblog.Like{
+		UUID:        types.NewNullUUID(),
+		Active:      types.NewNullBool(req.Active),
 		Type:        1,
 		ForeignUUID: post.UUID,
 		UserUUID:    post.UserUUID,
 		LikerUUID:   u.UUID,
 	}
 
-	likeFound, err := p.like.Find(ctx, &like)
+	err = p.like.Upsert(ctx, like)
+
 	if err != nil {
-		like.Active = types.NewNullBool(req.Active)
-		return p.like.Upsert(ctx, like)
+		return request.PostDataResponse{}, err
 	}
 
-	likeFound.Active = types.NewNullBool(!likeFound.Active.Bool)
+	var ops string
 
-	return p.like.Upsert(ctx, likeFound)
+	ops = "decr"
+
+	if req.Active {
+		ops = "incr"
+	}
+
+	post, err = p.post.Count(ctx, post, "likes", ops)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	user, err := p.services.User.Count(ctx, infoblog.User{UUID: post.UserUUID}, "likes", ops)
+	_ = user
+
+	postDataRes := request.PostDataResponse{}
+
+	err = p.MapStructs(&postDataRes, &post.PostEntity)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	err = p.MapStructs(&postDataRes.User, &user)
+	if err != nil {
+		return request.PostDataResponse{}, err
+	}
+
+	// 4. update post and activate
+	return postDataRes, nil
 }
 
 func (p *Post) Increment(ctx context.Context) (infoblog.Post, error) {

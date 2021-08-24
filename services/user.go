@@ -526,6 +526,10 @@ func (u *User) GetUserData(user infoblog.User) (request.UserData, error) {
 	return userData, err
 }
 
+func (u *User) Count(ctx context.Context, user infoblog.User, field, ops string) (infoblog.User, error) {
+	return u.userRepository.Count(ctx, user, field, ops)
+}
+
 func extractUser(ctx context.Context) (infoblog.User, error) {
 	u, ok := ctx.Value(types.User{}).(*infoblog.User)
 	if !ok {

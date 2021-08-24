@@ -791,7 +791,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostUUIDReq"
+              "$ref": "#/definitions/LikeReq"
             }
           }
         ],
@@ -1249,6 +1249,20 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "LikeReq": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "post_id": {
+          "type": "string",
+          "x-go-name": "UUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "LimitOffsetReq": {
       "type": "object",
       "properties": {
@@ -1274,6 +1288,63 @@
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "NullBool": {
+      "type": "object",
+      "properties": {
+        "Bool": {
+          "type": "boolean"
+        },
+        "Valid": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
+    },
+    "NullFloat64": {
+      "type": "object",
+      "properties": {
+        "Float64": {
+          "type": "number",
+          "format": "double"
+        },
+        "Valid": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
+    },
+    "NullString": {
+      "description": "NullString is a wrapper around sql.NullString",
+      "type": "object",
+      "properties": {
+        "String": {
+          "type": "string"
+        },
+        "Valid": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
+    },
+    "NullUUID": {
+      "type": "object",
+      "properties": {
+        "Binary": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "uint8"
+          }
+        },
+        "String": {
+          "type": "string"
+        },
+        "Valid": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
     },
     "PasswordRecoverRequest": {
       "type": "object",
@@ -1646,13 +1717,10 @@
       "type": "object",
       "properties": {
         "active": {
-          "type": "boolean",
-          "x-go-name": "Active"
+          "$ref": "#/definitions/NullBool"
         },
         "cost": {
-          "type": "number",
-          "format": "double",
-          "x-go-name": "Cost"
+          "$ref": "#/definitions/NullFloat64"
         },
         "counts": {
           "$ref": "#/definitions/UserDataCounts"
@@ -1663,16 +1731,13 @@
           "x-go-name": "CreatedAt"
         },
         "description": {
-          "type": "string",
-          "x-go-name": "Description"
+          "$ref": "#/definitions/NullString"
         },
         "email": {
-          "type": "string",
-          "x-go-name": "Email"
+          "$ref": "#/definitions/NullString"
         },
         "email_verified": {
-          "type": "boolean",
-          "x-go-name": "EmailVerified"
+          "$ref": "#/definitions/NullBool"
         },
         "is_friends": {
           "type": "boolean",
@@ -1688,52 +1753,42 @@
           "x-go-name": "Language"
         },
         "name": {
-          "type": "string",
-          "x-go-name": "Name"
+          "$ref": "#/definitions/NullString"
         },
         "nickname": {
-          "type": "string",
-          "x-go-name": "NickName"
+          "$ref": "#/definitions/NullString"
         },
         "notify_email": {
-          "type": "boolean",
-          "x-go-name": "NotifyEmail"
+          "$ref": "#/definitions/NullBool"
         },
         "notify_push": {
-          "type": "boolean",
-          "x-go-name": "NotifyPush"
+          "$ref": "#/definitions/NullBool"
         },
         "notify_telegram": {
-          "type": "boolean",
-          "x-go-name": "NotifyTelegram"
+          "$ref": "#/definitions/NullBool"
         },
         "password_set": {
           "type": "boolean",
           "x-go-name": "PasswordSet"
         },
         "phone": {
-          "type": "string",
-          "x-go-name": "Phone"
+          "$ref": "#/definitions/NullString"
         },
         "profile_image": {
-          "type": "string",
-          "x-go-name": "Avatar"
+          "$ref": "#/definitions/NullString"
         },
         "profile_image_set": {
           "type": "boolean",
           "x-go-name": "AvatarSet"
         },
         "second_name": {
-          "type": "string",
-          "x-go-name": "SecondName"
+          "$ref": "#/definitions/NullString"
         },
         "show_subs": {
-          "type": "boolean",
-          "x-go-name": "ShowSubs"
+          "$ref": "#/definitions/NullBool"
         },
         "trial": {
-          "type": "boolean",
-          "x-go-name": "Trial"
+          "$ref": "#/definitions/NullBool"
         },
         "updated_at": {
           "type": "string",
@@ -1741,8 +1796,7 @@
           "x-go-name": "UpdatedAt"
         },
         "user_id": {
-          "type": "string",
-          "x-go-name": "UUID"
+          "$ref": "#/definitions/NullUUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"

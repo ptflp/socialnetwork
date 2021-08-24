@@ -115,7 +115,7 @@ type postLikeResponse struct {
 // swagger:parameters postLikeRequest
 type postLikeParams struct {
 	// in:body
-	Body request.PostUUIDReq
+	Body request.LikeReq
 }
 
 // swagger:route POST /posts/get posts postGetRequest

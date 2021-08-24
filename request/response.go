@@ -43,6 +43,9 @@ type UserData struct {
 	NotifyTelegram types.NullBool    `json:"notify_telegram" db:"notify_telegram" ops:"update,create"`
 	NotifyPush     types.NullBool    `json:"notify_push" db:"notify_push" ops:"update,create"`
 	Language       int64             `json:"language" db:"language" ops:"update,create"`
+	Likes          types.NullUint64  `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Subscribes     types.NullUint64  `json:"subscribes_count" db:"subscribes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Subscribers    types.NullUint64  `json:"subscribers_count" db:"subscribers" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 	CreatedAt      time.Time         `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time         `json:"updated_at" db:"updated_at"`
 
@@ -51,8 +54,6 @@ type UserData struct {
 
 	PasswordSet *bool `json:"password_set,omitempty"`
 	AvatarSet   bool  `json:"profile_image_set"`
-
-	Counts *UserDataCounts `json:"counts,omitempty"`
 }
 
 type UserDataCounts struct {
@@ -63,23 +64,19 @@ type UserDataCounts struct {
 }
 
 type PostDataResponse struct {
-	UUID   string         `json:"post_id"`
-	Body   string         `json:"description"`
-	Type   int64          `json:"post_type"`
-	Files  []PostFileData `json:"files"`
-	User   UserData       `json:"user"`
-	Counts PostCountData  `json:"counts"`
-	Price  float64        `json:"price"`
+	UUID  string           `json:"post_id"`
+	Body  string           `json:"description"`
+	Type  int64            `json:"post_type"`
+	Files []PostFileData   `json:"files"`
+	User  UserData         `json:"user"`
+	Price float64          `json:"price"`
+	Likes types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Views types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 }
 
 type PostFileData struct {
 	Link string `json:"link"`
 	UUID string `json:"file_id"`
-}
-
-type PostCountData struct {
-	Likes    int64 `json:"likes"`
-	Comments int64 `json:"comments"`
 }
 
 type PostsFeedData struct {
