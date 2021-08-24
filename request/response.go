@@ -54,6 +54,8 @@ type UserData struct {
 
 	PasswordSet *bool `json:"password_set,omitempty"`
 	AvatarSet   bool  `json:"profile_image_set"`
+
+	Counts *UserDataCounts `json:"counts,omitempty"`
 }
 
 type UserDataCounts struct {
