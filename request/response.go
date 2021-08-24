@@ -66,19 +66,25 @@ type UserDataCounts struct {
 }
 
 type PostDataResponse struct {
-	UUID  string           `json:"post_id"`
-	Body  string           `json:"description"`
-	Type  int64            `json:"post_type"`
-	Files []PostFileData   `json:"files"`
-	User  UserData         `json:"user"`
-	Price float64          `json:"price"`
-	Likes types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
-	Views types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	UUID   string           `json:"post_id"`
+	Body   string           `json:"description"`
+	Type   int64            `json:"post_type"`
+	Files  []PostFileData   `json:"files"`
+	User   UserData         `json:"user"`
+	Price  float64          `json:"price"`
+	Counts PostCountData    `json:"counts"`
+	Likes  types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Views  types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 }
 
 type PostFileData struct {
 	Link string `json:"link"`
 	UUID string `json:"file_id"`
+}
+
+type PostCountData struct {
+	Likes    int64 `json:"likes"`
+	Comments int64 `json:"comments"`
 }
 
 type PostsFeedData struct {
