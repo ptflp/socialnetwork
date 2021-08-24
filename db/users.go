@@ -17,10 +17,11 @@ const (
 
 type userRepository struct {
 	db *sqlx.DB
+	crud
 }
 
 func NewUserRepository(db *sqlx.DB) infoblog.UserRepository {
-	return &userRepository{db: db}
+	return &userRepository{db: db, crud: crud{db: db}}
 }
 
 func (u *userRepository) FindByEmail(ctx context.Context, user infoblog.User) (infoblog.User, error) {
@@ -250,4 +251,13 @@ func (u *userRepository) FindLimitOffset(ctx context.Context, limit, offset uint
 	}
 
 	return users, nil
+}
+
+func (u *userRepository) Count(ctx context.Context, user infoblog.User, field, ops string) (infoblog.User, error) {
+	err := u.count(ctx, &user, field, ops)
+	if err != nil {
+		return infoblog.User{}, err
+	}
+
+	return user, nil
 }

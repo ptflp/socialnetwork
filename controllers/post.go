@@ -270,14 +270,15 @@ func (a *postsController) Like() http.HandlerFunc {
 			return
 		}
 
-		err = a.post.Like(r.Context(), postLikeReq)
+		post, err := a.post.Like(r.Context(), postLikeReq)
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return
 		}
 
-		a.SendJSON(w, request.PostsFeedResponse{
+		a.SendJSON(w, request.Response{
 			Success: true,
+			Data:    post,
 		})
 	}
 }
