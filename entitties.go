@@ -21,7 +21,7 @@ type Table struct {
 	Fields      []Field
 	FieldsMap   map[string]Field
 	Constraints []Constraint
-	Entity      interface{}
+	Entity      Tabler
 }
 
 func (t Table) CreateQuery() string {
@@ -65,8 +65,8 @@ func init() {
 }
 
 // register entities
-func RegisterEntities(entities ...Entity) {
-	tableEntities := make(map[string]interface{}, len(entities))
+func RegisterEntities(entities ...Tabler) {
+	tableEntities := make(map[string]Tabler, len(entities))
 	for i := range entities {
 		tableEntities[entities[i].TableName()] = entities[i]
 	}
@@ -167,7 +167,7 @@ func RegisterEntities(entities ...Entity) {
 	}
 }
 
-func GetFields(entity Entity, args ...string) ([]string, error) {
+func GetFields(entity Tabler, args ...string) ([]string, error) {
 	if len(args) < 1 {
 		return GetAllFields(entity.TableName())
 	}

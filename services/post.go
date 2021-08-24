@@ -359,7 +359,7 @@ func (p *Post) CountByUser(ctx context.Context, user infoblog.User) (int64, erro
 	return p.post.CountByUser(ctx, user)
 }
 
-func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
+func (p *Post) Like(ctx context.Context, req request.LikeReq) error {
 	u, ok := ctx.Value(types.User{}).(*infoblog.User)
 	if !ok {
 		return fmt.Errorf("get user from request context err")
@@ -381,9 +381,10 @@ func (p *Post) Like(ctx context.Context, req request.PostUUIDReq) error {
 
 	likeFound, err := p.like.Find(ctx, &like)
 	if err != nil {
-		like.Active = types.NewNullBool(true)
+		like.Active = types.NewNullBool(req.Active)
 		return p.like.Upsert(ctx, like)
 	}
+
 	likeFound.Active = types.NewNullBool(!likeFound.Active.Bool)
 
 	return p.like.Upsert(ctx, likeFound)

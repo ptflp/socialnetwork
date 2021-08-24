@@ -263,7 +263,7 @@ func (a *postsController) TestIncrement() http.HandlerFunc {
 
 func (a *postsController) Like() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var postLikeReq request.PostUUIDReq
+		var postLikeReq request.LikeReq
 		err := Decode(r, &postLikeReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)

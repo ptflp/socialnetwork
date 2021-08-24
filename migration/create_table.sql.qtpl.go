@@ -110,32 +110,40 @@ create table `)
 //line create_table.sql.qtpl:16
 		}
 //line create_table.sql.qtpl:16
+		qw422016.N().S(`
+`)
+//line create_table.sql.qtpl:17
 	}
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:17
+	qw422016.N().S(`
+     `)
+//line create_table.sql.qtpl:18
+	qw422016.E().S(table.Entity.OnCreate())
+//line create_table.sql.qtpl:18
 }
 
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 func WriteCreateTable(qq422016 qtio422016.Writer, table infoblog.Table) {
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	StreamCreateTable(qw422016, table)
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	qt422016.ReleaseWriter(qw422016)
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 }
 
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 func CreateTable(table infoblog.Table) string {
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	qb422016 := qt422016.AcquireByteBuffer()
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	WriteCreateTable(qb422016, table)
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	qs422016 := string(qb422016.B)
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	qt422016.ReleaseByteBuffer(qb422016)
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 	return qs422016
-//line create_table.sql.qtpl:16
+//line create_table.sql.qtpl:18
 }

@@ -19,6 +19,10 @@ type File struct {
 	UpdatedAt   time.Time      `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 }
 
+func (f File) OnCreate() string {
+	return ""
+}
+
 func (f File) TableName() string {
 	return "files"
 }

@@ -14,6 +14,10 @@ type ChatParticipant struct {
 	JoinedAt time.Time      `json:"joined_at" db:"joined_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 }
 
+func (c ChatParticipant) OnCreate() string {
+	return ""
+}
+
 func (c ChatParticipant) TableName() string {
 	return "chat_participants"
 }

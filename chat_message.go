@@ -17,6 +17,10 @@ type ChatMessages struct {
 	Message   string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)" orm_default:"not null"`
 }
 
+func (c ChatMessages) OnCreate() string {
+	return ""
+}
+
 func (c ChatMessages) TableName() string {
 	return "chat_messages"
 }
