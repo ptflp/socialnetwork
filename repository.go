@@ -14,6 +14,7 @@ type Repositories struct {
 	Friends         FriendRepository
 }
 
-type Entity interface {
+type Tabler interface {
 	TableName() string
+	OnCreate() string
 }

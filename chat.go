@@ -14,6 +14,10 @@ type Chat struct {
 	CreatedAt time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 }
 
+func (c Chat) OnCreate() string {
+	return ""
+}
+
 func (c Chat) TableName() string {
 	return "chats"
 }

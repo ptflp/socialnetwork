@@ -48,7 +48,7 @@ func (m *Migrator) Migrate() error {
 			}
 		}
 		if len(tableFields) > 0 {
-			entityFields, _ := infoblog.GetFields(table.Entity.(infoblog.Entity))
+			entityFields, _ := infoblog.GetFields(table.Entity)
 			var diff map[string]infoblog.Field
 			for i := range entityFields {
 				if _, ok := tableFieldsMap[entityFields[i]]; !ok {

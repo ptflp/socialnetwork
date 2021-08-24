@@ -19,6 +19,10 @@ type Comments struct {
 	CreatedAt   time.Time        `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 }
 
+func (c Comments) OnCreate() string {
+	return ""
+}
+
 func (c Comments) TableName() string {
 	return "comments"
 }

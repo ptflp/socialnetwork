@@ -34,6 +34,10 @@ type User struct {
 	DeletedAt      sql.NullTime      `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
 }
 
+func (u User) OnCreate() string {
+	return ""
+}
+
 func (u User) TableName() string {
 	return "users"
 }

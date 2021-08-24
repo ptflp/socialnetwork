@@ -20,7 +20,7 @@ type crud struct {
 }
 
 func (c *crud) create(ctx context.Context, entity interface{}) error {
-	ent, ok := entity.(infoblog.Entity)
+	ent, ok := entity.(infoblog.Tabler)
 	if !ok {
 		return fmt.Errorf("wrong entity")
 	}
@@ -43,7 +43,7 @@ func (c *crud) create(ctx context.Context, entity interface{}) error {
 }
 
 func (c *crud) update(ctx context.Context, entity interface{}) error {
-	ent, ok := entity.(infoblog.Entity)
+	ent, ok := entity.(infoblog.Tabler)
 	if !ok {
 		return fmt.Errorf("wrong entity")
 	}
@@ -74,7 +74,7 @@ func (c *crud) update(ctx context.Context, entity interface{}) error {
 }
 
 func (c *crud) find(ctx context.Context, entity interface{}, dest interface{}) error {
-	ent, ok := entity.(infoblog.Entity)
+	ent, ok := entity.(infoblog.Tabler)
 	if !ok {
 		return fmt.Errorf("wrong entity")
 	}
@@ -97,7 +97,7 @@ func (c *crud) find(ctx context.Context, entity interface{}, dest interface{}) e
 }
 
 func (c *crud) first(ctx context.Context, dest interface{}) error {
-	ent, ok := dest.(infoblog.Entity)
+	ent, ok := dest.(infoblog.Tabler)
 	if !ok {
 		return fmt.Errorf("wrong entity")
 	}
@@ -118,7 +118,7 @@ func (c *crud) first(ctx context.Context, dest interface{}) error {
 }
 
 func (c *crud) list(ctx context.Context, dest interface{}, entity interface{}, limit, offset uint64) error {
-	ent, ok := entity.(infoblog.Entity)
+	ent, ok := entity.(infoblog.Tabler)
 	if !ok {
 		return fmt.Errorf("wrong entity")
 	}
@@ -148,7 +148,7 @@ func (c *crud) count(ctx context.Context, entity interface{}, field, ops string)
 		return fmt.Errorf("bad count operation")
 	}
 
-	ent, ok := entity.(infoblog.Entity)
+	ent, ok := entity.(infoblog.Tabler)
 	if !ok {
 		return fmt.Errorf("wrong entity")
 	}

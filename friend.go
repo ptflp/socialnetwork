@@ -17,6 +17,10 @@ type Friend struct {
 	UpdatedAt   time.Time       `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 }
 
+func (f Friend) OnCreate() string {
+	return ""
+}
+
 func (f Friend) TableName() string {
 	return "friends"
 }

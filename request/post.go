@@ -29,3 +29,8 @@ type PostsFeedUserReq struct {
 type PostUUIDReq struct {
 	UUID string `json:"post_id"`
 }
+
+type LikeReq struct {
+	UUID   string `json:"post_id"`
+	Active bool   `json:"active"`
+}
