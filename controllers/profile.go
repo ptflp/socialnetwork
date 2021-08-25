@@ -70,7 +70,7 @@ func (a *profileController) GetProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, err := a.user.GetProfile(r.Context())
 		if err.Error() == "sql: no rows in result set" {
-			a.ErrorUnauthorized(w, err)
+			a.ErrorForbidden(w, err)
 			return
 		}
 		if err != nil {
