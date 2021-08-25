@@ -191,7 +191,6 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 		query = strings.Join([]string{query, sep, s[1]}, "")
 
 		args = append(args, inArgs...)
-		whereState = true
 	}
 
 	if condition.Order != nil {
