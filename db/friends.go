@@ -39,6 +39,16 @@ func (c *FriendRepository) List(ctx context.Context, limit, offset uint64) ([]in
 	return friend, err
 }
 
+func (f *FriendRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Friend, error) {
+	var friends []infoblog.Friend
+	err := f.crud.listx(ctx, &friends, infoblog.Friend{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return friends, nil
+}
+
 func NewFriendRepository(db *sqlx.DB) infoblog.FriendRepository {
 	cr := crud{db: db}
 	return &FriendRepository{db: db, crud: cr}
