@@ -234,11 +234,11 @@ func (f *filesRepository) FindByIDs(ctx context.Context, ids []string) ([]infobl
 }
 
 func (f *filesRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.File, error) {
-	var events []infoblog.File
-	err := f.crud.listx(ctx, &events, infoblog.File{}, condition)
+	var files []infoblog.File
+	err := f.crud.listx(ctx, &files, infoblog.File{}, condition)
 	if err != nil {
 		return nil, err
 	}
 
-	return events, nil
+	return files, nil
 }
