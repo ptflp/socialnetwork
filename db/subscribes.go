@@ -76,5 +76,5 @@ func (s *subsRepository) Listx(ctx context.Context, condition infoblog.Condition
 }
 
 func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {
-	return &subsRepository{db: db}
+	return &subsRepository{db: db, crud: crud{db: db}}
 }
