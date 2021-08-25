@@ -168,6 +168,30 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 		query = strings.Join([]string{query, sep, s[1]}, "")
 
 		args = append(args, inArgs...)
+		whereState = true
+	}
+
+	if condition.NotIn != nil {
+		queryNotIn := fmt.Sprintf("SELECT * FROM files WHERE %s IN (?)", condition.NotIn.Field)
+
+		queryNotIn, inArgs, err := sqlx.In(queryNotIn, condition.NotIn.Args)
+		if err != nil {
+			return err
+		}
+
+		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN(", 1)
+
+		s := strings.Split(queryNotIn, "WHERE")
+		sep := " WHERE"
+
+		if whereState {
+			sep = " AND"
+		}
+
+		query = strings.Join([]string{query, sep, s[1]}, "")
+
+		args = append(args, inArgs...)
+		whereState = true
 	}
 
 	if condition.Order != nil {

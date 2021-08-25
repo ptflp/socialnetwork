@@ -442,7 +442,7 @@ func (p *Post) Test(ctx context.Context) ([]infoblog.PostEntity, error) {
 			Field: "created_at",
 			Asc:   false,
 		},
-		In: &infoblog.In{
+		NotIn: &infoblog.In{
 			Field: "body",
 			Args:  []interface{}{"asfasfas"},
 		},

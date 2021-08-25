@@ -291,6 +291,7 @@ type Order struct {
 type Condition struct {
 	Equal  *sq.Eq
 	In     *In
+	NotIn  *In
 	Other  *Other
 	Order  *Order
 	Limit  int64
