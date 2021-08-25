@@ -261,3 +261,13 @@ func (u *userRepository) Count(ctx context.Context, user infoblog.User, field, o
 
 	return user, nil
 }
+
+func (u *userRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.User, error) {
+	var users []infoblog.User
+	err := u.crud.listx(ctx, &users, infoblog.User{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

@@ -39,6 +39,16 @@ func (c *ChatParticipantRepository) List(ctx context.Context, limit, offset uint
 	return chatParticipant, err
 }
 
+func (c *ChatParticipantRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.ChatParticipant, error) {
+	var chatParticipants []infoblog.ChatParticipant
+	err := c.crud.listx(ctx, &chatParticipants, infoblog.ChatParticipant{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return chatParticipants, nil
+}
+
 func NewChatParticipantRepository(db *sqlx.DB) infoblog.ChatParticipantRepository {
 	cr := crud{db: db}
 	return &ChatParticipantRepository{db: db, crud: cr}

@@ -28,4 +28,5 @@ type ChatRepository interface {
 	Update(ctx context.Context, chat Chat) error
 	Delete(ctx context.Context, chat Chat) error
 	List(ctx context.Context, limit, offset uint64) ([]Chat, error)
+	Listx(ctx context.Context, condition Condition) ([]Chat, error)
 }

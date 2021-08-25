@@ -33,6 +33,16 @@ func (c *EventRepository) List(ctx context.Context, limit, offset uint64) ([]inf
 	return events, err
 }
 
+func (e *EventRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Event, error) {
+	var events []infoblog.Event
+	err := e.crud.listx(ctx, &events, infoblog.Event{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
 func NewEventRepository(db *sqlx.DB) infoblog.EventRepository {
 	cr := crud{db: db}
 	return &EventRepository{db: db, crud: cr}
