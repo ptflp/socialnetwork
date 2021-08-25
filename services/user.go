@@ -218,6 +218,9 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 		SubscriberUUID: types.NewNullUUID(subscribeRequest.UUID),
 		Active:         types.NewNullBool(true),
 	})
+	if err != nil {
+		return err
+	}
 
 	user, err = u.userRepository.Count(ctx, user, "subscribes", "incr")
 	if err != nil {
