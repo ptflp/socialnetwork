@@ -28,4 +28,5 @@ type ChatParticipantRepository interface {
 	Update(ctx context.Context, chatParticipant ChatParticipant) error
 	Delete(ctx context.Context, chatParticipant ChatParticipant) error
 	List(ctx context.Context, limit, offset uint64) ([]ChatParticipant, error)
+	Listx(ctx context.Context, condition Condition) ([]ChatParticipant, error)
 }
