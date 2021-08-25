@@ -34,4 +34,5 @@ type EventRepository interface {
 	Find(ctx context.Context, event Event) (Event, error)
 	Update(ctx context.Context, event Event) error
 	List(ctx context.Context, limit, offset uint64) ([]Event, error)
+	Listx(ctx context.Context, condition Condition) ([]Event, error)
 }
