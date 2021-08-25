@@ -436,6 +436,24 @@ func (p *Post) Increment(ctx context.Context) (infoblog.Post, error) {
 	return post, nil
 }
 
+func (p *Post) Test(ctx context.Context) ([]infoblog.PostEntity, error) {
+	cond := infoblog.Condition{
+		Order: &infoblog.Order{
+			Field: "created_at",
+			Asc:   false,
+		},
+		In: &infoblog.In{
+			Field: "body",
+			Args:  []interface{}{"asfasfas"},
+		},
+		Limit:  1,
+		Offset: 0,
+	}
+	posts, err := p.post.Listx(ctx, cond)
+
+	return posts, err
+}
+
 func (p *Post) savePostDB(ctx context.Context, pst *infoblog.Post) error {
 	_, err := p.post.Create(ctx, *pst)
 	if err != nil {

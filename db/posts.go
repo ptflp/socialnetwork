@@ -230,6 +230,16 @@ func (pr *postsRepository) First(ctx context.Context) (infoblog.Post, error) {
 	return p, nil
 }
 
+func (pr *postsRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.PostEntity, error) {
+	var posts []infoblog.PostEntity
+	err := pr.crud.listx(ctx, &posts, infoblog.PostEntity{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
 func NewPostsRepository(db *sqlx.DB) infoblog.PostRepository {
 	return &postsRepository{db: db, crud: crud{db: db}}
 }

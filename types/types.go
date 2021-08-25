@@ -93,29 +93,6 @@ func (x *NullInt64) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type NullTime struct {
-	sql.NullTime
-}
-
-//MarshalJSON method is called by json.Marshal,
-//whenever it is of type NullString
-func (x *NullTime) MarshalJSON() ([]byte, error) {
-	if !x.Valid {
-		return []byte("null"), nil
-	}
-	return json.Marshal(x.Time)
-}
-
-func (x *NullTime) UnmarshalJSON(data []byte) error {
-	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.Time)
-	if err != nil {
-		return err
-	}
-	x.Valid = true
-
-	return nil
-}
-
 type NullFloat64 struct {
 	sql.NullFloat64
 }
@@ -217,6 +194,10 @@ func (x NullUUID) Value() (driver.Value, error) {
 
 type NullUint64 struct {
 	null.Uint64
+}
+
+type NullTime struct {
+	null.Time
 }
 
 type User struct{}

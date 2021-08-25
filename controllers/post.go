@@ -248,7 +248,7 @@ func (a *postsController) FeedUser() http.HandlerFunc {
 func (a *postsController) TestIncrement() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		feed, err := a.post.Increment(r.Context())
+		feed, err := a.post.Test(r.Context())
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return

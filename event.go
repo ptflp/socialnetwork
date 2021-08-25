@@ -2,8 +2,9 @@ package infoblog
 
 import (
 	"context"
-	"gitlab.com/InfoBlogFriends/server/types"
 	"time"
+
+	"gitlab.com/InfoBlogFriends/server/types"
 )
 
 type Event struct {
@@ -22,6 +23,10 @@ type Event struct {
 
 func (e Event) TableName() string {
 	return "event"
+}
+
+func (e Event) OnCreate() string {
+	return ""
 }
 
 type EventRepository interface {
