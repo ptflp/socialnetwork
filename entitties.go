@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 //go:generate go get -u github.com/valyala/quicktemplate/qtc
@@ -269,4 +271,28 @@ func GetFieldsPointers(u interface{}, args ...string) []interface{} {
 
 func GetTables() map[string]Table {
 	return tables
+}
+
+type In struct {
+	Field string
+	Args  []interface{}
+}
+
+type Other struct {
+	Condition string
+	Args      []interface{}
+}
+
+type Order struct {
+	Field string
+	Asc   bool
+}
+
+type Condition struct {
+	Equal  *sq.Eq
+	In     *In
+	Other  *Other
+	Order  *Order
+	Limit  int64
+	Offset int64
 }

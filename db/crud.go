@@ -19,18 +19,14 @@ type crud struct {
 	db *sqlx.DB
 }
 
-func (c *crud) create(ctx context.Context, entity interface{}) error {
-	ent, ok := entity.(infoblog.Tabler)
-	if !ok {
-		return fmt.Errorf("wrong entity")
-	}
-	createFields, err := infoblog.GetFields(ent, "create")
+func (c *crud) create(ctx context.Context, entity infoblog.Tabler) error {
+	createFields, err := infoblog.GetFields(entity, "create")
 	if err != nil {
 		return err
 	}
 	createFieldsPointers := infoblog.GetFieldsPointers(entity, "create")
 
-	queryRaw := sq.Insert(ent.TableName()).Columns(createFields...).Values(createFieldsPointers...)
+	queryRaw := sq.Insert(entity.TableName()).Columns(createFields...).Values(createFieldsPointers...)
 
 	query, args, err := queryRaw.ToSql()
 	if err != nil {
@@ -42,11 +38,8 @@ func (c *crud) create(ctx context.Context, entity interface{}) error {
 	return err
 }
 
-func (c *crud) update(ctx context.Context, entity interface{}) error {
-	ent, ok := entity.(infoblog.Tabler)
-	if !ok {
-		return fmt.Errorf("wrong entity")
-	}
+func (c *crud) update(ctx context.Context, entity infoblog.Tabler) error {
+	ent := entity
 	updateFields, err := infoblog.GetFields(ent, "update")
 	if err != nil {
 		return err
@@ -73,11 +66,8 @@ func (c *crud) update(ctx context.Context, entity interface{}) error {
 	return err
 }
 
-func (c *crud) find(ctx context.Context, entity interface{}, dest interface{}) error {
-	ent, ok := entity.(infoblog.Tabler)
-	if !ok {
-		return fmt.Errorf("wrong entity")
-	}
+func (c *crud) find(ctx context.Context, entity infoblog.Tabler, dest interface{}) error {
+	ent := entity
 	fields, err := infoblog.GetFields(ent)
 	if err != nil {
 		return err
@@ -117,11 +107,8 @@ func (c *crud) first(ctx context.Context, dest interface{}) error {
 	return err
 }
 
-func (c *crud) list(ctx context.Context, dest interface{}, entity interface{}, limit, offset uint64) error {
-	ent, ok := entity.(infoblog.Tabler)
-	if !ok {
-		return fmt.Errorf("wrong entity")
-	}
+func (c *crud) list(ctx context.Context, dest interface{}, entity infoblog.Tabler, limit, offset uint64) error {
+	ent := entity
 	fields, err := infoblog.GetFields(ent)
 	if err != nil {
 		return err
@@ -139,7 +126,71 @@ func (c *crud) list(ctx context.Context, dest interface{}, entity interface{}, l
 	return nil
 }
 
-func (c *crud) count(ctx context.Context, entity interface{}, field, ops string) error {
+func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabler, condition infoblog.Condition) error {
+	fields, err := infoblog.GetFields(entity)
+	if err != nil {
+		return err
+	}
+	var whereState bool
+
+	sQuery := sq.Select(fields...).From(entity.TableName())
+
+	if condition.Equal != nil {
+		sQuery = sQuery.Where(condition.Equal)
+		whereState = true
+	}
+
+	if condition.Other != nil {
+		sQuery = sQuery.Where(condition.Other.Condition, condition.Other.Args...)
+		whereState = true
+	}
+
+	query, args, err := sQuery.ToSql()
+	if err != nil {
+		return err
+	}
+
+	if condition.In != nil {
+		queryIn := fmt.Sprintf("SELECT * FROM files WHERE %s IN (?)", condition.In.Field)
+
+		queryIn, inArgs, err := sqlx.In(queryIn, condition.In.Args)
+		if err != nil {
+			return err
+		}
+
+		s := strings.Split(queryIn, "WHERE")
+		sep := " WHERE"
+
+		if whereState {
+			sep = " AND"
+		}
+
+		query = strings.Join([]string{query, sep, s[1]}, "")
+
+		args = append(args, inArgs...)
+	}
+
+	if condition.Order != nil {
+		direction := "DESC"
+		if condition.Order.Asc {
+			direction = "ASC"
+		}
+		order := fmt.Sprintf(" ORDER BY %s %s", condition.Order.Field, direction)
+		query = strings.Join([]string{query, order}, "")
+	}
+
+	limitOffset := fmt.Sprintf(" LIMIT %d OFFSET %d", condition.Limit, condition.Offset)
+
+	query = strings.Join([]string{query, limitOffset}, "")
+
+	if err = c.db.SelectContext(ctx, dest, query, args...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *crud) count(ctx context.Context, entity infoblog.Tabler, field, ops string) error {
 	switch ops {
 	case "decr":
 	case "incr":
@@ -148,10 +199,7 @@ func (c *crud) count(ctx context.Context, entity interface{}, field, ops string)
 		return fmt.Errorf("bad count operation")
 	}
 
-	ent, ok := entity.(infoblog.Tabler)
-	if !ok {
-		return fmt.Errorf("wrong entity")
-	}
+	ent := entity
 	fields, err := infoblog.GetFields(ent)
 	if err != nil {
 		return err

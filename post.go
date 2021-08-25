@@ -2,7 +2,6 @@ package infoblog
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/types"
@@ -19,7 +18,7 @@ type PostEntity struct {
 	Views     types.NullUint64  `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 	CreatedAt time.Time         `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt time.Time         `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
-	DeletedAt sql.NullTime      `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
+	DeletedAt types.NullTime    `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
 }
 
 func (p PostEntity) OnCreate() string {
@@ -43,6 +42,7 @@ type PostRepository interface {
 	Delete(ctx context.Context, p Post) error
 	Count(ctx context.Context, p Post, field, ops string) (Post, error)
 	First(ctx context.Context) (Post, error)
+	Listx(ctx context.Context, condition Condition) ([]PostEntity, error)
 
 	Find(ctx context.Context, p Post) (Post, error)
 	FindAll(ctx context.Context, user User, limit int64, offset int64) ([]Post, map[string]int, []string, error)
