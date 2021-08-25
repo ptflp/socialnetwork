@@ -62,4 +62,6 @@ type UserRepository interface {
 
 	CreateUser(ctx context.Context, user User) error
 	CreateUserByEmailPassword(ctx context.Context, user User) error
+
+	Listx(ctx context.Context, condition Condition) ([]User, error)
 }
