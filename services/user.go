@@ -11,6 +11,8 @@ import (
 	"path"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"gitlab.com/InfoBlogFriends/server/email"
 	"gitlab.com/InfoBlogFriends/server/types"
 
@@ -78,6 +80,29 @@ func (u *User) GetProfile(ctx context.Context) (request.UserData, error) {
 	if err != nil {
 		return request.UserData{}, err
 	}
+	cond := infoblog.Condition{
+		Equal: &sq.Eq{"user_uuid": user.UUID},
+	}
+	subscribers, err := u.subsRepository.Listx(ctx, cond)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	user.Subscribers.Uint64.Uint64 = uint64(len(subscribers))
+	user.Subscribers.Uint64.Valid = true
+
+	cond = infoblog.Condition{
+		Equal: &sq.Eq{"subscriber_uuid": user.UUID},
+	}
+
+	subscribes, err := u.subsRepository.Listx(ctx, cond)
+	if err != nil {
+		return request.UserData{}, err
+	}
+
+	user.Subscribes.Uint64.Uint64 = uint64(len(subscribes))
+	user.Subscribes.Uint64.Valid = true
+
 	userData := request.UserData{}
 	err = u.MapStructs(&userData, &user)
 	if err != nil {
@@ -93,10 +118,6 @@ func (u *User) GetProfile(ctx context.Context) (request.UserData, error) {
 		return request.UserData{}, err
 	}
 	likesCount, err := u.likesRepository.CountByUser(ctx, user)
-	if err != nil {
-		return request.UserData{}, err
-	}
-
 	if err != nil {
 		return request.UserData{}, err
 	}
