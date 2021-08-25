@@ -31,4 +31,5 @@ type ChatMessagesRepository interface {
 	Update(ctx context.Context, chatMessages ChatMessages) error
 	Delete(ctx context.Context, chatMessages ChatMessages) error
 	List(ctx context.Context, limit, offset uint64) ([]ChatMessages, error)
+	Listx(ctx context.Context, condition Condition) ([]ChatMessages, error)
 }
