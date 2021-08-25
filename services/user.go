@@ -198,6 +198,15 @@ func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeReque
 		Active:         types.NewNullBool(true),
 	})
 
+	user, err = u.userRepository.Count(ctx, user, "subscribes", "incr")
+	if err != nil {
+		return err
+	}
+	sub, err = u.userRepository.Count(ctx, sub, "subscribers", "incr")
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 
@@ -215,6 +224,19 @@ func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeReq
 		SubscriberUUID: types.NewNullUUID(subscribeRequest.UUID),
 		Active:         types.NewNullBool(false),
 	})
+	if err != nil {
+		return err
+	}
+
+	user, err = u.userRepository.Count(ctx, user, "subscribes", "decr")
+	if err != nil {
+		return err
+	}
+
+	sub, err = u.userRepository.Count(ctx, sub, "subscribers", "decr")
+	if err != nil {
+		return err
+	}
 
 	return err
 }
