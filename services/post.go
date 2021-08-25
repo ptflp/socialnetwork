@@ -449,6 +449,7 @@ func (p *Post) Test(ctx context.Context) ([]infoblog.PostEntity, error) {
 		Limit:  1,
 		Offset: 0,
 	}
+
 	posts, err := p.post.Listx(ctx, cond)
 
 	return posts, err
