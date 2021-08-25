@@ -38,4 +38,5 @@ type FileRepository interface {
 	FindByIDs(ctx context.Context, ids []string) ([]File, error)
 	FindByTypeFUUID(ctx context.Context, typeID int64, foreignUUID string) ([]File, error)
 	FindByPostsIDs(ctx context.Context, postsIDs []string) ([]File, error)
+	Listx(ctx context.Context, condition Condition) ([]File, error)
 }

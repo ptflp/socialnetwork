@@ -33,4 +33,5 @@ type CommentsRepository interface {
 	Update(ctx context.Context, comments Comments) error
 	Delete(ctx context.Context, comments Comments) error
 	List(ctx context.Context, limit, offset uint64) ([]Comments, error)
+	Listx(ctx context.Context, condition Condition) ([]Comments, error)
 }

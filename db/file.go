@@ -18,6 +18,7 @@ const (
 
 type filesRepository struct {
 	db *sqlx.DB
+	crud
 }
 
 func NewFilesRepository(db *sqlx.DB) infoblog.FileRepository {
@@ -225,6 +226,16 @@ func (f *filesRepository) FindByIDs(ctx context.Context, ids []string) ([]infobl
 	var files []infoblog.File
 
 	err = f.db.Select(&files, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
+func (f *filesRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.File, error) {
+	var files []infoblog.File
+	err := f.crud.listx(ctx, &files, infoblog.File{}, condition)
 	if err != nil {
 		return nil, err
 	}

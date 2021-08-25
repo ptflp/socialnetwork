@@ -31,4 +31,5 @@ type FriendRepository interface {
 	Update(ctx context.Context, friend Friend) error
 	Delete(ctx context.Context, friend Friend) error
 	List(ctx context.Context, limit, offset uint64) ([]Friend, error)
+	Listx(ctx context.Context, condition Condition) ([]Friend, error)
 }

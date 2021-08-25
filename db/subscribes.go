@@ -17,6 +17,7 @@ const (
 
 type subsRepository struct {
 	db *sqlx.DB
+	crud
 }
 
 func (sb *subsRepository) Create(ctx context.Context, sub infoblog.Subscriber) (int64, error) {
@@ -62,6 +63,16 @@ func (sb *subsRepository) CheckSubscribed(ctx context.Context, user infoblog.Use
 	n, _ := sb.db.MustExecContext(ctx, query, args...).RowsAffected()
 
 	return n > 1
+}
+
+func (s *subsRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Subscriber, error) {
+	var subscribers []infoblog.Subscriber
+	err := s.crud.listx(ctx, &subscribers, infoblog.Subscriber{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return subscribers, nil
 }
 
 func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {

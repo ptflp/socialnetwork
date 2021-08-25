@@ -33,4 +33,5 @@ type SubscriberRepository interface {
 	Delete(ctx context.Context, sub Subscriber) error
 	CountByUser(ctx context.Context, user User) (int64, error)
 	CheckSubscribed(ctx context.Context, user User, subscriber User) bool
+	Listx(ctx context.Context, condition Condition) ([]Subscriber, error)
 }
