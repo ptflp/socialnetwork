@@ -13,6 +13,7 @@ import (
 
 type likesRepository struct {
 	db *sqlx.DB
+	crud
 }
 
 func (lr *likesRepository) Upsert(ctx context.Context, like infoblog.Like) error {
@@ -78,6 +79,16 @@ func (lr *likesRepository) CountByPost(ctx context.Context, like infoblog.Like) 
 	err = lr.db.QueryRowContext(ctx, query, args...).Scan(&count)
 
 	return count.Int64, err
+}
+
+func (l *likesRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Like, error) {
+	var likes []infoblog.Like
+	err := l.crud.listx(ctx, &likes, infoblog.Like{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes, nil
 }
 
 func NewLikesRepository(db *sqlx.DB) infoblog.LikeRepository {
