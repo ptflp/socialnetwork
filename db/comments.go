@@ -39,6 +39,16 @@ func (c *CommentsRepository) List(ctx context.Context, limit, offset uint64) ([]
 	return chat, err
 }
 
+func (c *CommentsRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Comments, error) {
+	var comments []infoblog.Comments
+	err := c.crud.listx(ctx, &comments, infoblog.Comments{}, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	return comments, nil
+}
+
 func NewCommentsRepository(db *sqlx.DB) infoblog.CommentsRepository {
 	cr := crud{db: db}
 	return &CommentsRepository{db: db, crud: cr}
