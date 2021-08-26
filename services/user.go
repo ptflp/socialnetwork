@@ -288,6 +288,10 @@ func (u *User) List(ctx context.Context) ([]request.UserData, error) {
 	return usersData, nil
 }
 
+func (u *User) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.User, error) {
+	return u.userRepository.Listx(ctx, condition)
+}
+
 func (u *User) TempList(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
 	users, err := u.userRepository.FindLimitOffset(ctx, uint64(req.Limit), uint64(req.Offset))
 	if err != nil {
@@ -602,7 +606,7 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 
 	// 3. update file info, save to db
 	file.Active = 1
-	file.Type = types.FileAvatar
+	file.Type = types.TypeFileAvatar
 	file.UserUUID = user.UUID
 
 	err = u.file.SaveDB(ctx, &file)

@@ -103,3 +103,7 @@ func (f *File) GetFile(ctx context.Context, fileUUID string) (infoblog.File, err
 
 	return fileEnt, err
 }
+
+func (f *File) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.File, error) {
+	return f.fileRep.Listx(ctx, condition)
+}

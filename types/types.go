@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	FilePost = iota + 1
-	FileAvatar
+	TypeFilePost = iota + 1
+	TypeFileAvatar
 )
 
 //NullString is a wrapper around sql.NullString
