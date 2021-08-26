@@ -181,6 +181,19 @@ func (u *usersController) Autocomplete() http.HandlerFunc {
 			return
 		}
 
+		if len(nickNameReq.Nickname) < 3 {
+			u.SendJSON(w, request.Response{
+				Success: true,
+				Data: struct {
+					Users []request.UserData `json:"user"`
+				}{
+					Users: []request.UserData{},
+				},
+			})
+
+			return
+		}
+
 		userData, err := u.user.Autocomplete(r.Context(), nickNameReq)
 
 		if err != nil {
