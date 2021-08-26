@@ -218,8 +218,8 @@ func (u *User) Subscribe(ctx context.Context, subscribeRequest request.UserIDReq
 	}
 
 	_, err = u.subsRepository.Create(ctx, infoblog.Subscriber{
-		UserUUID:       user.UUID,
-		SubscriberUUID: types.NewNullUUID(subscribeRequest.UUID),
+		UserUUID:       sub.UUID,
+		SubscriberUUID: user.UUID,
 		Active:         types.NewNullBool(true),
 	})
 	if err != nil {
@@ -327,8 +327,12 @@ func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]re
 }
 
 func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
-	_, err := extractUser(ctx)
+	user, err := extractUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	subscribesCondition := infoblog.Condition{
+		Equal: &sq.Eq{"subscriber_uuid": user.UUID},
 		LimitOffset: &infoblog.LimitOffset{
 			Limit:  req.Limit,
 			Offset: req.Offset,
