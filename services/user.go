@@ -304,6 +304,24 @@ func (u *User) TempList(ctx context.Context, req request.LimitOffsetReq) ([]requ
 	return usersData, nil
 }
 
+func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
+	condition := infoblog.Condition{
+		Order: &infoblog.Order{
+			Field: "likes",
+		},
+	}
+	users, err := u.userRepository.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	var usersData []request.UserData
+
+	err = u.MapStructs(&usersData, &users)
+
+	return usersData, nil
+}
+
 func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.UserData, error) {
 	user := infoblog.User{}
 	var err error

@@ -202,9 +202,11 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 		query = strings.Join([]string{query, order}, "")
 	}
 
-	limitOffset := fmt.Sprintf(" LIMIT %d OFFSET %d", condition.Limit, condition.Offset)
+	if condition.LimitOffset != nil {
+		limitOffset := fmt.Sprintf(" LIMIT %d OFFSET %d", condition.LimitOffset.Limit, condition.LimitOffset.Offset)
 
-	query = strings.Join([]string{query, limitOffset}, "")
+		query = strings.Join([]string{query, limitOffset}, "")
+	}
 
 	if err = c.db.SelectContext(ctx, dest, query, args...); err != nil {
 		return err

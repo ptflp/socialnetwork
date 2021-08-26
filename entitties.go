@@ -288,12 +288,16 @@ type Order struct {
 	Asc   bool
 }
 
-type Condition struct {
-	Equal  *sq.Eq
-	In     *In
-	NotIn  *In
-	Other  *Other
-	Order  *Order
+type LimitOffset struct {
 	Limit  int64
 	Offset int64
+}
+
+type Condition struct {
+	Equal       *sq.Eq
+	In          *In
+	NotIn       *In
+	Other       *Other
+	Order       *Order
+	LimitOffset *LimitOffset
 }
