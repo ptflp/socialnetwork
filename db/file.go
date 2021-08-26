@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"gitlab.com/InfoBlogFriends/server/services"
+
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/jmoiron/sqlx"
@@ -22,7 +24,7 @@ type filesRepository struct {
 }
 
 func NewFilesRepository(db *sqlx.DB) infoblog.FileRepository {
-	return &filesRepository{db: db}
+	return &filesRepository{db: db, crud: crud{db: db}}
 }
 
 func (f *filesRepository) Create(ctx context.Context, p *infoblog.File) (int64, error) {
@@ -71,7 +73,14 @@ func (f *filesRepository) Update(ctx context.Context, file infoblog.File) error 
 }
 
 func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post infoblog.Post) error {
-	query, args, err := sq.Update("files").Set("foreign_uuid", post.UUID).ToSql()
+	rawQuery := sq.Update("files").Set("foreign_uuid", post.UUID)
+
+	if post.Type != services.PostTypeFree {
+		rawQuery.Set("private", types.NewNullBool(true))
+	}
+
+	query, args, err := rawQuery.ToSql()
+
 	if err != nil {
 		return err
 	}

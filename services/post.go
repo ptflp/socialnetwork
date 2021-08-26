@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"gitlab.com/InfoBlogFriends/server/types"
 	"gitlab.com/InfoBlogFriends/server/utils"
 
@@ -276,7 +278,7 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 			return request.PostsFeedData{}, err
 		}
 
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: types.NewNullUUID(pdr.UUID)})
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -292,12 +294,12 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 
 func (p *Post) FeedRecommend(ctx context.Context, req request.LimitOffsetReq) (request.PostsFeedData, error) {
 	u, err := extractUser(ctx)
-	if err != nil {
-		return request.PostsFeedData{}, err
+	if err == nil {
+		if u.UUID.Valid {
+			return p.FeedRecommendAuthed(ctx, req)
+		}
 	}
-	if u.UUID.Valid {
-		return p.FeedRecommendAuthed(ctx, req)
-	}
+
 	condition := infoblog.Condition{
 		Order: &infoblog.Order{
 			Field: "likes",
@@ -309,19 +311,25 @@ func (p *Post) FeedRecommend(ctx context.Context, req request.LimitOffsetReq) (r
 		},
 	}
 
+	return p.GetFeedData(ctx, condition)
+}
+
+func (p *Post) GetFeedData(ctx context.Context, condition infoblog.Condition) (request.PostsFeedData, error) {
+	postDataRes, postDataMap, postSliceUUIDs, err := p.GetPostByCondition(ctx, condition)
+	if err != nil || len(postSliceUUIDs) < 1 {
+		return request.PostsFeedData{}, err
+	}
+
+	_, err = p.GetFeedFiles(ctx, postDataMap, postSliceUUIDs...)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+	_, err = p.GetFeedUsers(ctx, postDataMap)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
 	count, err := p.post.GetCount(ctx, condition)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-
-	posts, err := p.post.Listx(ctx, condition)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-
-	postDataRes := make([]request.PostDataResponse, 0, len(posts))
-
-	err = p.MapStructs(&postDataRes, &posts)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
@@ -330,6 +338,107 @@ func (p *Post) FeedRecommend(ctx context.Context, req request.LimitOffsetReq) (r
 		Count: count,
 		Posts: postDataRes,
 	}, nil
+}
+
+func (p *Post) GetPostByCondition(ctx context.Context, condition infoblog.Condition) ([]request.PostDataResponse, map[string]*request.PostDataResponse, []interface{}, error) {
+	posts, err := p.post.Listx(ctx, condition)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	postDataRes := make([]request.PostDataResponse, 0, len(posts))
+
+	err = p.MapStructs(&postDataRes, &posts)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	postDataMap := make(map[string]*request.PostDataResponse, len(posts))
+	postSliceUUIDs := make([]interface{}, 0, len(posts))
+
+	for i := range postDataRes {
+		postDataMap[postDataRes[i].UUID.String] = &postDataRes[i]
+		postSliceUUIDs = append(postSliceUUIDs, postDataRes[i].UUID)
+		postDataRes[i].IsLiked = true
+	}
+
+	return postDataRes, postDataMap, postSliceUUIDs, err
+}
+
+func (p *Post) GetFeedFiles(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]request.PostFileData, error) {
+	filesCondition := infoblog.Condition{
+		Equal: &sq.Eq{"type": types.TypeFilePost},
+		In: &infoblog.In{
+			Field: "foreign_uuid",
+			Args:  postUUIDs,
+		},
+	}
+
+	files, err := p.file.Listx(ctx, filesCondition)
+	if err != nil {
+		return nil, err
+	}
+
+	filesData := make([]request.PostFileData, 0, len(files))
+
+	err = p.MapStructs(&filesData, &files)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range filesData {
+		if filesData[i].Private.Valid && filesData[i].Private.Bool {
+			filesData[i].Link = utils.PrivateLink(filesData[i])
+		} else {
+			filesData[i].Link = utils.PublicLink(filesData[i])
+		}
+
+		if postDataMap != nil {
+			postDataMap[filesData[i].ForeignUUID.String].Files = append(postDataMap[filesData[i].ForeignUUID.String].Files, filesData[i])
+		}
+	}
+
+	return filesData, err
+}
+
+func (p *Post) GetFeedUsers(ctx context.Context, postDataMap map[string]*request.PostDataResponse) ([]request.UserData, error) {
+	if len(postDataMap) < 1 {
+		return nil, fmt.Errorf("getFeedUsers post data empty")
+	}
+	userUUIDs := make([]interface{}, 0, len(postDataMap))
+	usersPostMap := make(map[string]*request.PostDataResponse, len(postDataMap))
+	for _, v := range postDataMap {
+		userUUIDs = append(userUUIDs, v.UserUUID)
+		usersPostMap[v.UserUUID.String] = v
+	}
+	if len(userUUIDs) < 1 {
+		return nil, fmt.Errorf("getFeedUsers no users found")
+	}
+
+	usersCondition := infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  userUUIDs,
+		},
+	}
+
+	users, err := p.services.User.Listx(ctx, usersCondition)
+	if err != nil {
+		return nil, err
+	}
+
+	usersData := make([]request.UserData, 0, len(users))
+
+	err = p.MapStructs(&usersData, &users)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range usersData {
+		usersPostMap[usersData[i].UUID.String].User = usersData[i]
+	}
+
+	return usersData, err
 }
 
 func (p *Post) FeedRecommendAuthed(ctx context.Context, req request.LimitOffsetReq) (request.PostsFeedData, error) {
@@ -352,27 +461,7 @@ func (p *Post) FeedRecommendAuthed(ctx context.Context, req request.LimitOffsetR
 		},
 	}
 
-	count, err := p.post.GetCount(ctx, condition)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-
-	posts, err := p.post.Listx(ctx, condition)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-
-	postDataRes := make([]request.PostDataResponse, 0, len(posts))
-
-	err = p.MapStructs(&postDataRes, &posts)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-
-	return request.PostsFeedData{
-		Count: count,
-		Posts: postDataRes,
-	}, nil
+	return p.GetFeedData(ctx, condition)
 }
 
 func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (request.PostsFeedData, error) {
@@ -426,7 +515,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 			return request.PostsFeedData{}, err
 		}
 
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: types.NewNullUUID(pdr.UUID)})
+		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}

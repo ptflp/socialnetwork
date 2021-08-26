@@ -111,7 +111,8 @@ func (c *crud) getCount(ctx context.Context, entity infoblog.Tabler, condition i
 	ent := entity
 	var whereState bool
 
-	queryRaw := sq.Select("COUNT(uuid)").From(ent.TableName()).Limit(1)
+	queryRaw := sq.Select("COUNT(uuid)").From(ent.TableName())
+
 	query, args, err := queryRaw.ToSql()
 	if err != nil {
 		return 0, err
@@ -146,7 +147,7 @@ func (c *crud) getCount(ctx context.Context, entity infoblog.Tabler, condition i
 			return 0, err
 		}
 
-		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN(", 1)
+		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN (", 1)
 
 		s := strings.Split(queryNotIn, "WHERE")
 		sep := " WHERE"
@@ -160,22 +161,9 @@ func (c *crud) getCount(ctx context.Context, entity infoblog.Tabler, condition i
 		args = append(args, inArgs...)
 	}
 
-	if condition.Order != nil {
-		direction := "DESC"
-		if condition.Order.Asc {
-			direction = "ASC"
-		}
-		order := fmt.Sprintf(" ORDER BY %s %s", condition.Order.Field, direction)
-		query = strings.Join([]string{query, order}, "")
-	}
+	query = strings.Join([]string{query, " LIMIT 1"}, "")
 
-	if condition.LimitOffset != nil {
-		limitOffset := fmt.Sprintf(" LIMIT %d OFFSET %d", condition.LimitOffset.Limit, condition.LimitOffset.Offset)
-
-		query = strings.Join([]string{query, limitOffset}, "")
-	}
-
-	rows, err := c.db.QueryxContext(ctx, query, args)
+	rows, err := c.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return 0, err
 	}

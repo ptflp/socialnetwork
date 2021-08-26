@@ -66,20 +66,26 @@ type UserDataCounts struct {
 }
 
 type PostDataResponse struct {
-	UUID   string           `json:"post_id"`
-	Body   string           `json:"description"`
-	Type   int64            `json:"post_type"`
-	Files  []PostFileData   `json:"files"`
-	User   UserData         `json:"user"`
-	Price  float64          `json:"price"`
-	Counts PostCountData    `json:"counts"`
-	Likes  types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
-	Views  types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	UUID     types.NullUUID   `json:"post_id"`
+	Body     string           `json:"description"`
+	Type     int64            `json:"post_type"`
+	Files    []PostFileData   `json:"files"`
+	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" orm_type:"binary(16)" orm_default:"null" orm_index:"index" ops:"create"`
+	User     UserData         `json:"user"`
+	Price    float64          `json:"price"`
+	Counts   PostCountData    `json:"counts"`
+	IsLiked  bool             `json:"is_liked"`
+	Likes    types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Views    types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 }
 
 type PostFileData struct {
-	Link string `json:"link"`
-	UUID string `json:"file_id"`
+	Link        string         `json:"link"`
+	UUID        string         `json:"file_id"`
+	ForeignUUID types.NullUUID `json:"foreign_uuid" db:"foreign_uuid" ops:"create,update" orm_type:"binary(16)" orm_default:"null"`
+	Dir         string         `json:"dir" db:"dir" ops:"create,update" orm_type:"varchar(100)" orm_default:"not null"`
+	Name        string         `json:"name" db:"name" ops:"create" orm_type:"varchar(50)" orm_default:"not null"`
+	Private     types.NullBool `json:"private"`
 }
 
 type PostCountData struct {
