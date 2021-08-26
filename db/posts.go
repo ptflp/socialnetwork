@@ -240,6 +240,10 @@ func (pr *postsRepository) Listx(ctx context.Context, condition infoblog.Conditi
 	return posts, nil
 }
 
+func (pr *postsRepository) GetCount(ctx context.Context, condition infoblog.Condition) (uint64, error) {
+	return pr.getCount(ctx, infoblog.PostEntity{}, condition)
+}
+
 func NewPostsRepository(db *sqlx.DB) infoblog.PostRepository {
 	return &postsRepository{db: db, crud: crud{db: db}}
 }

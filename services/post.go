@@ -285,6 +285,91 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 	}
 
 	return request.PostsFeedData{
+		Count: uint64(count),
+		Posts: postDataRes,
+	}, nil
+}
+
+func (p *Post) FeedRecommend(ctx context.Context, req request.LimitOffsetReq) (request.PostsFeedData, error) {
+	u, err := extractUser(ctx)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+	if u.UUID.Valid {
+		return p.FeedRecommendAuthed(ctx, req)
+	}
+	condition := infoblog.Condition{
+		Order: &infoblog.Order{
+			Field: "likes",
+			Asc:   false,
+		},
+		LimitOffset: &infoblog.LimitOffset{
+			Offset: req.Offset,
+			Limit:  req.Limit,
+		},
+	}
+
+	count, err := p.post.GetCount(ctx, condition)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	posts, err := p.post.Listx(ctx, condition)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	postDataRes := make([]request.PostDataResponse, 0, len(posts))
+
+	err = p.MapStructs(&postDataRes, &posts)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	return request.PostsFeedData{
+		Count: count,
+		Posts: postDataRes,
+	}, nil
+}
+
+func (p *Post) FeedRecommendAuthed(ctx context.Context, req request.LimitOffsetReq) (request.PostsFeedData, error) {
+	u, err := extractUser(ctx)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+	condition := infoblog.Condition{
+		NotIn: &infoblog.In{
+			Field: "user_uuid",
+			Args:  []interface{}{u.UUID},
+		},
+		Order: &infoblog.Order{
+			Field: "likes",
+			Asc:   false,
+		},
+		LimitOffset: &infoblog.LimitOffset{
+			Offset: req.Offset,
+			Limit:  req.Limit,
+		},
+	}
+
+	count, err := p.post.GetCount(ctx, condition)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	posts, err := p.post.Listx(ctx, condition)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	postDataRes := make([]request.PostDataResponse, 0, len(posts))
+
+	err = p.MapStructs(&postDataRes, &posts)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	return request.PostsFeedData{
 		Count: count,
 		Posts: postDataRes,
 	}, nil
@@ -350,7 +435,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 	}
 
 	return request.PostsFeedData{
-		Count: count,
+		Count: uint64(count),
 		Posts: postDataRes,
 	}, nil
 }

@@ -194,6 +194,29 @@ func (a *postsController) FeedRecent() http.HandlerFunc {
 	}
 }
 
+func (a *postsController) FeedRecommends() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		var postsListReq request.LimitOffsetReq
+		err = Decode(r, &postsListReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		feed, err := a.post.FeedRecommend(r.Context(), postsListReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.PostsFeedResponse{
+			Success: true,
+			Data:    feed,
+		})
+	}
+}
+
 func (a *postsController) FeedMy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		u, err := extractUser(r)

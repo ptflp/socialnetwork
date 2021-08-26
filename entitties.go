@@ -289,8 +289,8 @@ type Order struct {
 }
 
 type LimitOffset struct {
-	Limit  int64
 	Offset int64
+	Limit  int64
 }
 
 type Condition struct {

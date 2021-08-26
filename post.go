@@ -43,6 +43,7 @@ type PostRepository interface {
 	Count(ctx context.Context, p Post, field, ops string) (Post, error)
 	First(ctx context.Context) (Post, error)
 	Listx(ctx context.Context, condition Condition) ([]PostEntity, error)
+	GetCount(ctx context.Context, condition Condition) (uint64, error)
 
 	Find(ctx context.Context, p Post) (Post, error)
 	FindAll(ctx context.Context, user User, limit int64, offset int64) ([]Post, map[string]int, []string, error)
