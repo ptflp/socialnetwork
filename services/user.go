@@ -339,6 +339,9 @@ func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]re
 		},
 	}
 	mySubs, err := u.subsRepository.Listx(ctx, subscribesCondition)
+	if err != nil {
+		return nil, err
+	}
 	var userUUIDs []interface{}
 
 	for i := range mySubs {
@@ -360,6 +363,9 @@ func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]re
 	var usersData []request.UserData
 
 	err = u.MapStructs(&usersData, &users)
+	if err != nil {
+		return nil, err
+	}
 
 	return usersData, nil
 }

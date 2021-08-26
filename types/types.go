@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/volatiletech/null/v8"
 
@@ -121,7 +120,6 @@ type NullUUID struct {
 	Binary []byte
 	Valid  bool
 	String string
-	sync.RWMutex
 }
 
 func (x *NullUUID) MarshalJSON() ([]byte, error) {
@@ -145,7 +143,6 @@ func (x *NullUUID) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	x.Lock()
 
 	return nil
 }
@@ -184,7 +181,6 @@ func (x *NullUUID) Scan(value interface{}) error {
 
 	x.String = uuidRaw.String()
 
-	x.Lock()
 	return nil
 }
 
