@@ -16,8 +16,8 @@ type PostUpdateReq struct {
 }
 
 type LimitOffsetReq struct {
-	Limit  int64 `json:"limit"`
 	Offset int64 `json:"offset"`
+	Limit  int64 `json:"limit"`
 }
 
 type PostsFeedUserReq struct {

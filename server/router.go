@@ -149,7 +149,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 
 	r.Route("/expose", func(r chi.Router) {
 		r.Route("/feed", func(r chi.Router) {
-			r.Post("/recommends", posts.FeedRecent())
+			r.Post("/recommends", posts.FeedRecommends())
 		})
 		r.Get("/test", posts.TestIncrement())
 	})

@@ -88,7 +88,7 @@ type PostCountData struct {
 }
 
 type PostsFeedData struct {
-	Count int64              `json:"count"`
+	Count uint64             `json:"count"`
 	Posts []PostDataResponse `json:"posts"`
 }
 

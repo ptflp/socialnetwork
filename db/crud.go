@@ -107,6 +107,93 @@ func (c *crud) first(ctx context.Context, dest interface{}) error {
 	return err
 }
 
+func (c *crud) getCount(ctx context.Context, entity infoblog.Tabler, condition infoblog.Condition) (uint64, error) {
+	ent := entity
+	var whereState bool
+
+	queryRaw := sq.Select("COUNT(uuid)").From(ent.TableName()).Limit(1)
+	query, args, err := queryRaw.ToSql()
+	if err != nil {
+		return 0, err
+	}
+
+	if condition.In != nil {
+		queryIn := fmt.Sprintf("SELECT * FROM files WHERE %s IN (?)", condition.In.Field)
+
+		queryIn, inArgs, err := sqlx.In(queryIn, condition.In.Args)
+		if err != nil {
+			return 0, err
+		}
+
+		s := strings.Split(queryIn, "WHERE")
+		sep := " WHERE"
+
+		if whereState {
+			sep = " AND"
+		}
+
+		query = strings.Join([]string{query, sep, s[1]}, "")
+
+		args = append(args, inArgs...)
+		whereState = true
+	}
+
+	if condition.NotIn != nil {
+		queryNotIn := fmt.Sprintf("SELECT * FROM files WHERE %s IN (?)", condition.NotIn.Field)
+
+		queryNotIn, inArgs, err := sqlx.In(queryNotIn, condition.NotIn.Args)
+		if err != nil {
+			return 0, err
+		}
+
+		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN(", 1)
+
+		s := strings.Split(queryNotIn, "WHERE")
+		sep := " WHERE"
+
+		if whereState {
+			sep = " AND"
+		}
+
+		query = strings.Join([]string{query, sep, s[1]}, "")
+
+		args = append(args, inArgs...)
+	}
+
+	if condition.Order != nil {
+		direction := "DESC"
+		if condition.Order.Asc {
+			direction = "ASC"
+		}
+		order := fmt.Sprintf(" ORDER BY %s %s", condition.Order.Field, direction)
+		query = strings.Join([]string{query, order}, "")
+	}
+
+	if condition.LimitOffset != nil {
+		limitOffset := fmt.Sprintf(" LIMIT %d OFFSET %d", condition.LimitOffset.Limit, condition.LimitOffset.Offset)
+
+		query = strings.Join([]string{query, limitOffset}, "")
+	}
+
+	rows, err := c.db.QueryxContext(ctx, query, args)
+	if err != nil {
+		return 0, err
+	}
+
+	var count uint64
+	// iterate over each row
+	for rows.Next() {
+		err = rows.Scan(&count)
+		if err != nil {
+			return 0, err
+		}
+	}
+	// check the error from rows
+	err = rows.Err()
+
+	return count, err
+}
+
 func (c *crud) list(ctx context.Context, dest interface{}, entity infoblog.Tabler, limit, offset uint64) error {
 	ent := entity
 	fields, err := infoblog.GetFields(ent)
