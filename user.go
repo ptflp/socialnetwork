@@ -2,7 +2,6 @@ package infoblog
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/types"
@@ -10,6 +9,7 @@ import (
 
 type User struct {
 	UUID           types.NullUUID    `json:"user_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Role           types.NullInt64   `json:"role" db:"role" orm_type:"int" orm_default:"null" ops:"update"`
 	Phone          types.NullString  `json:"phone" db:"phone" ops:"update,create" orm_type:"varchar(34)" orm_index:"index,unique"`
 	Email          types.NullString  `json:"email" db:"email" ops:"update,create" orm_type:"varchar(89)" orm_index:"index,unique"`
 	Avatar         types.NullString  `json:"profile_image" db:"avatar" ops:"update" orm_type:"varchar(144)"`
@@ -34,7 +34,7 @@ type User struct {
 	Subscribers    types.NullUint64  `json:"subscribers_count" db:"subscribers" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 	CreatedAt      time.Time         `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt      time.Time         `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
-	DeletedAt      sql.NullTime      `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
+	DeletedAt      types.NullTime    `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
 }
 
 func (u User) OnCreate() string {
