@@ -81,5 +81,7 @@ func NewNullUUID(s ...string) NullUUID {
 
 	nullUUID.Valid = true
 
+	nullUUID.Lock()
+
 	return nullUUID
 }
