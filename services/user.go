@@ -322,6 +322,9 @@ func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]re
 	var usersData []request.UserData
 
 	err = u.MapStructs(&usersData, &users)
+	if err != nil {
+		return nil, err
+	}
 
 	return usersData, nil
 }
