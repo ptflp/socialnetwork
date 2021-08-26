@@ -157,16 +157,17 @@ func (x *NullUUID) Scan(value interface{}) error {
 		return nil
 	}
 
-	var source []byte
-	switch t := value.(type) {
+	var dest []byte
+	switch source := value.(type) {
 	case string:
-		*x = NewNullUUID(t)
+		*x = NewNullUUID(source)
 		return nil
 	case []byte:
-		if len(t) == 0 {
-			source = nil
+		if len(source) == 0 {
+			dest = nil
 		} else {
-			source = t
+			dest = make([]byte, len(source))
+			copy(dest, source)
 		}
 	case nil:
 		*x = NullUUID{}
@@ -174,11 +175,11 @@ func (x *NullUUID) Scan(value interface{}) error {
 		return errors.New("incompatible type for NullUUID")
 	}
 
-	uuidRaw, err := uuid.FromBytes(source)
+	uuidRaw, err := uuid.FromBytes(dest)
 	if err != nil {
 		return err
 	}
-	x.Binary = source
+	x.Binary = dest
 	x.Valid = true
 
 	x.String = uuidRaw.String()
