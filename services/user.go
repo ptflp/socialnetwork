@@ -204,7 +204,11 @@ func (u *User) prepareRecoveryTemplate(recoverUrl string) (bytes.Buffer, error) 
 	return b, err
 }
 
-func (u *User) Subscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
+func (u *User) Subscribe(ctx context.Context, subscribeRequest request.UserIDRequest) error {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: types.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
@@ -310,6 +314,40 @@ func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]re
 			Field: "likes",
 		},
 	}
+	users, err := u.userRepository.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	var usersData []request.UserData
+
+	err = u.MapStructs(&usersData, &users)
+
+	return usersData, nil
+}
+
+func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
+	_, err := extractUser(ctx)
+	subscribesCondition := infoblog.Condition{
+		LimitOffset: &infoblog.LimitOffset{
+			Limit:  req.Limit,
+			Offset: req.Offset,
+		},
+	}
+	mySubs, err := u.subsRepository.Listx(ctx, subscribesCondition)
+	var userUUIDs []interface{}
+
+	for i := range mySubs {
+		userUUIDs = append(userUUIDs, mySubs[i].UserUUID)
+	}
+
+	condition := infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  userUUIDs,
+		},
+	}
+
 	users, err := u.userRepository.Listx(ctx, condition)
 	if err != nil {
 		return nil, err

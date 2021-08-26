@@ -32,23 +32,18 @@ func NewUsersController(responder respond.Responder, user *services.User, logger
 
 func (u *usersController) Subscribe() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := extractUser(r)
-		if err != nil {
-			u.ErrorBadRequest(w, err)
-			return
-		}
 
 		var usersSubscribeReq request.UserIDRequest
 
 		// r.PostForm is u map of our POST form values
-		err = u.Decode(r.Body, &usersSubscribeReq)
+		err := u.Decode(r.Body, &usersSubscribeReq)
 
 		if err != nil {
 			u.ErrorBadRequest(w, err)
 			return
 		}
 
-		err = u.user.Subscribe(r.Context(), user, usersSubscribeReq)
+		err = u.user.Subscribe(r.Context(), usersSubscribeReq)
 
 		if err != nil {
 			u.ErrorBadRequest(w, err)
@@ -124,6 +119,35 @@ func (u *usersController) TempList() http.HandlerFunc {
 		}
 
 		usersData, err := u.user.TempList(r.Context(), limitOffsetReq)
+
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		u.SendJSON(w, request.Response{
+			Success: true,
+			Data: struct {
+				Users []request.UserData `json:"users"`
+			}{
+				Users: usersData,
+			},
+		})
+	}
+}
+
+func (u *usersController) Subscribes() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var limitOffsetReq request.LimitOffsetReq
+
+		err := u.Decode(r.Body, &limitOffsetReq)
+		if err != nil {
+			u.ErrorBadRequest(w, err)
+			return
+		}
+
+		usersData, err := u.user.Subscribes(r.Context(), limitOffsetReq)
 
 		if err != nil {
 			u.ErrorBadRequest(w, err)
