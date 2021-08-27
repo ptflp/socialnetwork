@@ -49,8 +49,7 @@ type UserData struct {
 	CreatedAt      time.Time         `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time         `json:"updated_at" db:"updated_at"`
 
-	IsFriends    bool `json:"is_friends"`
-	IsSubscriber bool `json:"is_subscriber"`
+	InSubscribes bool `json:"in_subscribes"`
 
 	PasswordSet *bool `json:"password_set,omitempty"`
 	AvatarSet   bool  `json:"profile_image_set"`

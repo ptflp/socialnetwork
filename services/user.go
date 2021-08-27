@@ -333,35 +333,7 @@ func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]re
 	return usersData, nil
 }
 
-func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
-	user, err := extractUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-	subscribesCondition := infoblog.Condition{
-		Equal: &sq.Eq{"subscriber_uuid": user.UUID},
-		LimitOffset: &infoblog.LimitOffset{
-			Limit:  req.Limit,
-			Offset: req.Offset,
-		},
-	}
-	mySubs, err := u.subsRepository.Listx(ctx, subscribesCondition)
-	if err != nil {
-		return nil, err
-	}
-	var userUUIDs []interface{}
-
-	for i := range mySubs {
-		userUUIDs = append(userUUIDs, mySubs[i].UserUUID)
-	}
-
-	condition := infoblog.Condition{
-		In: &infoblog.In{
-			Field: "uuid",
-			Args:  userUUIDs,
-		},
-	}
-
+func (u *User) GetUsersByCondition(ctx context.Context, condition infoblog.Condition) ([]request.UserData, error) {
 	users, err := u.userRepository.Listx(ctx, condition)
 	if err != nil {
 		return nil, err
@@ -375,6 +347,52 @@ func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]re
 	}
 
 	return usersData, nil
+}
+
+func (u *User) GetUserSubscribesUUIDs(ctx context.Context, user infoblog.User, subscribesCondition infoblog.Condition) ([]interface{}, error) {
+	subscribesCondition.Equal = &sq.Eq{"subscriber_uuid": user.UUID}
+	mySubs, err := u.subsRepository.Listx(ctx, subscribesCondition)
+	if err != nil {
+		return nil, err
+	}
+	var userUUIDs []interface{}
+
+	for i := range mySubs {
+		userUUIDs = append(userUUIDs, mySubs[i].UserUUID)
+	}
+
+	return userUUIDs, nil
+}
+
+func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	subscribesCondition := infoblog.Condition{
+		LimitOffset: &infoblog.LimitOffset{
+			Limit:  req.Limit,
+			Offset: req.Offset,
+		},
+	}
+	userUUIDs, err := u.GetUserSubscribesUUIDs(ctx, user, subscribesCondition)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(userUUIDs) < 1 {
+		return []request.UserData{}, nil
+	}
+
+	condition := infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  userUUIDs,
+		},
+	}
+
+	return u.GetUsersByCondition(ctx, condition)
 }
 
 func (u *User) Get(ctx context.Context, req request.UserIDNickRequest) (request.UserData, error) {
