@@ -411,10 +411,10 @@ func (p *Post) FeedGetUsers(ctx context.Context, postDataMap map[string]*request
 		return nil, fmt.Errorf("getFeedUsers post data empty")
 	}
 	userUUIDs := make([]interface{}, 0, len(postDataMap))
-	usersPostMap := make(map[string]*request.PostDataResponse, len(postDataMap))
+	userUUIDMapPosts := make(map[string][]*request.PostDataResponse, len(postDataMap))
 	for _, v := range postDataMap {
 		userUUIDs = append(userUUIDs, v.UserUUID)
-		usersPostMap[v.UserUUID.String] = v
+		userUUIDMapPosts[v.UserUUID.String] = append(userUUIDMapPosts[v.UserUUID.String], v)
 	}
 	if len(userUUIDs) < 1 {
 		return nil, fmt.Errorf("getFeedUsers no users found")
@@ -440,7 +440,12 @@ func (p *Post) FeedGetUsers(ctx context.Context, postDataMap map[string]*request
 	}
 
 	for i := range usersData {
-		usersPostMap[usersData[i].UUID.String].User = usersData[i]
+		v, ok := userUUIDMapPosts[usersData[i].UUID.String]
+		if ok {
+			for j := range v {
+				v[j].User = usersData[i]
+			}
+		}
 	}
 
 	user, err := extractUser(ctx)
@@ -458,7 +463,12 @@ func (p *Post) FeedGetUsers(ctx context.Context, postDataMap map[string]*request
 			for i := range subscribersUUIDS {
 				v, ok := subscribersUUIDS[i].(types.NullUUID)
 				if ok {
-					usersPostMap[v.String].User.InSubscribes = true
+					v, ok := userUUIDMapPosts[v.String]
+					if ok {
+						for j := range v {
+							v[j].User.InSubscribes = true
+						}
+					}
 				}
 			}
 		}
