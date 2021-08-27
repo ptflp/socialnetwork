@@ -438,6 +438,27 @@ func (p *Post) GetFeedUsers(ctx context.Context, postDataMap map[string]*request
 		usersPostMap[usersData[i].UUID.String].User = usersData[i]
 	}
 
+	user, err := extractUser(ctx)
+	if err == nil {
+		if user.UUID.Valid {
+			subscribersUUIDS, err := p.services.User.GetUserSubscribesUUIDs(ctx, user, infoblog.Condition{
+				In: &infoblog.In{
+					Field: "user_uuid",
+					Args:  userUUIDs,
+				},
+			})
+			if err != nil {
+				return nil, err
+			}
+			for i := range subscribersUUIDS {
+				v, ok := subscribersUUIDS[i].(types.NullUUID)
+				if ok {
+					usersPostMap[v.String].User.InSubscribes = true
+				}
+			}
+		}
+	}
+
 	return usersData, err
 }
 
