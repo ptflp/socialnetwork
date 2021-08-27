@@ -499,7 +499,7 @@ func (p *Post) FeedIsLiked(ctx context.Context, postDataMap map[string]*request.
 		}
 
 		for i := range likes {
-			v, ok := postDataMap[likes[i].UUID.String]
+			v, ok := postDataMap[likes[i].ForeignUUID.String]
 			if ok {
 				v.IsLiked = true
 			}
