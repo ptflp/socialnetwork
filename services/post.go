@@ -334,6 +334,11 @@ func (p *Post) GetFeedData(ctx context.Context, condition infoblog.Condition) (r
 		return request.PostsFeedData{}, err
 	}
 
+	//_, err = p.FeedIsOpen(ctx, postDataMap, postSliceUUIDs...)
+	//if err != nil {
+	//	return request.PostsFeedData{}, err
+	//}
+
 	count, err := p.post.GetCount(ctx, condition)
 	if err != nil {
 		return request.PostsFeedData{}, err
@@ -364,7 +369,6 @@ func (p *Post) GetFeedByCondition(ctx context.Context, condition infoblog.Condit
 	for i := range postDataRes {
 		postDataMap[postDataRes[i].UUID.String] = &postDataRes[i]
 		postSliceUUIDs = append(postSliceUUIDs, postDataRes[i].UUID)
-		postDataRes[i].IsLiked = true
 	}
 
 	return postDataRes, postDataMap, postSliceUUIDs, err
@@ -478,6 +482,36 @@ func (p *Post) FeedGetUsers(ctx context.Context, postDataMap map[string]*request
 }
 
 func (p *Post) FeedIsLiked(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]infoblog.Like, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	if user.UUID.Valid && postDataMap != nil {
+		isLikedCondition := infoblog.Condition{
+			Equal: &sq.Eq{"liker_uuid": user.UUID, "type": types.TypePost},
+			In: &infoblog.In{
+				Field: "foreign_uuid",
+				Args:  postUUIDs,
+			},
+		}
+		likes, err := p.like.Listx(ctx, isLikedCondition)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range likes {
+			v, ok := postDataMap[likes[i].UUID.String]
+			if ok {
+				v.IsLiked = true
+			}
+		}
+	}
+
+	return nil, nil
+}
+
+func (p *Post) FeedIsOpen(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]infoblog.Like, error) {
 	user, err := extractUser(ctx)
 	if err != nil {
 		return nil, nil
