@@ -315,16 +315,21 @@ func (p *Post) FeedRecommend(ctx context.Context, req request.LimitOffsetReq) (r
 }
 
 func (p *Post) GetFeedData(ctx context.Context, condition infoblog.Condition) (request.PostsFeedData, error) {
-	postDataRes, postDataMap, postSliceUUIDs, err := p.GetPostByCondition(ctx, condition)
+	feed, postDataMap, postSliceUUIDs, err := p.GetFeedByCondition(ctx, condition)
 	if err != nil || len(postSliceUUIDs) < 1 {
 		return request.PostsFeedData{}, err
 	}
 
-	_, err = p.GetFeedFiles(ctx, postDataMap, postSliceUUIDs...)
+	_, err = p.FeedGetFiles(ctx, postDataMap, postSliceUUIDs...)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
-	_, err = p.GetFeedUsers(ctx, postDataMap)
+	_, err = p.FeedGetUsers(ctx, postDataMap)
+	if err != nil {
+		return request.PostsFeedData{}, err
+	}
+
+	_, err = p.FeedIsLiked(ctx, postDataMap, postSliceUUIDs...)
 	if err != nil {
 		return request.PostsFeedData{}, err
 	}
@@ -336,11 +341,11 @@ func (p *Post) GetFeedData(ctx context.Context, condition infoblog.Condition) (r
 
 	return request.PostsFeedData{
 		Count: count,
-		Posts: postDataRes,
+		Posts: feed,
 	}, nil
 }
 
-func (p *Post) GetPostByCondition(ctx context.Context, condition infoblog.Condition) ([]request.PostDataResponse, map[string]*request.PostDataResponse, []interface{}, error) {
+func (p *Post) GetFeedByCondition(ctx context.Context, condition infoblog.Condition) ([]request.PostDataResponse, map[string]*request.PostDataResponse, []interface{}, error) {
 	posts, err := p.post.Listx(ctx, condition)
 	if err != nil {
 		return nil, nil, nil, err
@@ -365,7 +370,7 @@ func (p *Post) GetPostByCondition(ctx context.Context, condition infoblog.Condit
 	return postDataRes, postDataMap, postSliceUUIDs, err
 }
 
-func (p *Post) GetFeedFiles(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]request.PostFileData, error) {
+func (p *Post) FeedGetFiles(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]request.PostFileData, error) {
 	filesCondition := infoblog.Condition{
 		Equal: &sq.Eq{"type": types.TypeFilePost},
 		In: &infoblog.In{
@@ -401,7 +406,7 @@ func (p *Post) GetFeedFiles(ctx context.Context, postDataMap map[string]*request
 	return filesData, err
 }
 
-func (p *Post) GetFeedUsers(ctx context.Context, postDataMap map[string]*request.PostDataResponse) ([]request.UserData, error) {
+func (p *Post) FeedGetUsers(ctx context.Context, postDataMap map[string]*request.PostDataResponse) ([]request.UserData, error) {
 	if len(postDataMap) < 1 {
 		return nil, fmt.Errorf("getFeedUsers post data empty")
 	}
@@ -460,6 +465,33 @@ func (p *Post) GetFeedUsers(ctx context.Context, postDataMap map[string]*request
 	}
 
 	return usersData, err
+}
+
+func (p *Post) FeedIsLiked(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]infoblog.Like, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return nil, nil
+	}
+
+	if user.UUID.Valid {
+		isLikedCondition := infoblog.Condition{
+			Equal: &sq.Eq{"liker_uuid": user.UUID, "type": types.TypePost},
+			In: &infoblog.In{
+				Field: "foreign_uuid",
+				Args:  postUUIDs,
+			},
+		}
+		likes, err := p.like.Listx(ctx, isLikedCondition)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range likes {
+			postDataMap[likes[i].UUID.String].IsLiked = true
+		}
+	}
+
+	return nil, nil
 }
 
 func (p *Post) FeedRecommendAuthed(ctx context.Context, req request.LimitOffsetReq) (request.PostsFeedData, error) {
