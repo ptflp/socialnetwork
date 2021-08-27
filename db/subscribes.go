@@ -60,7 +60,14 @@ func (sb *subsRepository) CountByUser(ctx context.Context, user infoblog.User) (
 func (sb *subsRepository) CheckSubscribed(ctx context.Context, user infoblog.User, subscriber infoblog.User) bool {
 	query, args, _ := sq.Select("active").From("subscribes").Where(sq.Eq{"user_uuid": user.UUID, "subscriber_uuid": subscriber.UUID, "active": 1}).ToSql()
 
-	n, _ := sb.db.MustExecContext(ctx, query, args...).RowsAffected()
+	res, err := sb.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return false
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false
+	}
 
 	return n > 1
 }
