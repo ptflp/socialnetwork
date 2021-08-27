@@ -254,7 +254,7 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 			return err
 		}
 
-		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN(", 1)
+		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN (", 1)
 
 		s := strings.Split(queryNotIn, "WHERE")
 		sep := " WHERE"

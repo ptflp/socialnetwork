@@ -326,8 +326,8 @@ func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]re
 			Field: "likes",
 		},
 		Other: &infoblog.Other{
-			Condition: "nickname != ?",
-			Args:      []interface{}{nil},
+			Condition: "nickname IS NOT null",
+			Args:      nil,
 		},
 	}
 	users, err := u.userRepository.Listx(ctx, condition)
