@@ -20,6 +20,10 @@ const (
 	TypeFileAvatar
 )
 
+const (
+	TypePost = iota + 1
+)
+
 //NullString is a wrapper around sql.NullString
 type NullString struct {
 	sql.NullString
