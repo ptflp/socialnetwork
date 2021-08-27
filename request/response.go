@@ -74,6 +74,7 @@ type PostDataResponse struct {
 	Price    float64          `json:"price"`
 	Counts   PostCountData    `json:"counts"`
 	IsLiked  bool             `json:"is_liked"`
+	IsOpen   bool             `json:"is_open"`
 	Likes    types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 	Views    types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 }
