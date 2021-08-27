@@ -29,6 +29,7 @@ func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 		Chats:           NewChatRepository(mainDB),
 		ChatMessages:    NewChatMessagesRepository(mainDB),
 		ChatParticipant: NewChatParticipantRepository(mainDB),
+		Comments:        NewCommentsRepository(mainDB),
 		Friends:         NewFriendRepository(mainDB),
 	}
 

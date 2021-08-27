@@ -92,5 +92,5 @@ func (l *likesRepository) Listx(ctx context.Context, condition infoblog.Conditio
 }
 
 func NewLikesRepository(db *sqlx.DB) infoblog.LikeRepository {
-	return &likesRepository{db: db}
+	return &likesRepository{db: db, crud: crud{db: db}}
 }
