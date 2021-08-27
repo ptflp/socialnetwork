@@ -13,28 +13,28 @@ type FriendRepository struct {
 	crud
 }
 
-func (c *FriendRepository) Create(ctx context.Context, friend infoblog.Friend) error {
-	return c.create(ctx, &friend)
+func (f *FriendRepository) Create(ctx context.Context, friend infoblog.Friend) error {
+	return f.create(ctx, &friend)
 }
 
-func (c *FriendRepository) Find(ctx context.Context, friend infoblog.Friend) (infoblog.Friend, error) {
-	err := c.find(ctx, &friend, &friend)
+func (f *FriendRepository) Find(ctx context.Context, friend infoblog.Friend) (infoblog.Friend, error) {
+	err := f.find(ctx, &friend, &friend)
 
 	return friend, err
 }
 
-func (c *FriendRepository) Update(ctx context.Context, friend infoblog.Friend) error {
-	return c.update(ctx, &friend)
+func (f *FriendRepository) Update(ctx context.Context, friend infoblog.Friend) error {
+	return f.update(ctx, &friend)
 }
 
-func (c *FriendRepository) Delete(ctx context.Context, friend infoblog.Friend) error {
+func (f *FriendRepository) Delete(ctx context.Context, friend infoblog.Friend) error {
 	friend.Active = types.NullBool{}
-	return c.update(ctx, &friend)
+	return f.update(ctx, &friend)
 }
 
-func (c *FriendRepository) List(ctx context.Context, limit, offset uint64) ([]infoblog.Friend, error) {
+func (f *FriendRepository) List(ctx context.Context, limit, offset uint64) ([]infoblog.Friend, error) {
 	var friend []infoblog.Friend
-	err := c.list(ctx, &friend, &infoblog.Friend{}, limit, offset)
+	err := f.list(ctx, &friend, &infoblog.Friend{}, limit, offset)
 
 	return friend, err
 }

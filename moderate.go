@@ -1,6 +1,7 @@
 package infoblog
 
 import (
+	"context"
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/types"
@@ -20,4 +21,13 @@ func (l Moderate) OnCreate() string {
 
 func (l Moderate) TableName() string {
 	return "moderates"
+}
+
+type ModerateRepository interface {
+	Create(ctx context.Context, moderate Moderate) error
+	Find(ctx context.Context, moderate Moderate) (Moderate, error)
+	Update(ctx context.Context, moderate Moderate) error
+	Delete(ctx context.Context, moderate Moderate) error
+	List(ctx context.Context, limit, offset uint64) ([]Moderate, error)
+	Listx(ctx context.Context, condition Condition) ([]Moderate, error)
 }

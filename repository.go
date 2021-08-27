@@ -12,6 +12,8 @@ type Repositories struct {
 	Comments        CommentsRepository
 	Events          EventRepository
 	Friends         FriendRepository
+	Moderate        ModerateRepository
+	HashTag         HashTagRepository
 }
 
 type Tabler interface {

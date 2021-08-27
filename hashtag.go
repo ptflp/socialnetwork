@@ -1,6 +1,7 @@
 package infoblog
 
 import (
+	"context"
 	"time"
 
 	"gitlab.com/InfoBlogFriends/server/types"
@@ -20,4 +21,13 @@ func (h HashTag) OnCreate() string {
 
 func (h HashTag) TableName() string {
 	return "hashtags"
+}
+
+type HashTagRepository interface {
+	Create(ctx context.Context, hashtag HashTag) error
+	Find(ctx context.Context, hashtag HashTag) (HashTag, error)
+	Update(ctx context.Context, hashtag HashTag) error
+	Delete(ctx context.Context, hashtag HashTag) error
+	List(ctx context.Context, limit, offset uint64) ([]HashTag, error)
+	Listx(ctx context.Context, condition Condition) ([]HashTag, error)
 }
