@@ -487,7 +487,7 @@ func (p *Post) FeedIsLiked(ctx context.Context, postDataMap map[string]*request.
 
 	if user.UUID.Valid && postDataMap != nil {
 		isLikedCondition := infoblog.Condition{
-			Equal: &sq.Eq{"liker_uuid": user.UUID, "type": types.TypePost},
+			Equal: &sq.Eq{"liker_uuid": user.UUID, "type": types.TypePost, "active": 1},
 			In: &infoblog.In{
 				Field: "foreign_uuid",
 				Args:  postUUIDs,
