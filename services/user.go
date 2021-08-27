@@ -313,9 +313,21 @@ func (u *User) TempList(ctx context.Context, req request.LimitOffsetReq) ([]requ
 }
 
 func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]request.UserData, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	condition := infoblog.Condition{
+		NotIn: &infoblog.In{
+			Field: "uuid",
+			Args:  []interface{}{user.UUID},
+		},
 		Order: &infoblog.Order{
 			Field: "likes",
+		},
+		Other: &infoblog.Other{
+			Condition: "nickname != ?",
+			Args:      []interface{}{nil},
 		},
 	}
 	users, err := u.userRepository.Listx(ctx, condition)
