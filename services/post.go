@@ -371,7 +371,7 @@ func (p *Post) GetFeedByCondition(ctx context.Context, condition infoblog.Condit
 
 func (p *Post) FeedGetFiles(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]request.PostFileData, error) {
 	filesCondition := infoblog.Condition{
-		Equal: &sq.Eq{"type": types.TypeFilePost},
+		Equal: &sq.Eq{"type": types.TypePost},
 		In: &infoblog.In{
 			Field: "foreign_uuid",
 			Args:  postUUIDs,

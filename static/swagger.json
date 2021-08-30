@@ -503,6 +503,52 @@
         }
       }
     },
+    "/posts/comments/create": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "summary": "Создание комментария к посту.",
+        "operationId": "CommentCreateRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CommentCreateReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/CommentCreateResponse"
+          }
+        }
+      }
+    },
+    "/posts/comments/get": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "summary": "Получение комментариев поста.",
+        "operationId": "GetCommentsRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/PostUUIDReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/GetCommentsResponse"
+          }
+        }
+      }
+    },
     "/posts/create": {
       "post": {
         "security": [
@@ -1131,6 +1177,20 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "CommentCreateReq": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-go-name": "Body"
+        },
+        "post_id": {
+          "type": "string",
+          "x-go-name": "ForeignUUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "Config": {
       "type": "object",
       "properties": {
@@ -1346,6 +1406,19 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
     },
+    "NullUint64": {
+      "type": "object",
+      "properties": {
+        "Uint64": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "Valid": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
+    },
     "PasswordRecoverRequest": {
       "type": "object",
       "properties": {
@@ -1444,9 +1517,19 @@
           },
           "x-go-name": "Files"
         },
+        "is_liked": {
+          "type": "boolean",
+          "x-go-name": "IsLiked"
+        },
+        "is_open": {
+          "type": "boolean",
+          "x-go-name": "IsOpen"
+        },
+        "likes_count": {
+          "$ref": "#/definitions/NullUint64"
+        },
         "post_id": {
-          "type": "string",
-          "x-go-name": "UUID"
+          "$ref": "#/definitions/NullUUID"
         },
         "post_type": {
           "type": "integer",
@@ -1460,6 +1543,12 @@
         },
         "user": {
           "$ref": "#/definitions/UserData"
+        },
+        "user_id": {
+          "$ref": "#/definitions/NullUUID"
+        },
+        "views_count": {
+          "$ref": "#/definitions/NullUint64"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1467,13 +1556,27 @@
     "PostFileData": {
       "type": "object",
       "properties": {
+        "dir": {
+          "type": "string",
+          "x-go-name": "Dir"
+        },
         "file_id": {
           "type": "string",
           "x-go-name": "UUID"
         },
+        "foreign_uuid": {
+          "$ref": "#/definitions/NullUUID"
+        },
         "link": {
           "type": "string",
           "x-go-name": "Link"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "private": {
+          "$ref": "#/definitions/NullBool"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1512,7 +1615,7 @@
       "properties": {
         "count": {
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "Count"
         },
         "posts": {
@@ -1739,18 +1842,17 @@
         "email_verified": {
           "$ref": "#/definitions/NullBool"
         },
-        "is_friends": {
+        "in_subscribes": {
           "type": "boolean",
-          "x-go-name": "IsFriends"
-        },
-        "is_subscriber": {
-          "type": "boolean",
-          "x-go-name": "IsSubscriber"
+          "x-go-name": "InSubscribes"
         },
         "language": {
           "type": "integer",
           "format": "int64",
           "x-go-name": "Language"
+        },
+        "likes_count": {
+          "$ref": "#/definitions/NullUint64"
         },
         "name": {
           "$ref": "#/definitions/NullString"
@@ -1786,6 +1888,12 @@
         },
         "show_subs": {
           "$ref": "#/definitions/NullBool"
+        },
+        "subscribers_count": {
+          "$ref": "#/definitions/NullUint64"
+        },
+        "subscribes_count": {
+          "$ref": "#/definitions/NullUint64"
         },
         "trial": {
           "$ref": "#/definitions/NullBool"
@@ -1863,6 +1971,12 @@
     }
   },
   "responses": {
+    "CommentCreateResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
     "EmailLoginResponse": {
       "description": "",
       "schema": {
@@ -1876,6 +1990,12 @@
       }
     },
     "FacebookLoginResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "GetCommentsResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

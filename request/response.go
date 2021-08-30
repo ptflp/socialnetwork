@@ -119,3 +119,9 @@ type ChatData struct {
 	Type      types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int"`
 	CreatedAt time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 }
+
+type CommentData struct {
+	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
+	Body     types.NullString `json:"body"`
+	User     UserData         `json:"user"`
+}
