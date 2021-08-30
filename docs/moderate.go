@@ -79,3 +79,22 @@ type moderateGetAllParams struct {
 	// in:body
 	Body request.LimitOffsetReq
 }
+
+// swagger:route POST /moderate/update moderate moderateUpdateRequest
+// Обновление статуса модерации.
+// security:
+//   - Bearer: []
+// responses:
+//   200: moderateUpdateResponse
+
+// swagger:response moderateUpdateResponse
+type moderateUpdateResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters moderateUpdateRequest
+type moderateUpdateParams struct {
+	// in:body
+	Body request.ModerateUpdateStatusReq
+}

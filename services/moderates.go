@@ -160,6 +160,55 @@ func (m *Moderates) Get(ctx context.Context, req request.UUIDReq) (request.Moder
 	return moderatesData[0], nil
 }
 
+func (m *Moderates) Update(ctx context.Context, req request.ModerateUpdateStatusReq) (request.ModerateData, error) {
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"type": types.TypeUserModerate, "active": true},
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  []interface{}{types.NewNullUUID(req.UUID)},
+		},
+	}
+
+	moderates, err := m.moderateRep.Listx(ctx, condition)
+	if err != nil {
+		return request.ModerateData{}, err
+	}
+	if len(moderates) < 1 {
+		return request.ModerateData{}, err
+	}
+	err = m.MapStructs(&moderates[0], &req)
+	if err != nil {
+		return request.ModerateData{}, err
+	}
+	err = m.moderateRep.Update(ctx, moderates[0])
+	if err != nil {
+		return request.ModerateData{}, err
+	}
+
+	moderatesData := make([]request.ModerateData, 0, len(moderates))
+
+	err = m.MapStructs(&moderatesData, &moderates)
+	if err != nil {
+		return request.ModerateData{}, err
+	}
+	if len(moderatesData) < 1 {
+		return request.ModerateData{}, nil
+	}
+
+	uuids := make([]interface{}, 0, len(moderatesData))
+	moderatesDataMap := make(map[string]*request.ModerateData, len(moderatesData))
+	for i := range moderatesData {
+		uuids = append(uuids, moderatesData[i].UUID)
+		moderatesDataMap[moderatesData[i].UUID.String] = &moderatesData[i]
+	}
+	_, err = m.ModeratesGetFiles(ctx, moderatesDataMap, uuids...)
+	if err != nil {
+		return request.ModerateData{}, err
+	}
+
+	return moderatesData[0], nil
+}
+
 func (m *Moderates) ModeratesGetFiles(ctx context.Context, moderateDataMap map[string]*request.ModerateData, moderatesUUID ...interface{}) ([]request.FileData, error) {
 	filesCondition := infoblog.Condition{
 		Equal: &sq.Eq{"type": types.TypeUserModerate},

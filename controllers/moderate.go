@@ -88,6 +88,32 @@ func (a *moderateController) Get() http.HandlerFunc {
 	}
 }
 
+func (a *moderateController) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var moderateUUID request.ModerateUpdateStatusReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &moderateUUID)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		moderate, err := a.moderates.Update(r.Context(), moderateUUID)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    moderate,
+		})
+	}
+}
+
 func (a *moderateController) GetModerates() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var limitOffsetReq request.LimitOffsetReq
