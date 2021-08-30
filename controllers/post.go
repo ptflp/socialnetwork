@@ -17,19 +17,21 @@ import (
 type postsController struct {
 	*decoder.Decoder
 	respond.Responder
-	user   *services.User
-	file   *services.File
-	post   *services.Post
-	logger *zap.Logger
+	user     *services.User
+	file     *services.File
+	post     *services.Post
+	logger   *zap.Logger
+	comments *services.Comments
 }
 
-func NewPostsController(responder respond.Responder, user *services.User, file *services.File, post *services.Post, logger *zap.Logger) *postsController {
+func NewPostsController(responder respond.Responder, services *services.Services, logger *zap.Logger) *postsController {
 	return &postsController{
 		Decoder:   decoder.NewDecoder(),
 		Responder: responder,
-		user:      user,
-		file:      file,
-		post:      post,
+		user:      services.User,
+		file:      services.File,
+		post:      services.Post,
+		comments:  services.Comments,
 		logger:    logger,
 	}
 }
@@ -302,6 +304,49 @@ func (a *postsController) Like() http.HandlerFunc {
 		a.SendJSON(w, request.Response{
 			Success: true,
 			Data:    post,
+		})
+	}
+}
+
+func (a *postsController) CreateComment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var commentCreateReq request.CommentCreateReq
+		err := Decode(r, &commentCreateReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = a.comments.CreatePostComment(r.Context(), commentCreateReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+		})
+	}
+}
+
+func (a *postsController) GetComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var getCommentsReq request.PostUUIDReq
+		err := Decode(r, &getCommentsReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		commentsData, err := a.comments.GetPostComments(r.Context(), getCommentsReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    commentsData,
 		})
 	}
 }

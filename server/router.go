@@ -128,11 +128,19 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/upload/background", profileController.Update())
 	})
 
-	posts := controllers.NewPostsController(cmps.Responder(), services.User, services.File, services.Post, cmps.Logger())
+	posts := controllers.NewPostsController(cmps.Responder(), services, cmps.Logger())
 	r.Route("/posts", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Post("/like", posts.Like())
-		r.Post("/create", posts.Create())
+		r.Route("/create", func(r chi.Router) {
+			r.Post("/", posts.Create())
+		})
+
+		r.Route("/comments", func(r chi.Router) {
+			r.Post("/create", posts.CreateComment())
+			r.Post("/get", posts.GetComments())
+		})
+
 		r.Post("/file/upload", posts.UploadFile())
 		r.Post("/update", posts.Update())
 		r.Post("/delete", posts.Delete())

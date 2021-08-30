@@ -229,3 +229,37 @@ type publicFeedParams struct {
 	// in:body
 	Body request.LimitOffsetReq
 }
+
+// swagger:route POST /posts/comments/create posts CommentCreateRequest
+// Создание комментария к посту.
+// responses:
+//   200: CommentCreateResponse
+
+// swagger:response CommentCreateResponse
+type CommentCreateResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters CommentCreateRequest
+type CommentCreateParams struct {
+	// in:body
+	Body request.CommentCreateReq
+}
+
+// swagger:route POST /posts/comments/get posts GetCommentsRequest
+// Получение комментариев поста.
+// responses:
+//   200: GetCommentsResponse
+
+// swagger:response GetCommentsResponse
+type GetCommentsResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters GetCommentsRequest
+type GetCommentsParams struct {
+	// in:body
+	Body request.PostUUIDReq
+}

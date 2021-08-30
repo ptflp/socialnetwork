@@ -34,3 +34,8 @@ type LikeReq struct {
 	UUID   string `json:"post_id"`
 	Active bool   `json:"active"`
 }
+
+type CommentCreateReq struct {
+	Body        string `json:"body"`
+	ForeignUUID string `json:"post_id"`
+}

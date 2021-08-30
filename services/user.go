@@ -636,7 +636,7 @@ func (u *User) SaveAvatar(ctx context.Context, formFile FormFile) (request.UserD
 
 	// 3. update file info, save to db
 	file.Active = 1
-	file.Type = types.TypeFileAvatar
+	file.Type = types.TypeAvatar
 	file.UserUUID = user.UUID
 
 	err = u.file.SaveDB(ctx, &file)

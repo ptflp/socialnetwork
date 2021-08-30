@@ -62,7 +62,7 @@ func init() {
 		Chat{},
 		ChatMessages{},
 		ChatParticipant{},
-		Comments{},
+		Comment{},
 		Friend{},
 		Moderate{},
 		HashTag{},
