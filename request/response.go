@@ -127,7 +127,7 @@ type CommentData struct {
 }
 
 type ModerateData struct {
-	UUID      types.NullUUID   `json:"like_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	UUID      types.NullUUID   `json:"moderate_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
 	Type      int64            `json:"type" db:"type" ops:"create" orm_type:"int" orm_default:"not null"`
 	Status    types.NullInt64  `json:"status" db:"status" ops:"create" orm_type:"int" orm_default:"null"`
 	Active    types.NullBool   `json:"active" db:"active" ops:"create" orm_type:"boolean" orm_default:"null"`

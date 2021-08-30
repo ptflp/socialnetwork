@@ -209,6 +209,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Use(token.CheckStrict)
 		r.Post("/file/upload", moderate.UploadFile())
 		r.Post("/create", moderate.Create())
+		r.Post("/update", moderate.Update())
 		r.Post("/get", moderate.Get())
 		r.Post("/get/all", moderate.GetModerates())
 	})
