@@ -94,6 +94,15 @@ func (f *File) UpdatePostUUID(ctx context.Context, ids []string, p infoblog.Post
 	return f.fileRep.UpdatePostUUID(ctx, ids, p)
 }
 
+func (f *File) UpdateFileType(ctx context.Context, ids []string, file infoblog.File) error {
+	if len(ids) < 1 {
+		return nil
+	}
+	uuids := make([]types.NullUUID, 0, len(ids))
+
+	return f.fileRep.UpdateFileType(ctx, file, uuids...)
+}
+
 func (f *File) GetFilesByPostUUIDs(ctx context.Context, postUUIDs []string) ([]infoblog.File, error) {
 	return f.fileRep.FindByPostsIDs(ctx, postUUIDs)
 }

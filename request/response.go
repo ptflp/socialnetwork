@@ -68,7 +68,7 @@ type PostDataResponse struct {
 	UUID     types.NullUUID   `json:"post_id"`
 	Body     string           `json:"description"`
 	Type     int64            `json:"post_type"`
-	Files    []PostFileData   `json:"files"`
+	Files    []FileData       `json:"files"`
 	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" orm_type:"binary(16)" orm_default:"null" orm_index:"index" ops:"create"`
 	User     UserData         `json:"user"`
 	Price    float64          `json:"price"`
@@ -79,7 +79,7 @@ type PostDataResponse struct {
 	Views    types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 }
 
-type PostFileData struct {
+type FileData struct {
 	Link        string         `json:"link"`
 	UUID        string         `json:"file_id"`
 	ForeignUUID types.NullUUID `json:"foreign_uuid" db:"foreign_uuid" ops:"create,update" orm_type:"binary(16)" orm_default:"null"`
@@ -124,4 +124,17 @@ type CommentData struct {
 	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
 	Body     types.NullString `json:"body"`
 	User     UserData         `json:"user"`
+}
+
+type ModerateData struct {
+	UUID      types.NullUUID   `json:"like_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Type      int64            `json:"type" db:"type" ops:"create" orm_type:"int" orm_default:"not null"`
+	Status    types.NullInt64  `json:"status" db:"status" ops:"create" orm_type:"int" orm_default:"null"`
+	Active    types.NullBool   `json:"active" db:"active" ops:"create" orm_type:"boolean" orm_default:"null"`
+	UserUUID  types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
+	Reason    types.NullString `json:"reason" db:"reason" ops:"update,create" orm_type:"varchar(233)"`
+	CreatedAt time.Time        `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
+	UpdatedAt time.Time        `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
+	DeletedAt types.NullTime   `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index" ops:"delete"`
+	Files     []FileData
 }

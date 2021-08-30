@@ -35,18 +35,18 @@ func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder, 
 	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes, services: services, subscribes: reps.Subscribers}
 }
 
-func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFileData, error) {
+func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.FileData, error) {
 	// 1. save file to filesystem
 	u, err := extractUser(ctx)
 	if err != nil {
-		return request.PostFileData{}, err
+		return request.FileData{}, err
 	}
 
 	fileUUID := types.NewNullUUID()
 
 	file, err := p.file.SaveFileSystem(formFile, u, fileUUID)
 	if err != nil {
-		return request.PostFileData{}, err
+		return request.FileData{}, err
 	}
 
 	// 2. save post to db
@@ -58,10 +58,10 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.PostFil
 
 	err = p.file.SaveDB(ctx, &file)
 	if err != nil {
-		return request.PostFileData{}, err
+		return request.FileData{}, err
 	}
 
-	return request.PostFileData{
+	return request.FileData{
 		Link: utils.Link(file),
 		UUID: file.UUID.String,
 	}, nil
@@ -115,10 +115,10 @@ func (p *Post) SavePost(ctx context.Context, req request.PostCreateReq) (request
 		return request.PostDataResponse{}, err
 	}
 
-	files := make([]request.PostFileData, 0, len(filesRaw))
+	files := make([]request.FileData, 0, len(filesRaw))
 
 	for i := range filesRaw {
-		file := request.PostFileData{
+		file := request.FileData{
 			Link: utils.Link(filesRaw[i]),
 			UUID: filesRaw[i].UUID.String,
 		}
@@ -166,7 +166,7 @@ func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 	return p.post.Update(ctx, post)
 }
 
-func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
+func (p *Post) Delete(ctx context.Context, req request.UUIDReq) error {
 	u, err := extractUser(ctx)
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
 	return p.post.Delete(ctx, post)
 }
 
-func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDataResponse, error) {
+func (p *Post) Get(ctx context.Context, req request.UUIDReq) (request.PostDataResponse, error) {
 	var err error
 	postDataRes := request.PostDataResponse{}
 	post := infoblog.Post{}
@@ -200,10 +200,10 @@ func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDa
 		return postDataRes, err
 	}
 
-	files := make([]request.PostFileData, 0, len(filesRaw))
+	files := make([]request.FileData, 0, len(filesRaw))
 
 	for i := range filesRaw {
-		file := request.PostFileData{
+		file := request.FileData{
 			Link: utils.Link(filesRaw[i]),
 			UUID: filesRaw[i].UUID.String,
 		}
@@ -253,9 +253,9 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 	postDataRes := make([]request.PostDataResponse, 0, req.Limit)
 
 	for i := range posts {
-		postsFileData := make([]request.PostFileData, 0, req.Limit)
+		postsFileData := make([]request.FileData, 0, req.Limit)
 		for j := range posts[i].Files {
-			postsFileData = append(postsFileData, request.PostFileData{
+			postsFileData = append(postsFileData, request.FileData{
 				Link: utils.Link(posts[i].Files[j]),
 				UUID: posts[i].Files[j].UUID.String,
 			})
@@ -369,7 +369,7 @@ func (p *Post) GetFeedByCondition(ctx context.Context, condition infoblog.Condit
 	return postDataRes, postDataMap, postSliceUUIDs, err
 }
 
-func (p *Post) FeedGetFiles(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]request.PostFileData, error) {
+func (p *Post) FeedGetFiles(ctx context.Context, postDataMap map[string]*request.PostDataResponse, postUUIDs ...interface{}) ([]request.FileData, error) {
 	filesCondition := infoblog.Condition{
 		Equal: &sq.Eq{"type": types.TypePost},
 		In: &infoblog.In{
@@ -383,7 +383,7 @@ func (p *Post) FeedGetFiles(ctx context.Context, postDataMap map[string]*request
 		return nil, err
 	}
 
-	filesData := make([]request.PostFileData, 0, len(files))
+	filesData := make([]request.FileData, 0, len(files))
 
 	err = p.MapStructs(&filesData, &files)
 	if err != nil {
@@ -558,9 +558,9 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 	postDataRes := make([]request.PostDataResponse, 0, req.Limit)
 
 	for i := range posts {
-		postsFileData := make([]request.PostFileData, 0, req.Limit)
+		postsFileData := make([]request.FileData, 0, req.Limit)
 		for j := range posts[i].Files {
-			postsFileData = append(postsFileData, request.PostFileData{
+			postsFileData = append(postsFileData, request.FileData{
 				Link: utils.Link(posts[i].Files[j]),
 				UUID: posts[i].Files[j].UUID.String,
 			})

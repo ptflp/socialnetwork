@@ -203,5 +203,14 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 	})
 
+	moderate := controllers.NewModerateController(cmps.Responder(), services, cmps.Logger())
+
+	r.Route("/moderate", func(r chi.Router) {
+		r.Post("/file/upload", moderate.UploadFile())
+		r.Post("/create", moderate.Create())
+		r.Post("/get", moderate.Get())
+		r.Post("/get/all", moderate.GetModerates())
+	})
+
 	return r, nil
 }

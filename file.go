@@ -33,6 +33,7 @@ type FileRepository interface {
 	Create(ctx context.Context, p *File) (int64, error)
 	Update(ctx context.Context, p File) error
 	UpdatePostUUID(ctx context.Context, ids []string, post Post) error
+	UpdateFileType(ctx context.Context, file File, uuids ...types.NullUUID) error
 	Delete(ctx context.Context, p File) error
 
 	Find(ctx context.Context, f File) (File, error)
