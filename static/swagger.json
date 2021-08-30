@@ -272,6 +272,125 @@
         }
       }
     },
+    "/moderate/create": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "moderate"
+        ],
+        "summary": "Создание поста.",
+        "operationId": "moderateCreateRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/ModerateCreateReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/moderateCreateResponse"
+          }
+        }
+      }
+    },
+    "/moderate/file/upload": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "moderate"
+        ],
+        "summary": "Загрузка файла поста.",
+        "operationId": "moderateFileUploadRequest",
+        "parameters": [
+          {
+            "type": "file",
+            "x-go-name": "File",
+            "name": "file",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/moderateFileUploadResponse"
+          }
+        }
+      }
+    },
+    "/moderate/get": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "moderate"
+        ],
+        "summary": "Создание поста.",
+        "operationId": "moderateGetRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UUIDReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/moderateGetResponse"
+          }
+        }
+      }
+    },
+    "/moderate/get/all": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "moderate"
+        ],
+        "summary": "Создание поста.",
+        "operationId": "moderateGetAllRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LimitOffsetReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/moderateGetAllResponse"
+          }
+        }
+      }
+    },
     "/people/autocomplete": {
       "post": {
         "security": [
@@ -538,7 +657,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostUUIDReq"
+              "$ref": "#/definitions/UUIDReq"
             }
           }
         ],
@@ -598,7 +717,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostUUIDReq"
+              "$ref": "#/definitions/UUIDReq"
             }
           }
         ],
@@ -807,7 +926,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/PostUUIDReq"
+              "$ref": "#/definitions/UUIDReq"
             }
           }
         ],
@@ -1309,6 +1428,34 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "FileData": {
+      "type": "object",
+      "properties": {
+        "dir": {
+          "type": "string",
+          "x-go-name": "Dir"
+        },
+        "file_id": {
+          "type": "string",
+          "x-go-name": "UUID"
+        },
+        "foreign_uuid": {
+          "$ref": "#/definitions/NullUUID"
+        },
+        "link": {
+          "type": "string",
+          "x-go-name": "Link"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "private": {
+          "$ref": "#/definitions/NullBool"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "LikeReq": {
       "type": "object",
       "properties": {
@@ -1335,6 +1482,19 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Offset"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "ModerateCreateReq": {
+      "type": "object",
+      "properties": {
+        "files_id": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "FilesID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1513,7 +1673,7 @@
         "files": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/PostFileData"
+            "$ref": "#/definitions/FileData"
           },
           "x-go-name": "Files"
         },
@@ -1549,44 +1709,6 @@
         },
         "views_count": {
           "$ref": "#/definitions/NullUint64"
-        }
-      },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
-    },
-    "PostFileData": {
-      "type": "object",
-      "properties": {
-        "dir": {
-          "type": "string",
-          "x-go-name": "Dir"
-        },
-        "file_id": {
-          "type": "string",
-          "x-go-name": "UUID"
-        },
-        "foreign_uuid": {
-          "$ref": "#/definitions/NullUUID"
-        },
-        "link": {
-          "type": "string",
-          "x-go-name": "Link"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "private": {
-          "$ref": "#/definitions/NullBool"
-        }
-      },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
-    },
-    "PostUUIDReq": {
-      "type": "object",
-      "properties": {
-        "post_id": {
-          "type": "string",
-          "x-go-name": "UUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1812,6 +1934,16 @@
         "state": {
           "type": "string",
           "x-go-name": "State"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "UUIDReq": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "x-go-name": "UUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -2056,6 +2188,30 @@
       }
     },
     "getProfileResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "moderateCreateResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "moderateFileUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "moderateGetAllResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "moderateGetResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
