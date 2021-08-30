@@ -3,7 +3,7 @@ package docs
 import "gitlab.com/InfoBlogFriends/server/request"
 
 // swagger:route POST /moderate/create moderate moderateCreateRequest
-// Создание поста.
+// Создание модерации.
 // security:
 //   - Bearer: []
 // responses:
@@ -23,7 +23,7 @@ type moderateCreateParams struct {
 }
 
 // swagger:route POST /moderate/file/upload moderate moderateFileUploadRequest
-// Загрузка файла поста.
+// Загрузка файла модерации.
 // security:
 //   - Bearer: []
 // responses:
@@ -43,7 +43,7 @@ type moderateFileUploadParams struct {
 }
 
 // swagger:route POST /moderate/get moderate moderateGetRequest
-// Создание поста.
+// Получение модерации по айди.
 // security:
 //   - Bearer: []
 // responses:
@@ -56,14 +56,13 @@ type moderateGetResponse struct {
 }
 
 // swagger:parameters moderateGetRequest
-// Создание записи модерации.
 type moderateGetParams struct {
 	// in:body
 	Body request.UUIDReq
 }
 
 // swagger:route POST /moderate/get/all moderate moderateGetAllRequest
-// Создание поста.
+// Получение списка модерации.
 // security:
 //   - Bearer: []
 // responses:
@@ -76,7 +75,6 @@ type moderateGetAllResponse struct {
 }
 
 // swagger:parameters moderateGetAllRequest
-// Создание записи модерации.
 type moderateGetAllParams struct {
 	// in:body
 	Body request.LimitOffsetReq

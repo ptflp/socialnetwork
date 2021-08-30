@@ -95,10 +95,14 @@ func (f *File) UpdatePostUUID(ctx context.Context, ids []string, p infoblog.Post
 }
 
 func (f *File) UpdateFileType(ctx context.Context, ids []string, file infoblog.File) error {
-	if len(ids) < 1 {
+	uuids := make([]types.NullUUID, 0, len(ids))
+
+	for i := range ids {
+		uuids = append(uuids, types.NewNullUUID(ids[i]))
+	}
+	if len(uuids) < 1 {
 		return nil
 	}
-	uuids := make([]types.NullUUID, 0, len(ids))
 
 	return f.fileRep.UpdateFileType(ctx, file, uuids...)
 }

@@ -39,7 +39,7 @@ func (m *Moderates) SaveFile(ctx context.Context, formFile FormFile) (request.Fi
 	}
 	// 3. update file info, save to db
 	file.Active = 1
-	file.Type = 1
+	file.Type = types.TypeUserModerate
 	file.UserUUID = u.UUID
 
 	err = m.Services.File.SaveDB(ctx, &file)

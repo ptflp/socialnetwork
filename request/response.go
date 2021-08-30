@@ -136,5 +136,5 @@ type ModerateData struct {
 	CreatedAt time.Time        `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt time.Time        `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 	DeletedAt types.NullTime   `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index" ops:"delete"`
-	Files     []FileData
+	Files     []FileData       `json:"files"`
 }
