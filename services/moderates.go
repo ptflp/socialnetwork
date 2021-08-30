@@ -114,7 +114,7 @@ func (m *Moderates) GetModerates(ctx context.Context, limitOffsetReq request.Lim
 		uuids = append(uuids, moderatesData[i].UUID)
 		moderatesDataMap[moderatesData[i].UUID.String] = &moderatesData[i]
 	}
-	_, err = m.FeedGetFiles(ctx, moderatesDataMap, uuids...)
+	_, err = m.ModeratesGetFiles(ctx, moderatesDataMap, uuids...)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (m *Moderates) Get(ctx context.Context, req request.UUIDReq) (request.Moder
 		uuids = append(uuids, moderatesData[i].UUID)
 		moderatesDataMap[moderatesData[i].UUID.String] = &moderatesData[i]
 	}
-	_, err = m.FeedGetFiles(ctx, moderatesDataMap, uuids...)
+	_, err = m.ModeratesGetFiles(ctx, moderatesDataMap, uuids...)
 	if err != nil {
 		return request.ModerateData{}, err
 	}
@@ -160,7 +160,7 @@ func (m *Moderates) Get(ctx context.Context, req request.UUIDReq) (request.Moder
 	return moderatesData[0], nil
 }
 
-func (m *Moderates) FeedGetFiles(ctx context.Context, moderateDataMap map[string]*request.ModerateData, moderatesUUID ...interface{}) ([]request.FileData, error) {
+func (m *Moderates) ModeratesGetFiles(ctx context.Context, moderateDataMap map[string]*request.ModerateData, moderatesUUID ...interface{}) ([]request.FileData, error) {
 	filesCondition := infoblog.Condition{
 		Equal: &sq.Eq{"type": types.TypeUserModerate},
 		In: &infoblog.In{
