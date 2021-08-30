@@ -23,6 +23,7 @@ type User struct {
 	ShowSubs       types.NullBool    `json:"show_subs" db:"show_subs" ops:"update,create" orm_type:"boolean"`
 	Cost           types.NullFloat64 `json:"cost" db:"cost" ops:"update,create" orm_type:"decimal(13,4)"`
 	Trial          types.NullBool    `json:"trial" db:"trial" ops:"update,create" orm_type:"boolean"`
+	Moderated      types.NullBool    `json:"moderated" db:"moderated" ops:"update,create" orm_type:"boolean" orm_default:"null"`
 	NotifyEmail    types.NullBool    `json:"notify_email" db:"notify_email" ops:"update,create" orm_type:"boolean"`
 	NotifyTelegram types.NullBool    `json:"notify_telegram" db:"notify_telegram" ops:"update,create" orm_type:"boolean"`
 	NotifyPush     types.NullBool    `json:"notify_push" db:"notify_push" ops:"update,create" orm_type:"boolean"`

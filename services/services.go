@@ -9,24 +9,27 @@ import (
 type Services struct {
 	AuthService infoblog.AuthService
 	// TODO change to interface
-	User     *User
-	Post     *Post
-	File     *File
-	Comments *Comments
+	User      *User
+	Post      *Post
+	File      *File
+	Comments  *Comments
+	Moderates *Moderates
 }
 
-func NewServices(cmps components.Componenter, repositories infoblog.Repositories) *Services {
+func NewServices(cmps components.Componenter, reps infoblog.Repositories) *Services {
 	var services Services
-	comments := NewCommentsService(repositories.Comments, &services)
-	file := NewFileService(repositories.Files)
-	post := NewPostService(repositories, file, cmps.Decoder(), &services)
-	user := NewUserService(repositories, post, cmps, file)
+	comments := NewCommentsService(reps.Comments, &services)
+	file := NewFileService(reps.Files)
+	post := NewPostService(reps, file, cmps.Decoder(), &services)
+	user := NewUserService(reps, post, cmps, file)
+	moderates := NewModeratesService(reps, &services)
 
-	services.AuthService = auth.NewAuthService(repositories, cmps)
+	services.AuthService = auth.NewAuthService(reps, cmps)
 	services.Comments = comments
 	services.User = user
 	services.Post = post
 	services.File = file
+	services.Moderates = moderates
 
 	return &services
 }

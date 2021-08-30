@@ -134,7 +134,7 @@ type postGetResponse struct {
 // swagger:parameters postGetRequest
 type postGetParams struct {
 	// in:body
-	Body request.PostUUIDReq
+	Body request.UUIDReq
 }
 
 // swagger:route POST /posts/delete posts postDeleteRequest
@@ -153,7 +153,7 @@ type postDeleteResponse struct {
 // swagger:parameters postDeleteRequest
 type postDeleteParams struct {
 	// in:body
-	Body request.PostUUIDReq
+	Body request.UUIDReq
 }
 
 // swagger:route POST /posts/update posts postUpdateRequest
@@ -261,5 +261,5 @@ type GetCommentsResponse struct {
 // swagger:parameters GetCommentsRequest
 type GetCommentsParams struct {
 	// in:body
-	Body request.PostUUIDReq
+	Body request.UUIDReq
 }

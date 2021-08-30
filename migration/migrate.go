@@ -37,10 +37,10 @@ func (m *Migrator) Migrate() error {
 			createQuery := CreateTable(table)
 			queries := strings.Split(createQuery, ";")
 			for i := range queries {
+				queries[i] = strings.TrimSpace(queries[i])
 				if queries[i] == "" {
 					continue
 				}
-				queries[i] = strings.TrimSpace(queries[i])
 				_, err = m.db.Queryx(queries[i])
 				if err != nil {
 					return err

@@ -72,11 +72,11 @@ func (f *filesRepository) Update(ctx context.Context, file infoblog.File) error 
 	return err
 }
 
-func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post infoblog.Post) error {
-	rawQuery := sq.Update("files").Set("foreign_uuid", post.UUID)
-
-	if post.Type != services.PostTypeFree {
-		rawQuery.Set("private", types.NewNullBool(true))
+func (f *filesRepository) UpdateFileType(ctx context.Context, file infoblog.File, uuids ...types.NullUUID) error {
+	rawQuery := sq.Update("files").Set("foreign_uuid", file.ForeignUUID)
+	rawQuery.Set("private", file.Private)
+	if file.Type != 0 {
+		rawQuery.Set("type", file.Type)
 	}
 
 	query, args, err := rawQuery.ToSql()
@@ -87,10 +87,6 @@ func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post
 
 	queryIn := "SELECT * FROM files WHERE uuid IN (?)"
 
-	uuids := make([]types.NullUUID, 0, len(ids))
-	for i := range ids {
-		uuids = append(uuids, types.NewNullUUID(ids[i]))
-	}
 	queryIn, args2, err := sqlx.In(queryIn, uuids)
 	if err != nil {
 		return err
@@ -102,6 +98,24 @@ func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post
 	args = append(args, args2...)
 
 	return f.db.QueryRowContext(ctx, query, args...).Err()
+}
+
+func (f *filesRepository) UpdatePostUUID(ctx context.Context, ids []string, post infoblog.Post) error {
+	file := infoblog.File{
+		ForeignUUID: post.UUID,
+		Type:        types.TypePost,
+	}
+
+	if post.Type != services.PostTypeFree {
+		file.Private = types.NewNullBool(true)
+	}
+
+	uuids := make([]types.NullUUID, 0, len(ids))
+	for i := range ids {
+		uuids = append(uuids, types.NewNullUUID(ids[i]))
+	}
+
+	return f.UpdateFileType(ctx, file, uuids...)
 }
 
 func (f *filesRepository) Delete(ctx context.Context, p infoblog.File) error {

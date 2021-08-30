@@ -90,7 +90,7 @@ func (a *postsController) Update() http.HandlerFunc {
 
 func (a *postsController) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var postAddReq request.PostUUIDReq
+		var postAddReq request.UUIDReq
 
 		// r.PostForm is a map of our POST form values
 		err := Decode(r, &postAddReq)
@@ -116,7 +116,7 @@ func (a *postsController) Delete() http.HandlerFunc {
 
 func (a *postsController) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var postAddReq request.PostUUIDReq
+		var postAddReq request.UUIDReq
 
 		// r.PostForm is a map of our POST form values
 		err := Decode(r, &postAddReq)
@@ -331,7 +331,7 @@ func (a *postsController) CreateComment() http.HandlerFunc {
 
 func (a *postsController) GetComments() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var getCommentsReq request.PostUUIDReq
+		var getCommentsReq request.UUIDReq
 		err := Decode(r, &getCommentsReq)
 		if err != nil {
 			a.ErrorBadRequest(w, err)
