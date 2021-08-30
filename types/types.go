@@ -132,7 +132,7 @@ func (x *NullUUID) MarshalJSON() ([]byte, error) {
 
 func (x *NullUUID) UnmarshalJSON(data []byte) error {
 	if data[0] == 110 {
-		x = &NullUUID{}
+		*x = NullUUID{}
 		return nil
 	}
 	err := decoder.NewDecoder().Decode(bytes.NewBuffer(data), &x.String)
