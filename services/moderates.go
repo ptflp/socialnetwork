@@ -14,6 +14,12 @@ import (
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
 
+const (
+	StatusNotProcessed = iota
+	StatusProcessed
+	StatusDeclined
+)
+
 type Moderates struct {
 	moderateRep infoblog.ModerateRepository
 	Services    *Services
@@ -68,6 +74,7 @@ func (m *Moderates) CreateModerate(ctx context.Context, moderateReq request.Mode
 		Type:     types.TypeUserModerate,
 		Active:   types.NewNullBool(true),
 		UserUUID: user.UUID,
+		Status:   StatusNotProcessed,
 	}
 
 	err = m.moderateRep.Create(ctx, moderate)
