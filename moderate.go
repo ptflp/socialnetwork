@@ -10,7 +10,7 @@ import (
 type Moderate struct {
 	UUID      types.NullUUID   `json:"moderate_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
 	Type      int64            `json:"type" db:"type" ops:"create" orm_type:"int" orm_default:"not null"`
-	Status    int64            `json:"status" db:"status" ops:"create,update" orm_type:"int" orm_default:"0"`
+	Status    int64            `json:"status" db:"status" ops:"create,update" orm_type:"int" orm_default:"default 0"`
 	Active    types.NullBool   `json:"active" db:"active" ops:"create,update" orm_type:"boolean" orm_default:"null"`
 	UserUUID  types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
 	Reason    types.NullString `json:"reason" db:"reason" ops:"update,create" orm_type:"varchar(233)"`
