@@ -1227,6 +1227,36 @@
         }
       }
     },
+    "/restricted/signal": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "signal"
+        ],
+        "summary": "Signal.",
+        "operationId": "signalRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/signalResponse"
+          }
+        }
+      }
+    },
     "/system/config": {
       "get": {
         "security": [
@@ -2379,6 +2409,12 @@
       }
     },
     "sendCodeResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "signalResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
