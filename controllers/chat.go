@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/components"
+
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
 	"gitlab.com/InfoBlogFriends/server/request"
@@ -20,11 +22,11 @@ type chatController struct {
 	chats  *services.Chats
 }
 
-func NewChatController(responder respond.Responder, services *services.Services, logger *zap.Logger) *chatController {
+func NewChatController(components components.Componenter, services *services.Services) *chatController {
 	return &chatController{
 		Decoder:   decoder.NewDecoder(),
-		Responder: responder,
-		logger:    logger,
+		Responder: components.Responder(),
+		logger:    components.Logger(),
 		chats:     services.Chats,
 	}
 }

@@ -203,6 +203,36 @@
         }
       }
     },
+    "/chat/message/send": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "chatMessage"
+        ],
+        "summary": "Signal.",
+        "operationId": "chatMessageRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SendMessage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/chatMessageResponse"
+          }
+        }
+      }
+    },
     "/exist/email": {
       "post": {
         "tags": [
@@ -1981,6 +2011,20 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
     },
+    "SendMessage": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "to_uuid": {
+          "type": "string",
+          "x-go-name": "ToUUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "Server": {
       "type": "object",
       "properties": {
@@ -2018,7 +2062,7 @@
     "UUIDReq": {
       "type": "object",
       "properties": {
-        "post_id": {
+        "id": {
           "type": "string",
           "x-go-name": "UUID"
         }
@@ -2161,7 +2205,7 @@
     "UserIDRequest": {
       "type": "object",
       "properties": {
-        "user_id": {
+        "uuid": {
           "type": "string",
           "x-go-name": "UUID"
         }
@@ -2229,6 +2273,12 @@
       }
     },
     "avatarUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "chatMessageResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

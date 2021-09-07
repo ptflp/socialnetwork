@@ -83,10 +83,10 @@ func (m *Chats) SendMessagePrivate(ctx context.Context, req request.SendMessage)
 		if err != nil {
 			return err
 		}
-	}
-
-	if len(cp) < 2 {
-		return fmt.Errorf("error count of chat participants %d", len(cp))
+	} else {
+		if len(cp) < 2 {
+			return fmt.Errorf("error count of chat participants %d", len(cp))
+		}
 	}
 
 	err = m.SendMessage(ctx, req, cp[0].ChatUUID.String)
@@ -139,7 +139,7 @@ func (m *Chats) GetPrivateParticipants(ctx context.Context, req request.SendMess
 	}
 
 	if len(cp) < 2 {
-		return nil, err
+		return nil, fmt.Errorf("error count of chat participants %d", len(cp))
 	}
 
 	return cp, nil

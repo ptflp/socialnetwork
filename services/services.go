@@ -24,6 +24,7 @@ func NewServices(cmps components.Componenter, reps infoblog.Repositories) *Servi
 	post := NewPostService(reps, file, cmps.Decoder(), &services)
 	user := NewUserService(reps, post, cmps, file)
 	moderates := NewModeratesService(reps, &services)
+	chats := NewChatService(reps, &services)
 
 	services.AuthService = auth.NewAuthService(reps, cmps)
 	services.Comments = comments
@@ -31,6 +32,7 @@ func NewServices(cmps components.Componenter, reps infoblog.Repositories) *Servi
 	services.Post = post
 	services.File = file
 	services.Moderates = moderates
+	services.Chats = chats
 
 	return &services
 }
