@@ -219,9 +219,11 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/signal", signal.Signal())
 	})
 
+	chat := controllers.NewChatController(cmps, services)
 	r.Route("/chat", func(r chi.Router) {
+		r.Use(token.CheckStrict)
 		r.Route("/message", func(r chi.Router) {
-			r.Post("/send", signal.Signal())
+			r.Post("/send", chat.SendMessagePrivate())
 		})
 	})
 
