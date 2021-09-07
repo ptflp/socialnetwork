@@ -27,7 +27,7 @@ type PostsFeedUserReq struct {
 }
 
 type UUIDReq struct {
-	UUID string `json:"post_id"`
+	UUID string `json:"id"`
 }
 
 type LikeReq struct {

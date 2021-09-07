@@ -14,6 +14,7 @@ type Services struct {
 	File      *File
 	Comments  *Comments
 	Moderates *Moderates
+	Chats     *Chats
 }
 
 func NewServices(cmps components.Componenter, reps infoblog.Repositories) *Services {
