@@ -219,5 +219,11 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/signal", signal.Signal())
 	})
 
+	r.Route("/chat", func(r chi.Router) {
+		r.Route("/message", func(r chi.Router) {
+			r.Post("/send", signal.Signal())
+		})
+	})
+
 	return r, nil
 }

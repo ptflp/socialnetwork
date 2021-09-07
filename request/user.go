@@ -3,7 +3,7 @@ package request
 //go:generate easytags $GOFILE
 
 type UserIDRequest struct {
-	UUID string `json:"user_id"`
+	UUID string `json:"uuid"`
 }
 
 type UserNicknameRequest struct {
