@@ -64,7 +64,7 @@ func (a *moderateController) Create() http.HandlerFunc {
 
 func (a *moderateController) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var moderateUUID request.UUIDReq
+		var moderateUUID request.PostUUIDReq
 
 		// r.PostForm is a map of our POST form values
 		err := Decode(r, &moderateUUID)

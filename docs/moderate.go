@@ -58,7 +58,7 @@ type moderateGetResponse struct {
 // swagger:parameters moderateGetRequest
 type moderateGetParams struct {
 	// in:body
-	Body request.UUIDReq
+	Body request.PostUUIDReq
 }
 
 // swagger:route POST /moderate/get/all moderate moderateGetAllRequest
