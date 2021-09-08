@@ -26,6 +26,10 @@ type PostsFeedUserReq struct {
 	UUID   string `json:"user_id"`
 }
 
+type PostUUIDReq struct {
+	UUID string `json:"post_id"`
+}
+
 type UUIDReq struct {
 	UUID string `json:"id"`
 }

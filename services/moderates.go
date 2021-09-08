@@ -129,7 +129,7 @@ func (m *Moderates) GetModerates(ctx context.Context, limitOffsetReq request.Lim
 	return moderatesData, nil
 }
 
-func (m *Moderates) Get(ctx context.Context, req request.UUIDReq) (request.ModerateData, error) {
+func (m *Moderates) Get(ctx context.Context, req request.PostUUIDReq) (request.ModerateData, error) {
 	condition := infoblog.Condition{
 		Equal: &sq.Eq{"type": types.TypeUserModerate, "active": true},
 		In: &infoblog.In{

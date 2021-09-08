@@ -216,6 +216,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 
 	signal := controllers.NewSignalController(cmps.Responder(), services, cmps.Logger())
 	r.Route("/restricted", func(r chi.Router) {
+		r.Use(token.CheckStrict)
 		r.Post("/signal", signal.Signal())
 	})
 

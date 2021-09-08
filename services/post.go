@@ -166,7 +166,7 @@ func (p *Post) Update(ctx context.Context, req request.PostUpdateReq) error {
 	return p.post.Update(ctx, post)
 }
 
-func (p *Post) Delete(ctx context.Context, req request.UUIDReq) error {
+func (p *Post) Delete(ctx context.Context, req request.PostUUIDReq) error {
 	u, err := extractUser(ctx)
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func (p *Post) Delete(ctx context.Context, req request.UUIDReq) error {
 	return p.post.Delete(ctx, post)
 }
 
-func (p *Post) Get(ctx context.Context, req request.UUIDReq) (request.PostDataResponse, error) {
+func (p *Post) Get(ctx context.Context, req request.PostUUIDReq) (request.PostDataResponse, error) {
 	var err error
 	postDataRes := request.PostDataResponse{}
 	post := infoblog.Post{}
