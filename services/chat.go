@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -20,24 +21,30 @@ const (
 )
 
 type Chats struct {
-	chatRep            infoblog.ChatRepository
-	chatMessagesRep    infoblog.ChatMessagesRepository
-	chatParticipantRep infoblog.ChatParticipantRepository
-	Services           *Services
+	chatRep             infoblog.ChatRepository
+	chatMessagesRep     infoblog.ChatMessagesRepository
+	chatParticipantRep  infoblog.ChatParticipantRepository
+	chatPrivateUsersRep infoblog.ChatPrivateUsersRepository
+	Services            *Services
 	*decoder.Decoder
 }
 
 func NewChatService(reps infoblog.Repositories, services *Services) *Chats {
-	return &Chats{chatRep: reps.Chats, chatMessagesRep: reps.ChatMessages, chatParticipantRep: reps.ChatParticipant, Decoder: decoder.NewDecoder(), Services: services}
+	return &Chats{chatRep: reps.Chats, chatMessagesRep: reps.ChatMessages, chatParticipantRep: reps.ChatParticipant, Decoder: decoder.NewDecoder(), Services: services, chatPrivateUsersRep: reps.ChatPrivateUser}
 }
 
-func (m *Chats) CreateChat(ctx context.Context) (infoblog.Chat, error) {
-	chat := infoblog.Chat{
-		UUID:   types.NewNullUUID(),
-		Type:   types.NewNullInt64(TypeChatPrivate),
-		Active: types.NewNullBool(true),
+func (m *Chats) CreateChat(ctx context.Context, chatType int64) (infoblog.Chat, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return infoblog.Chat{}, err
 	}
-	err := m.chatRep.Create(ctx, chat)
+	chat := infoblog.Chat{
+		UUID:     types.NewNullUUID(),
+		Type:     types.NewNullInt64(chatType),
+		Active:   types.NewNullBool(true),
+		UserUUID: user.UUID,
+	}
+	err = m.chatRep.Create(ctx, chat)
 
 	if err != nil {
 		return infoblog.Chat{}, err
@@ -46,7 +53,7 @@ func (m *Chats) CreateChat(ctx context.Context) (infoblog.Chat, error) {
 	return chat, nil
 }
 
-func (m *Chats) SendMessage(ctx context.Context, req request.SendMessage, chatUUID string) error {
+func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) error {
 	user, err := extractUser(ctx)
 	if err != nil {
 		return err
@@ -54,7 +61,7 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessage, chatUU
 
 	chatMessage := infoblog.ChatMessages{
 		UUID:     types.NewNullUUID(),
-		ChatUUID: types.NewNullUUID(chatUUID),
+		ChatUUID: types.NewNullUUID(req.ChatUUID),
 		UserUUID: user.UUID,
 		Active:   types.NewNullBool(true),
 		Message:  req.Message,
@@ -63,42 +70,87 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessage, chatUU
 	return m.chatMessagesRep.Create(ctx, chatMessage)
 }
 
-func (m *Chats) SendMessagePrivate(ctx context.Context, req request.SendMessage) error {
-	var err error
-	var user infoblog.User
-	user, err = extractUser(ctx)
-	if err != nil {
-		return err
+func (m *Chats) Info(ctx context.Context, req request.GetInfoReq) error {
+	if req.UserUUID != nil {
+		return m.GetInfoByUser(ctx, req)
 	}
-
-	var cp []infoblog.ChatParticipant
-	cp, err = m.GetPrivateParticipants(ctx, req)
-	if err != nil {
-		var chat infoblog.Chat
-		chat, err = m.CreateChat(ctx)
-		if err != nil {
-			return err
-		}
-		err = m.AddParticipant(ctx, chat, user, infoblog.User{UUID: types.NewNullUUID(req.ToUUID)})
-		if err != nil {
-			return err
-		}
-	} else {
-		if len(cp) < 2 {
-			return fmt.Errorf("error count of chat participants %d", len(cp))
-		}
-	}
-
-	err = m.SendMessage(ctx, req, cp[0].ChatUUID.String)
-	if err != nil {
-		return err
+	if req.ChatUUID != nil {
+		return m.GetInfo(ctx, req)
 	}
 
 	return nil
 }
 
+func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) error {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
+
+	if req.UserUUID == nil {
+		return fmt.Errorf("bad request user uuid is nil")
+	}
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"user_uuid": user.UUID, "to_user_uuid": types.NewNullUUID(*req.UserUUID)},
+	}
+
+	cpur, err := m.chatPrivateUsersRep.Listx(ctx, condition)
+	if err != nil {
+		return err
+	}
+
+	var chat infoblog.Chat
+	if len(cpur) < 1 {
+		chat, err = m.CreateChat(ctx, TypeChatPrivate)
+		if err != nil {
+			return err
+		}
+		err = m.AddParticipant(ctx, chat, user, infoblog.User{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+}
+
+func (m *Chats) GetInfo(ctx context.Context, req request.GetInfoReq) error {
+	return nil
+}
+
 func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ...infoblog.User) error {
 	var err error
+
+	if chat.Type.Int64 == TypeChatPrivate {
+		if len(users) != 2 {
+			return fmt.Errorf("error users count in private chat %d", len(users))
+		}
+		cpur := infoblog.ChatPrivateUser{
+			UserUUID:   users[0].UUID,
+			ToUserUUID: users[1].UUID,
+			ChatUUID:   chat.UUID,
+			Active:     types.NullBool{},
+			CreatedAt:  time.Time{},
+			UpdatedAt:  time.Time{},
+		}
+		err = m.chatPrivateUsersRep.Create(ctx, cpur)
+		if err != nil {
+			return err
+		}
+		cpur = infoblog.ChatPrivateUser{
+			UserUUID:   users[1].UUID,
+			ToUserUUID: users[0].UUID,
+			ChatUUID:   chat.UUID,
+			Active:     types.NullBool{},
+			CreatedAt:  time.Time{},
+			UpdatedAt:  time.Time{},
+		}
+		err = m.chatPrivateUsersRep.Create(ctx, cpur)
+		if err != nil {
+			return err
+		}
+	}
+
 	for i := range users {
 		cp := infoblog.ChatParticipant{
 			ChatUUID: types.NewNullUUID(),
@@ -116,7 +168,7 @@ func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ..
 	return nil
 }
 
-func (m *Chats) GetPrivateParticipants(ctx context.Context, req request.SendMessage) ([]infoblog.ChatParticipant, error) {
+func (m *Chats) GetPrivateParticipants(ctx context.Context, req request.SendMessageReq) ([]infoblog.ChatParticipant, error) {
 	var err error
 	var user infoblog.User
 	var cp []infoblog.ChatParticipant
@@ -129,7 +181,7 @@ func (m *Chats) GetPrivateParticipants(ctx context.Context, req request.SendMess
 		Equal: &sq.Eq{"type": TypeChatPrivate, "active": true},
 		In: &infoblog.In{
 			Field: "user_uuid",
-			Args:  []interface{}{user.UUID, types.NewNullUUID(req.ToUUID)},
+			Args:  []interface{}{user.UUID, types.NewNullUUID(req.ChatUUID)},
 		},
 	}
 
@@ -171,5 +223,6 @@ func (m *Chats) GetPrivateMessages(ctx context.Context, req request.UUIDReq) ([]
 }
 
 func (m *Chats) GetChatByUser(ctx context.Context, req request.UUIDReq) {
-
+	condition := infoblog.Condition{}
+	m.chatParticipantRep.Listx(ctx, condition)
 }

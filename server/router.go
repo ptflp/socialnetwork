@@ -224,8 +224,9 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	r.Route("/chat", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Route("/message", func(r chi.Router) {
-			r.Post("/send", chat.SendMessagePrivate())
+			r.Post("/send", chat.SendMessage())
 		})
+		r.Post("/info", chat.Info())
 	})
 
 	return r, nil

@@ -18,5 +18,5 @@ type chatMessageResponse struct {
 // swagger:parameters chatMessageRequest
 type chatMessageParams struct {
 	// in:body
-	Body request.SendMessage
+	Body request.SendMessageReq
 }

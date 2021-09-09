@@ -31,9 +31,9 @@ func NewChatController(components components.Componenter, services *services.Ser
 	}
 }
 
-func (a *chatController) SendMessagePrivate() http.HandlerFunc {
+func (a *chatController) SendMessage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var sendMessagePrivate request.SendMessage
+		var sendMessagePrivate request.SendMessageReq
 
 		// r.PostForm is a map of our POST form values
 		err := Decode(r, &sendMessagePrivate)
@@ -43,7 +43,32 @@ func (a *chatController) SendMessagePrivate() http.HandlerFunc {
 			return
 		}
 
-		err = a.chats.SendMessagePrivate(r.Context(), sendMessagePrivate)
+		err = a.chats.SendMessage(r.Context(), sendMessagePrivate)
+
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+		})
+	}
+}
+
+func (a *chatController) Info() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var getInfoReq request.GetInfoReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &getInfoReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = a.chats.Info(r.Context(), getInfoReq)
 
 		if err != nil {
 			a.ErrorInternal(w, err)
