@@ -16,17 +16,17 @@ require (
 	github.com/json-iterator/go v1.1.11
 	github.com/nyaruka/phonenumbers v1.0.70
 	github.com/sendgrid/rest v2.6.4+incompatible // indirect
-	github.com/sendgrid/sendgrid-go v3.10.0+incompatible
+	github.com/sendgrid/sendgrid-go v3.10.0+incompatible // indirect
 	github.com/spf13/viper v1.8.0
 	github.com/subosito/gotenv v1.2.0
 	github.com/valyala/quicktemplate v1.6.3
-	github.com/volatiletech/null/v8 v8.1.2 // indirect
+	github.com/volatiletech/null/v8 v8.1.2
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
 	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
 	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
-	gorm.io/driver/mysql v1.1.2
-	gorm.io/gorm v1.21.13
+	gorm.io/driver/mysql v1.1.2 // indirect
+	gorm.io/gorm v1.21.13 // indirect
 )

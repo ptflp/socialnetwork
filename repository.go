@@ -9,6 +9,7 @@ type Repositories struct {
 	Chats           ChatRepository
 	ChatMessages    ChatMessagesRepository
 	ChatParticipant ChatParticipantRepository
+	ChatPrivateUser ChatPrivateUsersRepository
 	Comments        CommentsRepository
 	Events          EventRepository
 	Friends         FriendRepository
