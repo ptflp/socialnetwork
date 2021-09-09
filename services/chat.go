@@ -25,12 +25,12 @@ type Chats struct {
 	chatMessagesRep     infoblog.ChatMessagesRepository
 	chatParticipantRep  infoblog.ChatParticipantRepository
 	chatPrivateUsersRep infoblog.ChatPrivateUsersRepository
-	Services            *Services
+	services            *Services
 	*decoder.Decoder
 }
 
 func NewChatService(reps infoblog.Repositories, services *Services) *Chats {
-	return &Chats{chatRep: reps.Chats, chatMessagesRep: reps.ChatMessages, chatParticipantRep: reps.ChatParticipant, Decoder: decoder.NewDecoder(), Services: services, chatPrivateUsersRep: reps.ChatPrivateUser}
+	return &Chats{chatRep: reps.Chats, chatMessagesRep: reps.ChatMessages, chatParticipantRep: reps.ChatParticipant, Decoder: decoder.NewDecoder(), services: services, chatPrivateUsersRep: reps.ChatPrivateUser}
 }
 
 func (m *Chats) CreateChat(ctx context.Context, chatType int64) (infoblog.Chat, error) {
@@ -70,7 +70,7 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) err
 	return m.chatMessagesRep.Create(ctx, chatMessage)
 }
 
-func (m *Chats) Info(ctx context.Context, req request.GetInfoReq) error {
+func (m *Chats) Info(ctx context.Context, req request.GetInfoReq) (request.ChatData, error) {
 	if req.UserUUID != nil {
 		return m.GetInfoByUser(ctx, req)
 	}
@@ -78,17 +78,17 @@ func (m *Chats) Info(ctx context.Context, req request.GetInfoReq) error {
 		return m.GetInfo(ctx, req)
 	}
 
-	return nil
+	return request.ChatData{}, fmt.Errorf("bad request")
 }
 
-func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) error {
+func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (request.ChatData, error) {
 	user, err := extractUser(ctx)
 	if err != nil {
-		return err
+		return request.ChatData{}, err
 	}
 
 	if req.UserUUID == nil {
-		return fmt.Errorf("bad request user uuid is nil")
+		return request.ChatData{}, fmt.Errorf("bad request user uuid is nil")
 	}
 	condition := infoblog.Condition{
 		Equal: &sq.Eq{"user_uuid": user.UUID, "to_user_uuid": types.NewNullUUID(*req.UserUUID)},
@@ -96,26 +96,93 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) error
 
 	cpur, err := m.chatPrivateUsersRep.Listx(ctx, condition)
 	if err != nil {
-		return err
+		return request.ChatData{}, err
 	}
 
 	var chat infoblog.Chat
 	if len(cpur) < 1 {
 		chat, err = m.CreateChat(ctx, TypeChatPrivate)
 		if err != nil {
-			return err
+			return request.ChatData{}, err
 		}
 		err = m.AddParticipant(ctx, chat, user, infoblog.User{})
 		if err != nil {
-			return err
+			return request.ChatData{}, err
 		}
 	}
+	if len(cpur) > 0 {
+		chat, err = m.chatRep.Find(ctx, infoblog.Chat{UUID: cpur[0].ChatUUID})
+		if err != nil {
+			return request.ChatData{}, err
+		}
+	}
+	var chatData request.ChatData
+	err = m.MapStructs(&chatData, &chat)
 
-	return err
+	condition = infoblog.Condition{
+		Equal: &sq.Eq{"chat_uuid": chatData.UUID},
+	}
+
+	chatParticipants, err := m.chatParticipantRep.Listx(ctx, condition)
+	if err != nil {
+		return request.ChatData{}, err
+	}
+	userUUIDs := make([]interface{}, 0, 2)
+
+	for _, v := range chatParticipants {
+		userUUIDs = append(userUUIDs, v.UserUUID)
+	}
+
+	if len(userUUIDs) < 1 {
+		return request.ChatData{}, fmt.Errorf("getFeedUsers no users found")
+	}
+
+	condition = infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  userUUIDs,
+		},
+	}
+
+	users, err := m.services.User.Listx(ctx, condition)
+	if err != nil {
+		return request.ChatData{}, err
+	}
+
+	usersData := make([]request.UserData, 0, len(users))
+
+	err = m.MapStructs(&usersData, &users)
+
+	if err != nil {
+		return request.ChatData{}, err
+	}
+
+	chatData.Participants = usersData
+
+	condition = infoblog.Condition{
+		Equal: &sq.Eq{"chat_uuid": chatData.UUID},
+	}
+
+	chatMessages, err := m.chatMessagesRep.Listx(ctx, condition)
+
+	if err != nil {
+		return request.ChatData{}, err
+	}
+
+	var messagesData []request.MessageData
+	err = m.MapStructs(&messagesData, &chatMessages)
+
+	if err != nil {
+		return request.ChatData{}, err
+	}
+
+	chatData.LastMessages = messagesData
+
+	return chatData, err
 }
 
-func (m *Chats) GetInfo(ctx context.Context, req request.GetInfoReq) error {
-	return nil
+func (m *Chats) GetInfo(ctx context.Context, req request.GetInfoReq) (request.ChatData, error) {
+	return request.ChatData{}, nil
 }
 
 func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ...infoblog.User) error {

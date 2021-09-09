@@ -114,12 +114,6 @@ type RecoverCheckPhoneData struct {
 	RecoverID string `json:"recover_id"`
 }
 
-type ChatData struct {
-	UUID      types.NullUUID  `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
-	Type      types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int"`
-	CreatedAt time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
-}
-
 type CommentData struct {
 	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
 	Body     types.NullString `json:"body"`
@@ -137,4 +131,20 @@ type ModerateData struct {
 	UpdatedAt time.Time        `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 	DeletedAt types.NullTime   `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index" ops:"delete"`
 	Files     []FileData       `json:"files"`
+}
+
+type ChatData struct {
+	UUID         types.NullUUID  `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Type         types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int" `
+	Active       types.NullBool  `json:"active" db:"active" ops:"create,update" orm_type:"boolean" orm_default:"null"`
+	UserUUID     types.NullUUID  `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
+	CreatedAt    time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
+	Participants []UserData      `json:"participants"`
+	LastMessages []MessageData   `json:"last_messages"`
+}
+
+type MessageData struct {
+	Message  string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)" orm_default:"not null"`
+	UserUUID types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
+	User     UserData       `json:"user"`
 }

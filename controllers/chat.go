@@ -59,7 +59,6 @@ func (a *chatController) SendMessage() http.HandlerFunc {
 func (a *chatController) Info() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var getInfoReq request.GetInfoReq
-
 		// r.PostForm is a map of our POST form values
 		err := Decode(r, &getInfoReq)
 
@@ -68,7 +67,7 @@ func (a *chatController) Info() http.HandlerFunc {
 			return
 		}
 
-		err = a.chats.Info(r.Context(), getInfoReq)
+		chatData, err := a.chats.Info(r.Context(), getInfoReq)
 
 		if err != nil {
 			a.ErrorInternal(w, err)
@@ -77,6 +76,7 @@ func (a *chatController) Info() http.HandlerFunc {
 
 		a.SendJSON(w, request.Response{
 			Success: true,
+			Data:    chatData,
 		})
 	}
 }
