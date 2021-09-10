@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 
@@ -70,6 +69,23 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) err
 	return m.chatMessagesRep.Create(ctx, chatMessage)
 }
 
+func (m *Chats) GetMessages(ctx context.Context, req request.GetMessagesReq) ([]request.MessageData, error) {
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"chat_uuid": types.NewNullUUID(req.ChatUUID)},
+	}
+	messages, err := m.chatMessagesRep.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+	var messagesData []request.MessageData
+	err = m.MapStructs(&messagesData, &messages)
+	if err != nil {
+		return nil, err
+	}
+
+	return messagesData, nil
+}
+
 func (m *Chats) Info(ctx context.Context, req request.GetInfoReq) (request.ChatData, error) {
 	if req.UserUUID != nil {
 		return m.GetInfoByUser(ctx, req)
@@ -87,9 +103,14 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (requ
 		return request.ChatData{}, err
 	}
 
+	if *req.UserUUID == user.UUID.String {
+		return request.ChatData{}, fmt.Errorf("cant write to urself")
+	}
+
 	if req.UserUUID == nil {
 		return request.ChatData{}, fmt.Errorf("bad request user uuid is nil")
 	}
+
 	condition := infoblog.Condition{
 		Equal: &sq.Eq{"user_uuid": user.UUID, "to_user_uuid": types.NewNullUUID(*req.UserUUID)},
 	}
@@ -105,7 +126,7 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (requ
 		if err != nil {
 			return request.ChatData{}, err
 		}
-		err = m.AddParticipant(ctx, chat, user, infoblog.User{})
+		err = m.AddParticipant(ctx, chat, user, infoblog.User{UUID: types.NewNullUUID(*req.UserUUID)})
 		if err != nil {
 			return request.ChatData{}, err
 		}
@@ -118,6 +139,9 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (requ
 	}
 	var chatData request.ChatData
 	err = m.MapStructs(&chatData, &chat)
+	if err != nil {
+		return request.ChatData{}, err
+	}
 
 	condition = infoblog.Condition{
 		Equal: &sq.Eq{"chat_uuid": chatData.UUID},
@@ -127,14 +151,14 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (requ
 	if err != nil {
 		return request.ChatData{}, err
 	}
-	userUUIDs := make([]interface{}, 0, 2)
 
+	userUUIDs := make([]interface{}, 0, 2)
 	for _, v := range chatParticipants {
 		userUUIDs = append(userUUIDs, v.UserUUID)
 	}
 
 	if len(userUUIDs) < 1 {
-		return request.ChatData{}, fmt.Errorf("getFeedUsers no users found")
+		return request.ChatData{}, fmt.Errorf("get chat participants, no users found")
 	}
 
 	condition = infoblog.Condition{
@@ -161,6 +185,10 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (requ
 
 	condition = infoblog.Condition{
 		Equal: &sq.Eq{"chat_uuid": chatData.UUID},
+		LimitOffset: &infoblog.LimitOffset{
+			Offset: 0,
+			Limit:  2,
+		},
 	}
 
 	chatMessages, err := m.chatMessagesRep.Listx(ctx, condition)
@@ -185,6 +213,121 @@ func (m *Chats) GetInfo(ctx context.Context, req request.GetInfoReq) (request.Ch
 	return request.ChatData{}, nil
 }
 
+func (m *Chats) GetChats(ctx context.Context, req request.GetChatsReq) ([]request.ChatData, error) {
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"user_uuid": types.NewNullUUID(req.UserUUID)},
+	}
+
+	cpr, err := m.chatParticipantRep.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	chatsUUIDs := make([]interface{}, 0, len(cpr))
+	for i := range cpr {
+		chatsUUIDs = append(chatsUUIDs, cpr[i].ChatUUID)
+	}
+
+	condition = infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  chatsUUIDs,
+		},
+	}
+
+	chats, err := m.chatRep.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	var chatsData []request.ChatData
+	err = m.MapStructs(&chatsData, &chats)
+	if err != nil {
+		return nil, err
+	}
+
+	uuidMapsChats := make(map[string]*request.ChatData, len(chatsData))
+	messagesMapsChats := make(map[string]*request.ChatData, len(chatsData))
+	messagesUUIDs := make([]interface{}, 0, len(chatsData))
+	for i := range chatsData {
+		uuidMapsChats[chatsData[i].UUID.String] = &chatsData[i]
+		messagesMapsChats[chatsData[i].LastMessageUUID.String] = &chatsData[i]
+		messagesUUIDs = append(messagesUUIDs, chatsData[i].LastMessageUUID)
+	}
+
+	condition = infoblog.Condition{
+		In: &infoblog.In{
+			Field: "chat_uuid",
+			Args:  chatsUUIDs,
+		},
+	}
+
+	chatParticipants, err := m.chatParticipantRep.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	userMapsChats := make(map[string]*request.ChatData, len(chatParticipants))
+	userUUIDs := make([]interface{}, 0, len(chatParticipants))
+	for _, v := range chatParticipants {
+		userUUIDs = append(userUUIDs, v.UserUUID)
+		userMapsChats[v.UserUUID.String] = uuidMapsChats[v.ChatUUID.String]
+	}
+
+	if len(userUUIDs) < 1 {
+		return nil, fmt.Errorf("get chat participants, no users found")
+	}
+
+	condition = infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  userUUIDs,
+		},
+	}
+
+	users, err := m.services.User.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	usersData := make([]request.UserData, 0, len(users))
+
+	err = m.MapStructs(&usersData, &users)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range usersData {
+		userMapsChats[usersData[i].UUID.String].Participants = append(userMapsChats[usersData[i].UUID.String].Participants, usersData[i])
+	}
+
+	condition = infoblog.Condition{
+		In: &infoblog.In{
+			Field: "chat_uuid",
+			Args:  messagesUUIDs,
+		},
+	}
+
+	chatMessages, err := m.chatMessagesRep.Listx(ctx, condition)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var messagesData []request.MessageData
+	err = m.MapStructs(&messagesData, &chatMessages)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range messagesData {
+		messagesMapsChats[messagesData[i].UUID.String].LastMessages = append(messagesMapsChats[messagesData[i].UUID.String].LastMessages, messagesData[i])
+	}
+
+	return chatsData, nil
+}
+
 func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ...infoblog.User) error {
 	var err error
 
@@ -192,14 +335,14 @@ func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ..
 		if len(users) != 2 {
 			return fmt.Errorf("error users count in private chat %d", len(users))
 		}
+
 		cpur := infoblog.ChatPrivateUser{
 			UserUUID:   users[0].UUID,
 			ToUserUUID: users[1].UUID,
 			ChatUUID:   chat.UUID,
-			Active:     types.NullBool{},
-			CreatedAt:  time.Time{},
-			UpdatedAt:  time.Time{},
+			Active:     types.NewNullBool(true),
 		}
+
 		err = m.chatPrivateUsersRep.Create(ctx, cpur)
 		if err != nil {
 			return err
@@ -208,9 +351,7 @@ func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ..
 			UserUUID:   users[1].UUID,
 			ToUserUUID: users[0].UUID,
 			ChatUUID:   chat.UUID,
-			Active:     types.NullBool{},
-			CreatedAt:  time.Time{},
-			UpdatedAt:  time.Time{},
+			Active:     types.NewNullBool(true),
 		}
 		err = m.chatPrivateUsersRep.Create(ctx, cpur)
 		if err != nil {
@@ -220,7 +361,7 @@ func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ..
 
 	for i := range users {
 		cp := infoblog.ChatParticipant{
-			ChatUUID: types.NewNullUUID(),
+			ChatUUID: chat.UUID,
 			UserUUID: users[i].UUID,
 			Type:     chat.Type,
 			Active:   types.NewNullBool(true),
@@ -233,63 +374,4 @@ func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ..
 	}
 
 	return nil
-}
-
-func (m *Chats) GetPrivateParticipants(ctx context.Context, req request.SendMessageReq) ([]infoblog.ChatParticipant, error) {
-	var err error
-	var user infoblog.User
-	var cp []infoblog.ChatParticipant
-	user, err = extractUser(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	condition := infoblog.Condition{
-		Equal: &sq.Eq{"type": TypeChatPrivate, "active": true},
-		In: &infoblog.In{
-			Field: "user_uuid",
-			Args:  []interface{}{user.UUID, types.NewNullUUID(req.ChatUUID)},
-		},
-	}
-
-	cp, err = m.chatParticipantRep.Listx(ctx, condition)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(cp) < 2 {
-		return nil, fmt.Errorf("error count of chat participants %d", len(cp))
-	}
-
-	return cp, nil
-}
-
-func (m *Chats) GetPrivateMessages(ctx context.Context, req request.UUIDReq) ([]infoblog.ChatMessages, error) {
-	condition := infoblog.Condition{
-		Equal: &sq.Eq{"user_uuid": types.NewNullUUID(req.UUID), "type": TypeChatPrivate},
-	}
-	cp, err := m.chatParticipantRep.Listx(ctx, condition)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(cp) < 2 {
-		return nil, fmt.Errorf("error count of chat participants %d", len(cp))
-	}
-
-	condition = infoblog.Condition{
-		Equal: &sq.Eq{"chat_uuid": cp[0].ChatUUID},
-	}
-
-	ms, err := m.chatMessagesRep.Listx(ctx, condition)
-	if err != nil {
-		return nil, err
-	}
-
-	return ms, nil
-}
-
-func (m *Chats) GetChatByUser(ctx context.Context, req request.UUIDReq) {
-	condition := infoblog.Condition{}
-	m.chatParticipantRep.Listx(ctx, condition)
 }

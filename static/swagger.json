@@ -203,6 +203,66 @@
         }
       }
     },
+    "/chat/get/messages": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "chat"
+        ],
+        "summary": "Получить информацию о чате.",
+        "operationId": "chatGetMessagesRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/GetMessagesReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/chatGetMessagesResponse"
+          }
+        }
+      }
+    },
+    "/chat/info": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "chat"
+        ],
+        "summary": "Получить информацию о чате.",
+        "operationId": "chatInfoRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/GetInfoReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/chatInfoResponse"
+          }
+        }
+      }
+    },
     "/chat/message/send": {
       "post": {
         "security": [
@@ -213,16 +273,16 @@
           }
         ],
         "tags": [
-          "chatMessage"
+          "chat"
         ],
-        "summary": "Signal.",
+        "summary": "Отправить сообщение.",
         "operationId": "chatMessageRequest",
         "parameters": [
           {
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/SendMessage"
+              "$ref": "#/definitions/SendMessageReq"
             }
           }
         ],
@@ -380,7 +440,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/UUIDReq"
+              "$ref": "#/definitions/PostUUIDReq"
             }
           }
         ],
@@ -717,7 +777,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/UUIDReq"
+              "$ref": "#/definitions/PostUUIDReq"
             }
           }
         ],
@@ -777,7 +837,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/UUIDReq"
+              "$ref": "#/definitions/PostUUIDReq"
             }
           }
         ],
@@ -986,7 +1046,7 @@
             "name": "Body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/UUIDReq"
+              "$ref": "#/definitions/PostUUIDReq"
             }
           }
         ],
@@ -1546,6 +1606,30 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "GetInfoReq": {
+      "type": "object",
+      "properties": {
+        "chat_id": {
+          "type": "string",
+          "x-go-name": "ChatUUID"
+        },
+        "user_id": {
+          "type": "string",
+          "x-go-name": "UserUUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "GetMessagesReq": {
+      "type": "object",
+      "properties": {
+        "chat_id": {
+          "type": "string",
+          "x-go-name": "ChatUUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "LikeReq": {
       "type": "object",
       "properties": {
@@ -1820,6 +1904,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "PostUUIDReq": {
+      "type": "object",
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "x-go-name": "UUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "PostUpdateReq": {
       "type": "object",
       "properties": {
@@ -2011,16 +2105,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/config"
     },
-    "SendMessage": {
+    "SendMessageReq": {
       "type": "object",
       "properties": {
+        "chat_id": {
+          "type": "string",
+          "x-go-name": "ChatUUID"
+        },
         "message": {
           "type": "string",
           "x-go-name": "Message"
-        },
-        "to_uuid": {
-          "type": "string",
-          "x-go-name": "ToUUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -2055,16 +2149,6 @@
         "state": {
           "type": "string",
           "x-go-name": "State"
-        }
-      },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
-    },
-    "UUIDReq": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "x-go-name": "UUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -2273,6 +2357,18 @@
       }
     },
     "avatarUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "chatGetMessagesResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "chatInfoResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
