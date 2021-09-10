@@ -134,17 +134,20 @@ type ModerateData struct {
 }
 
 type ChatData struct {
-	UUID         types.NullUUID  `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
-	Type         types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int" `
-	Active       types.NullBool  `json:"active" db:"active" ops:"create,update" orm_type:"boolean" orm_default:"null"`
-	UserUUID     types.NullUUID  `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
-	CreatedAt    time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
-	Participants []UserData      `json:"participants"`
-	LastMessages []MessageData   `json:"last_messages"`
+	UUID            types.NullUUID  `json:"chat_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Type            types.NullInt64 `json:"type" db:"type" ops:"update,create" orm_type:"int" `
+	Active          types.NullBool  `json:"active" db:"active" ops:"create,update" orm_type:"boolean" orm_default:"null"`
+	UserUUID        types.NullUUID  `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
+	CreatedAt       time.Time       `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
+	LastMessageUUID types.NullUUID  `json:"last_message" db:"last_message" ops:"create" orm_type:"binary(16)" orm_default:"null" orm_index:"index"`
+	Participants    []UserData      `json:"participants"`
+	LastMessages    []MessageData   `json:"last_messages"`
 }
 
 type MessageData struct {
+	UUID     types.NullUUID `json:"message_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
 	Message  string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)" orm_default:"not null"`
+	ChatUUID types.NullUUID `json:"chat_id" db:"chat_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
 	UserUUID types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
 	User     UserData       `json:"user"`
 }

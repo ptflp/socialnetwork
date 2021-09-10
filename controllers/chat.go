@@ -56,6 +56,58 @@ func (a *chatController) SendMessage() http.HandlerFunc {
 	}
 }
 
+func (a *chatController) GetMessages() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var getMessages request.GetMessagesReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &getMessages)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		messagesData, err := a.chats.GetMessages(r.Context(), getMessages)
+
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    messagesData,
+		})
+	}
+}
+
+func (a *chatController) GetChats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var getChatsReq request.GetChatsReq
+
+		// r.PostForm is a map of our POST form values
+		err := Decode(r, &getChatsReq)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		chatsData, err := a.chats.GetChats(r.Context(), getChatsReq)
+
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    chatsData,
+		})
+	}
+}
+
 func (a *chatController) Info() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var getInfoReq request.GetInfoReq
