@@ -203,6 +203,36 @@
         }
       }
     },
+    "/chat/get/chats": {
+      "post": {
+        "security": [
+          {
+            "Bearer": [
+              "[]"
+            ]
+          }
+        ],
+        "tags": [
+          "chat"
+        ],
+        "summary": "Получить информацию о чате.",
+        "operationId": "chatGetChatsRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/GetChatsReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/chatGetChatsResponse"
+          }
+        }
+      }
+    },
     "/chat/get/messages": {
       "post": {
         "security": [
@@ -1606,6 +1636,16 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "GetChatsReq": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "x-go-name": "UserUUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "GetInfoReq": {
       "type": "object",
       "properties": {
@@ -2357,6 +2397,12 @@
       }
     },
     "avatarUploadResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "chatGetChatsResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
