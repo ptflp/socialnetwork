@@ -149,5 +149,4 @@ type MessageData struct {
 	Message  string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)" orm_default:"not null"`
 	ChatUUID types.NullUUID `json:"chat_id" db:"chat_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
 	UserUUID types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
-	User     UserData       `json:"user"`
 }

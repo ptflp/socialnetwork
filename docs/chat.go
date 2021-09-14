@@ -58,3 +58,22 @@ type chatGetMessagesParams struct {
 	// in:body
 	Body request.GetMessagesReq
 }
+
+// swagger:route POST /chat/get/chats chat chatGetChatsRequest
+// Получить информацию о чате.
+// security:
+//   - Bearer: []
+// responses:
+//   200: chatGetChatsResponse
+
+// swagger:response chatGetChatsResponse
+type chatGetChatsResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters chatGetChatsRequest
+type chatGetChatsParams struct {
+	// in:body
+	Body request.GetChatsReq
+}
