@@ -1,8 +1,9 @@
 package server
 
 import (
-	"bytes"
+	"html/template"
 	"net/http"
+	"time"
 )
 
 const (
@@ -30,7 +31,7 @@ const (
     <script>
         window.onload = function() {
           SwaggerUIBundle({
-            url: "/static/swagger.json?123",
+            url: "/static/swagger.json?{{.Time}}",
             dom_id: '#swagger-ui',
             presets: [
               SwaggerUIBundle.presets.apis,
@@ -46,8 +47,17 @@ const (
 )
 
 func swaggerUI(w http.ResponseWriter, r *http.Request) {
-	buf := bytes.NewBuffer([]byte(swaggerTemplate))
-	b := buf.Bytes()
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = w.Write(b)
+	tmpl, err := template.New("swagger").Parse(swaggerTemplate)
+	if err != nil {
+		return
+	}
+	err = tmpl.Execute(w, struct {
+		Time int64
+	}{
+		Time: time.Now().Unix(),
+	})
+	if err != nil {
+		return
+	}
 }
