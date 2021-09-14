@@ -58,6 +58,13 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) err
 		return err
 	}
 
+	chat := infoblog.Chat{UUID: types.NewNullUUID(req.ChatUUID)}
+
+	chat, err = m.chatRep.Find(ctx, chat)
+	if err != nil {
+		return err
+	}
+
 	chatMessage := infoblog.ChatMessages{
 		UUID:     types.NewNullUUID(),
 		ChatUUID: types.NewNullUUID(req.ChatUUID),
@@ -66,7 +73,14 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) err
 		Message:  req.Message,
 	}
 
-	return m.chatMessagesRep.Create(ctx, chatMessage)
+	err = m.chatMessagesRep.Create(ctx, chatMessage)
+	if err != nil {
+		return err
+	}
+	chat.LastMessageUUID = chatMessage.UUID
+	err = m.chatRep.Update(ctx, chat)
+
+	return err
 }
 
 func (m *Chats) GetMessages(ctx context.Context, req request.GetMessagesReq) ([]request.MessageData, error) {
@@ -185,6 +199,9 @@ func (m *Chats) GetInfoByUser(ctx context.Context, req request.GetInfoReq) (requ
 
 	condition = infoblog.Condition{
 		Equal: &sq.Eq{"chat_uuid": chatData.UUID},
+		Order: &infoblog.Order{
+			Field: "created_at",
+		},
 		LimitOffset: &infoblog.LimitOffset{
 			Offset: 0,
 			Limit:  2,
@@ -302,8 +319,11 @@ func (m *Chats) GetChats(ctx context.Context, req request.GetChatsReq) ([]reques
 	}
 
 	condition = infoblog.Condition{
+		Order: &infoblog.Order{
+			Field: "created_at",
+		},
 		In: &infoblog.In{
-			Field: "chat_uuid",
+			Field: "uuid",
 			Args:  messagesUUIDs,
 		},
 	}
