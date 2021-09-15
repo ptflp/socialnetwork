@@ -62,7 +62,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 				Success: true,
 			}
 		case ActionGetChats:
-			chats, err := a.chat.GetChats(ctx, request.GetChatsReq{UserUUID: wssReq.UUID})
+			chats, err := a.chat.GetChats(ctx, request.GetChatsReq{UserUUID: user.UUID.String})
 			if err != nil {
 				a.ErrorInternal(w, err)
 				return
