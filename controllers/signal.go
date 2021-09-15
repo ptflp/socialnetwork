@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -18,24 +17,16 @@ import (
 type signalController struct {
 	*decoder.Decoder
 	respond.Responder
-	user      *services.User
-	file      *services.File
-	post      *services.Post
-	logger    *zap.Logger
-	comments  *services.Comments
-	moderates *services.Moderates
+	chat   *services.Chats
+	logger *zap.Logger
 }
 
 func NewSignalController(responder respond.Responder, services *services.Services, logger *zap.Logger) *signalController {
 	return &signalController{
 		Decoder:   decoder.NewDecoder(),
 		Responder: responder,
-		user:      services.User,
-		file:      services.File,
-		post:      services.Post,
-		comments:  services.Comments,
+		chat:      services.Chats,
 		logger:    logger,
-		moderates: services.Moderates,
 	}
 }
 
@@ -46,17 +37,62 @@ func (a *signalController) Signal() http.HandlerFunc {
 			a.ErrorForbidden(w, err)
 			return
 		}
-		data := Payload{
-			Touserid: user.UUID.String,
-			Data:     Data{Somedata: "asfasfasfafa"},
+		var wssReq WssRequest
+		err = a.Decoder.Decode(r.Body, &wssReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
 		}
-		payloadBytes, err := json.Marshal(data)
+		data := Payload{
+			ToUserID: user.UUID.String,
+		}
+		ctx := r.Context()
+
+		switch wssReq.Action {
+		case ActionSendChatMessage:
+			err = a.chat.SendMessage(ctx, request.SendMessageReq{
+				Message:  wssReq.Message,
+				ChatUUID: wssReq.UUID,
+			})
+			if err != nil {
+				a.ErrorInternal(w, err)
+				return
+			}
+			data.Data = request.Response{
+				Success: true,
+			}
+		case ActionGetChats:
+			chats, err := a.chat.GetChats(ctx, request.GetChatsReq{UserUUID: wssReq.UUID})
+			if err != nil {
+				a.ErrorInternal(w, err)
+				return
+			}
+			data.Data = chats
+		case ActionGetChatInfo:
+			chatData, err := a.chat.GetInfoByUser(ctx, request.GetInfoReq{
+				UserUUID: &wssReq.UUID,
+			})
+			if err != nil {
+				a.ErrorInternal(w, err)
+				return
+			}
+			data.Data = chatData
+		case ActionGetChatMessages:
+			messages, err := a.chat.GetMessages(ctx, request.GetMessagesReq{ChatUUID: wssReq.UUID})
+			if err != nil {
+				a.ErrorInternal(w, err)
+				return
+			}
+			data.Data = messages
+		}
+
+		var body bytes.Buffer
+		err = a.Encode(&body, data)
 		if err != nil {
 			return
 		}
-		body := bytes.NewReader(payloadBytes)
 
-		req, err := http.NewRequest("POST", "http://137.184.77.68/signalling", body)
+		req, err := http.NewRequest("POST", "https://wss.fanam.org/signalling", &body)
 		if err != nil {
 			return
 		}
@@ -88,9 +124,23 @@ func (a *signalController) Signal() http.HandlerFunc {
 // }'
 
 type Payload struct {
-	Touserid string `json:"toUserId"`
-	Data     Data   `json:"data"`
+	ToUserID string      `json:"toUserId"`
+	Data     interface{} `json:"data"`
 }
+
 type Data struct {
-	Somedata string `json:"someData"`
+	SomeData string `json:"someData"`
+}
+
+const (
+	ActionSendChatMessage = iota + 1
+	ActionGetChats
+	ActionGetChatMessages
+	ActionGetChatInfo
+)
+
+type WssRequest struct {
+	Action  int    `json:"action"`
+	Message string `json:"message"`
+	UUID    string `json:"uuid"`
 }

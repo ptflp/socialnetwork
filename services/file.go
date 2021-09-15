@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	"gitlab.com/InfoBlogFriends/server/types"
 
 	infoblog "gitlab.com/InfoBlogFriends/server"
@@ -67,6 +68,15 @@ func (f *File) SaveFileSystem(formFile FormFile, user infoblog.User, fileUUID ty
 	}
 	defer out.Close()
 
+	mtype, err := mimetype.DetectReader(formFile.File)
+	if err != nil {
+		return infoblog.File{}, err
+	}
+	_, err = formFile.File.Seek(0, 0)
+	if err != nil {
+		return infoblog.File{}, err
+	}
+
 	_, err = io.Copy(out, formFile.File)
 
 	if err != nil {
@@ -74,9 +84,10 @@ func (f *File) SaveFileSystem(formFile FormFile, user infoblog.User, fileUUID ty
 	}
 
 	return infoblog.File{
-		Dir:  dir,
-		Name: fileName,
-		UUID: fileUUID,
+		Dir:      dir,
+		Name:     fileName,
+		UUID:     fileUUID,
+		MimeType: types.NewNullString(mtype.String()),
 	}, nil
 }
 
