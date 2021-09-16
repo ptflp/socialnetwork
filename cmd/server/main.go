@@ -46,7 +46,7 @@ func main() {
 
 	repositories := db.NewRepositories(cmps)
 
-	service := services.NewServices(cmps, repositories)
+	service := services.NewServices(ctx, cmps, repositories)
 
 	// router initialization
 	r, err := server.NewRouter(service, cmps)

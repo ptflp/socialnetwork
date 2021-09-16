@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	"github.com/disintegration/imaging"
 
 	"gitlab.com/InfoBlogFriends/server/services"
@@ -53,7 +55,7 @@ func (a *fileController) GetFile() http.HandlerFunc {
 		}()
 		if err != nil {
 			fileRaw, err = os.Open("./templates/unnamed.png")
-			//File not found, send 404
+			//Video not found, send 404
 			if err != nil {
 				w.WriteHeader(http.StatusNotFound)
 				_, err = w.Write([]byte("Файл не найден на сервере"))
@@ -79,7 +81,7 @@ func (a *fileController) GetFile() http.HandlerFunc {
 		FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get
 		//Send the headers
 
-		if file.Type == services.FileTypePost {
+		if file.Type == types.TypePost {
 			if a.post.CheckFilePermission(r.Context(), file) {
 				_, err = fileRaw.Seek(0, 0)
 				w.Header().Set("Content-Disposition", "inline;")

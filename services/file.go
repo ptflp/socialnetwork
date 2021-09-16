@@ -21,7 +21,8 @@ const (
 
 const (
 	FileTypeNull = iota
-	FileTypePost
+	FileTypeImage
+	FileTypeVideo
 )
 
 type File struct {
@@ -37,15 +38,23 @@ func NewFileService(fileRep infoblog.FileRepository) *File {
 	return &File{fileRep: fileRep}
 }
 
-func (f *File) SaveFileSystem(formFile FormFile, user infoblog.User, fileUUID types.NullUUID) (infoblog.File, error) {
-	if _, err := os.Stat(UploadDirectory); os.IsNotExist(err) {
-		err = os.Mkdir(UploadDirectory, 0755)
+func (f *File) SaveFileSystem(formFile FormFile, user infoblog.User, fileUUID types.NullUUID, args ...string) (infoblog.File, error) {
+	uploadDir := UploadDirectory
+	if len(args) > 0 {
+		uploadDir = args[0]
+	}
+	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+		err = os.Mkdir(uploadDir, 0755)
 		if err != nil {
 			return infoblog.File{}, err
 		}
 	}
 
-	dir := path.Join(UploadDirectory, user.UUID.String)
+	dir := path.Join(uploadDir, user.UUID.String)
+	if len(args) > 1 {
+		dir = args[1]
+	}
+
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err = os.Mkdir(dir, 0755)
 		if err != nil {
@@ -130,4 +139,8 @@ func (f *File) GetFile(ctx context.Context, fileUUID string) (infoblog.File, err
 
 func (f *File) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.File, error) {
 	return f.fileRep.Listx(ctx, condition)
+}
+
+func (f *File) Update(ctx context.Context, file infoblog.File) error {
+	return f.fileRep.Update(ctx, file)
 }

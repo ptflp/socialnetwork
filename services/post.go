@@ -53,8 +53,9 @@ func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.FileDat
 
 	// 3. update file info, save to db
 	file.Active = 1
-	file.Type = 1
+	file.Type = types.TypePost
 	file.UserUUID = u.UUID
+	file.FileType = FileTypeImage
 
 	err = p.file.SaveDB(ctx, &file)
 	if err != nil {

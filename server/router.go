@@ -142,6 +142,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 
 		r.Post("/file/upload", posts.UploadFile())
+		r.Post("/file/upload/video", posts.UploadVideo())
 		r.Post("/update", posts.Update())
 		r.Post("/delete", posts.Delete())
 		r.Post("/get", posts.Get())
