@@ -80,12 +80,14 @@ type PostDataResponse struct {
 }
 
 type FileData struct {
-	Link        string         `json:"link"`
-	UUID        string         `json:"file_id"`
-	ForeignUUID types.NullUUID `json:"foreign_uuid" db:"foreign_uuid" ops:"create,update" orm_type:"binary(16)" orm_default:"null"`
-	Dir         string         `json:"dir" db:"dir" ops:"create,update" orm_type:"varchar(100)" orm_default:"not null"`
-	Name        string         `json:"name" db:"name" ops:"create" orm_type:"varchar(50)" orm_default:"not null"`
-	Private     types.NullBool `json:"private"`
+	Link        string          `json:"link"`
+	UUID        string          `json:"file_id"`
+	ForeignUUID types.NullUUID  `json:"foreign_uuid" db:"foreign_uuid" ops:"create,update" orm_type:"binary(16)" orm_default:"null"`
+	FileType    types.NullInt64 `json:"file_type" db:"file_type" ops:"create,update" orm_type:"int" orm_default:"null"`
+	Status      types.NullInt64 `json:"status" db:"status" ops:"create,update" orm_type:"int" orm_default:"null"`
+	Dir         string          `json:"dir" db:"dir" ops:"create,update" orm_type:"varchar(100)" orm_default:"not null"`
+	Name        string          `json:"name" db:"name" ops:"create" orm_type:"varchar(50)" orm_default:"not null"`
+	Private     types.NullBool  `json:"private"`
 }
 
 type PostCountData struct {
