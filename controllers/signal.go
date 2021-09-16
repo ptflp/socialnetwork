@@ -58,16 +58,18 @@ func (a *signalController) Signal() http.HandlerFunc {
 				a.ErrorInternal(w, err)
 				return
 			}
-			data.Data = request.Response{
+			data.Data.Res = request.Response{
 				Success: true,
 			}
+			data.Data.Action = ActionSendChatMessage
 		case ActionGetChats:
 			chats, err := a.chat.GetChats(ctx, request.GetChatsReq{UserUUID: user.UUID.String})
 			if err != nil {
 				a.ErrorInternal(w, err)
 				return
 			}
-			data.Data = chats
+			data.Data.Res = chats
+			data.Data.Action = ActionGetChats
 		case ActionGetChatInfo:
 			chatData, err := a.chat.GetInfoByUser(ctx, request.GetInfoReq{
 				UserUUID: &wssReq.UUID,
@@ -76,14 +78,16 @@ func (a *signalController) Signal() http.HandlerFunc {
 				a.ErrorInternal(w, err)
 				return
 			}
-			data.Data = chatData
+			data.Data.Res = chatData
+			data.Data.Action = ActionGetChatInfo
 		case ActionGetChatMessages:
 			messages, err := a.chat.GetMessages(ctx, request.GetMessagesReq{ChatUUID: wssReq.UUID})
 			if err != nil {
 				a.ErrorInternal(w, err)
 				return
 			}
-			data.Data = messages
+			data.Data.Res = messages
+			data.Data.Action = ActionGetChatMessages
 		}
 
 		var body bytes.Buffer
@@ -124,12 +128,14 @@ func (a *signalController) Signal() http.HandlerFunc {
 // }'
 
 type Payload struct {
-	ToUserID string      `json:"toUserId"`
-	Data     interface{} `json:"data"`
+	Action   int    `json:"action"`
+	ToUserID string `json:"toUserId"`
+	Data     Data   `json:"data"`
 }
 
 type Data struct {
-	SomeData string `json:"someData"`
+	Res    interface{} `json:"res"`
+	Action int         `json:"action"`
 }
 
 const (
