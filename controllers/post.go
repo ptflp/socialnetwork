@@ -17,9 +17,8 @@ import (
 type postsController struct {
 	*decoder.Decoder
 	respond.Responder
-	user     *services.User
-	file     *services.File
 	post     *services.Post
+	video    *services.Video
 	logger   *zap.Logger
 	comments *services.Comments
 }
@@ -28,11 +27,10 @@ func NewPostsController(responder respond.Responder, services *services.Services
 	return &postsController{
 		Decoder:   decoder.NewDecoder(),
 		Responder: responder,
-		user:      services.User,
-		file:      services.File,
 		post:      services.Post,
 		comments:  services.Comments,
 		logger:    logger,
+		video:     services.Video,
 	}
 }
 
@@ -160,6 +158,39 @@ func (a *postsController) UploadFile() http.HandlerFunc {
 		}
 
 		fileData, err := a.post.SaveFile(r.Context(), formFile)
+
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+			Data:    fileData,
+		})
+	}
+}
+
+func (a *postsController) UploadVideo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(100 << 20)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+		file, fHeader, err := r.FormFile("file")
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+		defer file.Close()
+
+		formFile := services.FormFile{
+			File:       file,
+			FileHeader: fHeader,
+		}
+
+		fileData, err := a.video.UploadVideo(r.Context(), formFile)
 
 		if err != nil {
 			a.ErrorBadRequest(w, err)

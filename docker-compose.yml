@@ -15,6 +15,24 @@ services:
     volumes:
       - /home/go:/go
       - ./:/go/src/gitlab.com/InfoBlogFriends/server
+  mp4encoder:
+    container_name: mp4encoder_${ENV}
+    image: jlesage/handbrake
+    restart: always
+    networks:
+      - skynet
+    volumes:
+      - ./public/videos/new:/watch:rw
+      - ./public/videos/converted:/output:rw
+  hlsencoder:
+    container_name: hlsencoder_${ENV}
+    image: ptflp/docker-ffmpeg-hls
+    restart: always
+    networks:
+      - skynet
+    volumes:
+      - ./public/videos/tohls:/root/input
+      - ./public/videos/hls:/root/output
 networks:
   skynet:
     external:

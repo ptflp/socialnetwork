@@ -42,6 +42,26 @@ type postFileUploadParams struct {
 	File interface{} `json:"file"`
 }
 
+// swagger:route POST /posts/file/upload/video posts postVideoUploadRequest
+// Загрузка видео поста.
+// security:
+//   - Bearer: []
+// responses:
+//   200: postVideoUploadResponse
+
+// swagger:response postVideoUploadResponse
+type postVideoUploadResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters postVideoUploadRequest
+type postVideoUploadParams struct {
+	// in: formData
+	// swagger:file
+	File interface{} `json:"file"`
+}
+
 // swagger:route POST /posts/feed/recent posts postsFeedRequest
 // Получение ленты последних постов.
 // security:
