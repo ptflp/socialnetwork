@@ -65,7 +65,7 @@ func (v *Video) UploadVideo(ctx context.Context, formFile FormFile) (request.Fil
 	file.Active = 1
 	file.Type = types.TypePost
 	file.UserUUID = u.UUID
-	file.FileType = FileTypeVideo
+	file.FileType = types.NewNullInt64(FileTypeVideo)
 
 	err = v.file.SaveDB(ctx, &file)
 	if err != nil {
