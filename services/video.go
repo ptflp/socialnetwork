@@ -30,6 +30,7 @@ const (
 	ToMp4Path        = "public/videos/new"
 	ConvertedMP4Path = "public/videos/converted"
 	ToHLSPath        = "public/videos/tohls"
+	ConvertedHLSPath = "public/videos/hls"
 
 	NumJobs           = 13
 	WorkerPoolDelay   = 5 * time.Second
@@ -39,6 +40,7 @@ const (
 const (
 	StatusNotFound = iota + 1
 	StatusConvertedMP4
+	StatusConvertedHLS
 )
 
 func NewVideoService(ctx context.Context, cmps components.Componenter, services *Services) *Video {
@@ -123,6 +125,15 @@ func (v *Video) Worker() {
 		case <-v.ctx.Done():
 			return
 		case video = <-v.ch:
+			hlsDir := path.Join(ConvertedHLSPath, video.UUID.String)
+			if _, err = os.Stat(hlsDir); os.IsNotExist(err) {
+				video.Status = types.NewNullInt64(StatusConvertedHLS)
+				err = v.file.Update(context.Background(), video)
+				if err != nil {
+					v.logger.Error("video update status not found", zap.Error(err))
+				}
+				continue
+			}
 			fileName := strings.Join([]string{video.UUID.String, "mp4"}, ".")
 			originalFile := path.Join(ToMp4Path, video.Name)
 			if _, err = os.Stat(originalFile); os.IsNotExist(err) {
