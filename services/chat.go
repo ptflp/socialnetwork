@@ -84,6 +84,9 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) (re
 	}
 
 	chatMessage, err = m.chatMessagesRep.Find(ctx, chatMessage)
+	if err != nil {
+		return request.MessageData{}, err
+	}
 
 	var messageData request.MessageData
 	err = m.MapStructs(&messageData, &chatMessage)
