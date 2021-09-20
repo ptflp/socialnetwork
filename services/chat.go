@@ -79,6 +79,9 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) (re
 	}
 	chat.LastMessageUUID = chatMessage.UUID
 	err = m.chatRep.Update(ctx, chat)
+	if err != nil {
+		return request.MessageData{}, err
+	}
 
 	var messageData request.MessageData
 	err = m.MapStructs(&messageData, &chatMessage)
