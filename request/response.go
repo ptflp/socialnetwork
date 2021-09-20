@@ -147,8 +147,9 @@ type ChatData struct {
 }
 
 type MessageData struct {
-	UUID     types.NullUUID `json:"message_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
-	Message  string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)" orm_default:"not null"`
-	ChatUUID types.NullUUID `json:"chat_id" db:"chat_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
-	UserUUID types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
+	UUID      types.NullUUID `json:"message_id" db:"uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null primary key"`
+	Message   string         `json:"message" db:"message" ops:"update,create" orm_type:"varchar(233)" orm_default:"not null"`
+	ChatUUID  types.NullUUID `json:"chat_id" db:"chat_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
+	UserUUID  types.NullUUID `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"null"`
+	CreatedAt time.Time      `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 }
