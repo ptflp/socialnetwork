@@ -43,7 +43,7 @@ func (a *chatController) SendMessage() http.HandlerFunc {
 			return
 		}
 
-		err = a.chats.SendMessage(r.Context(), sendMessagePrivate)
+		chatData, err := a.chats.SendMessage(r.Context(), sendMessagePrivate)
 
 		if err != nil {
 			a.ErrorInternal(w, err)
@@ -52,6 +52,7 @@ func (a *chatController) SendMessage() http.HandlerFunc {
 
 		a.SendJSON(w, request.Response{
 			Success: true,
+			Data:    chatData,
 		})
 	}
 }
