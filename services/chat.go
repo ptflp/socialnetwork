@@ -86,6 +86,9 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) err
 func (m *Chats) GetMessages(ctx context.Context, req request.GetMessagesReq) ([]request.MessageData, error) {
 	condition := infoblog.Condition{
 		Equal: &sq.Eq{"chat_uuid": types.NewNullUUID(req.ChatUUID)},
+		Order: &infoblog.Order{
+			Field: "created_at",
+		},
 	}
 	messages, err := m.chatMessagesRep.Listx(ctx, condition)
 	if err != nil {
