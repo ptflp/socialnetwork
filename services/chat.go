@@ -83,6 +83,8 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) (re
 		return request.MessageData{}, err
 	}
 
+	chatMessage, err = m.chatMessagesRep.Find(ctx, chatMessage)
+
 	var messageData request.MessageData
 	err = m.MapStructs(&messageData, &chatMessage)
 
@@ -99,6 +101,10 @@ func (m *Chats) GetMessages(ctx context.Context, req request.GetMessagesReq) ([]
 	messages, err := m.chatMessagesRep.Listx(ctx, condition)
 	if err != nil {
 		return nil, err
+	}
+	for i := len(messages)/2 - 1; i >= 0; i-- {
+		opp := len(messages) - 1 - i
+		messages[i], messages[opp] = messages[opp], messages[i]
 	}
 	var messagesData []request.MessageData
 	err = m.MapStructs(&messagesData, &messages)
