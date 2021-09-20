@@ -52,17 +52,17 @@ func (m *Chats) CreateChat(ctx context.Context, chatType int64) (infoblog.Chat, 
 	return chat, nil
 }
 
-func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) error {
+func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) (request.MessageData, error) {
 	user, err := extractUser(ctx)
 	if err != nil {
-		return err
+		return request.MessageData{}, err
 	}
 
 	chat := infoblog.Chat{UUID: types.NewNullUUID(req.ChatUUID)}
 
 	chat, err = m.chatRep.Find(ctx, chat)
 	if err != nil {
-		return err
+		return request.MessageData{}, err
 	}
 
 	chatMessage := infoblog.ChatMessages{
@@ -75,12 +75,15 @@ func (m *Chats) SendMessage(ctx context.Context, req request.SendMessageReq) err
 
 	err = m.chatMessagesRep.Create(ctx, chatMessage)
 	if err != nil {
-		return err
+		return request.MessageData{}, err
 	}
 	chat.LastMessageUUID = chatMessage.UUID
 	err = m.chatRep.Update(ctx, chat)
 
-	return err
+	var messageData request.MessageData
+	err = m.MapStructs(&messageData, &chatMessage)
+
+	return messageData, err
 }
 
 func (m *Chats) GetMessages(ctx context.Context, req request.GetMessagesReq) ([]request.MessageData, error) {
