@@ -50,7 +50,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 
 		switch wssReq.Action {
 		case ActionSendChatMessage:
-			chatData, err := a.chat.SendMessage(ctx, request.SendMessageReq{
+			messageData, err := a.chat.SendMessage(ctx, request.SendMessageReq{
 				Message:  wssReq.Message,
 				ChatUUID: wssReq.UUID,
 			})
@@ -60,7 +60,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 			}
 			data.Data.Res = request.Response{
 				Success: true,
-				Data:    chatData,
+				Data:    []request.MessageData{messageData},
 			}
 			data.Data.Action = ActionSendChatMessage
 		case ActionGetChats:
