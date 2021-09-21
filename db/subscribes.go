@@ -12,7 +12,7 @@ import (
 
 const (
 	createSubscribe = "INSERT INTO subscribes (user_uuid, subscriber_uuid, active) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE active = 1"
-	deleteSubscribe = "INSERT INTO subscribes (user_uuid, subscriber_uuid, active) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE active = 0"
+	deleteSubscribe = "INSERT INTO subscribes (user_uuid, subscriber_uuid, active) VALUES (?, ?, false) ON DUPLICATE KEY UPDATE active = false"
 )
 
 type subsRepository struct {
@@ -72,14 +72,18 @@ func (sb *subsRepository) CheckSubscribed(ctx context.Context, user infoblog.Use
 	return n > 1
 }
 
-func (s *subsRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Subscriber, error) {
+func (sb *subsRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Subscriber, error) {
 	var subscribers []infoblog.Subscriber
-	err := s.crud.listx(ctx, &subscribers, infoblog.Subscriber{}, condition)
+	err := sb.crud.listx(ctx, &subscribers, infoblog.Subscriber{}, condition)
 	if err != nil {
 		return nil, err
 	}
 
 	return subscribers, nil
+}
+
+func (sb *subsRepository) Update(ctx context.Context, sub infoblog.Subscriber) error {
+	return sb.crud.update(ctx, sub)
 }
 
 func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {

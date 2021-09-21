@@ -248,8 +248,8 @@ func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeReq
 	}
 
 	err = u.subsRepository.Delete(ctx, infoblog.Subscriber{
-		UserUUID:       user.UUID,
-		SubscriberUUID: types.NewNullUUID(subscribeRequest.UUID),
+		UserUUID:       types.NewNullUUID(subscribeRequest.UUID),
+		SubscriberUUID: user.UUID,
 		Active:         types.NewNullBool(false),
 	})
 	if err != nil {
@@ -382,6 +382,7 @@ func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]re
 		return nil, err
 	}
 	subscribesCondition := infoblog.Condition{
+		Equal: &sq.Eq{"active": true},
 		LimitOffset: &infoblog.LimitOffset{
 			Limit:  req.Limit,
 			Offset: req.Offset,
