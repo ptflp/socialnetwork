@@ -20,7 +20,7 @@ type Subscriber struct {
 }
 
 func (s Subscriber) OnCreate() string {
-	return ""
+	return "create unique index subscribes_user_uuid_subscriber_uuid_uindex on subscribes (user_uuid, subscriber_uuid);"
 }
 
 func (s Subscriber) TableName() string {
@@ -29,6 +29,7 @@ func (s Subscriber) TableName() string {
 
 type SubscriberRepository interface {
 	Create(ctx context.Context, sub Subscriber) (int64, error)
+	Update(ctx context.Context, sub Subscriber) error
 	FindByUser(ctx context.Context, user User) ([]Subscriber, error)
 	Delete(ctx context.Context, sub Subscriber) error
 	CountByUser(ctx context.Context, user User) (int64, error)
