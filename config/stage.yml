@@ -3,13 +3,7 @@ app:
   FrontEnd: "http://stagefront.ptflp.ru"
 
 db:
-  net: "tcp"
-  driver: "mysql"
-  dbname: "infoblog"
-  username: "root"
-  password: "jxtymCkj;ysGfhjkm"
-  host: "infoblogdb_stage"
-  timeout: 10
+  dbname: "infoblog_stage"
 
 server:
   port: 8955

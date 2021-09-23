@@ -3,6 +3,8 @@ package migration
 import (
 	"strings"
 
+	"gitlab.com/InfoBlogFriends/server/config"
+
 	"github.com/jmoiron/sqlx"
 	infoblog "gitlab.com/InfoBlogFriends/server"
 )
@@ -12,11 +14,12 @@ import (
 const selectTableFields = "SELECT COLUMN_NAME  FROM INFORMATION_SCHEMA.COLUMNS  WHERE  TABLE_SCHEMA = ? AND TABLE_NAME = ?"
 
 type Migrator struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	dbConf config.DB
 }
 
-func NewMigrator(db *sqlx.DB) *Migrator {
-	return &Migrator{db: db}
+func NewMigrator(db *sqlx.DB, dbConf config.DB) *Migrator {
+	return &Migrator{db: db, dbConf: dbConf}
 }
 
 func (m *Migrator) Migrate() error {
@@ -25,7 +28,7 @@ func (m *Migrator) Migrate() error {
 	for name := range tables {
 		table := tables[name]
 		var tableFields []string
-		err = m.db.Select(&tableFields, selectTableFields, "infoblog", table.Name)
+		err = m.db.Select(&tableFields, selectTableFields, m.dbConf.DBName, table.Name)
 		if err != nil {
 			return err
 		}

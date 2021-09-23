@@ -9,7 +9,7 @@ db:
   username: "root"
   password: "jxtymCkj;ysGfhjkm"
   host: "infoblogdb"
-  timeout: 10
+  timeout: 3
 
 Email:
   ServerAddress: "smtp.mail.ru"

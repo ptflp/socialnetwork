@@ -13,7 +13,7 @@ func NewRepositories(cmps components.Componenter) infoblog.Repositories {
 	if err != nil {
 		cmps.Logger().Fatal("db initialization error", zap.Error(err))
 	}
-	migrator := migration.NewMigrator(mainDB)
+	migrator := migration.NewMigrator(mainDB, cmps.Config().DB)
 	err = migrator.Migrate()
 	if err != nil {
 		cmps.Logger().Fatal("error on migration apply", zap.Error(err))
