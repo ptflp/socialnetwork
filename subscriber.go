@@ -19,6 +19,11 @@ type Subscriber struct {
 	DeletedAt      sql.NullTime   `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
 }
 
+type asfasf struct {
+	ASfasfasf  int `json:"a_sfasfasf"`
+	ASJFKjASKF int `json:"asjf_kj_askf"`
+}
+
 func (s Subscriber) OnCreate() string {
 	return "create unique index subscribes_user_uuid_subscriber_uuid_uindex on subscribes (user_uuid, subscriber_uuid);"
 }
