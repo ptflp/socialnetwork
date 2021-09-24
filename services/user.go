@@ -329,6 +329,10 @@ func (u *User) Recommends(ctx context.Context, req request.LimitOffsetReq) ([]re
 			Condition: "nickname IS NOT null",
 			Args:      nil,
 		},
+		LimitOffset: &infoblog.LimitOffset{
+			Offset: req.Offset,
+			Limit:  req.Limit,
+		},
 	}
 	users, err := u.userRepository.Listx(ctx, condition)
 	if err != nil {
