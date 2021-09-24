@@ -535,67 +535,20 @@ func (p *Post) FeedRecommendAuthed(ctx context.Context, req request.LimitOffsetR
 
 func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (request.PostsFeedData, error) {
 	u := infoblog.User{UUID: types.NewNullUUID(req.UUID)}
-	posts, postIDIndexMap, postsIDs, err := p.post.FindAll(ctx, u, req.Limit, req.Offset)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-	if len(posts) < 1 {
-		return request.PostsFeedData{}, nil
-	}
-	files, err := p.file.GetFilesByPostUUIDs(ctx, postsIDs)
-	if err != nil {
-		return request.PostsFeedData{}, err
-	}
-	count, err := p.post.CountByUser(ctx, u)
-	if err != nil {
-		return request.PostsFeedData{}, err
+
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"user_uuid": u.UUID},
+		Order: &infoblog.Order{
+			Field: "created_at",
+			Asc:   false,
+		},
+		LimitOffset: &infoblog.LimitOffset{
+			Offset: req.Offset,
+			Limit:  req.Limit,
+		},
 	}
 
-	for i := range files {
-		id := postIDIndexMap[files[i].ForeignUUID.String]
-		posts[id].Files = append(posts[id].Files, files[i])
-	}
-
-	postDataRes := make([]request.PostDataResponse, 0, req.Limit)
-
-	for i := range posts {
-		postsFileData := make([]request.FileData, 0, req.Limit)
-		for j := range posts[i].Files {
-			var fileData request.FileData
-			_ = p.MapStructs(&fileData, &posts[i].Files[j])
-			fileData.Link = utils.Link(posts[i].Files[j])
-			postsFileData = append(postsFileData, fileData)
-		}
-
-		var userData request.UserData
-
-		userData, err = p.services.User.GetUserData(posts[i].User)
-		if err != nil {
-			return request.PostsFeedData{}, err
-		}
-
-		pdr := request.PostDataResponse{
-			Files: postsFileData,
-			User:  userData,
-		}
-
-		err = p.MapStructs(&pdr, &posts[i].PostEntity)
-		if err != nil {
-			return request.PostsFeedData{}, err
-		}
-
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
-		if err != nil {
-			return request.PostsFeedData{}, err
-		}
-
-		postDataRes = append(postDataRes, pdr)
-	}
-
-	return request.PostsFeedData{
-		Count: uint64(count),
-		Posts: postDataRes,
-	}, nil
+	return p.GetFeedData(ctx, condition)
 }
 
 func (p *Post) CountByUser(ctx context.Context, user infoblog.User) (int64, error) {
