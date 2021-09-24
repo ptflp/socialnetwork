@@ -561,10 +561,10 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 	for i := range posts {
 		postsFileData := make([]request.FileData, 0, req.Limit)
 		for j := range posts[i].Files {
-			postsFileData = append(postsFileData, request.FileData{
-				Link: utils.Link(posts[i].Files[j]),
-				UUID: posts[i].Files[j].UUID.String,
-			})
+			var fileData request.FileData
+			err = p.MapStructs(&fileData, &posts[i].Files[j])
+			fileData.Link = utils.Link(posts[i].Files[j])
+			postsFileData = append(postsFileData, fileData)
 		}
 
 		var userData request.UserData

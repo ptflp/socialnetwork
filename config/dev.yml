@@ -3,7 +3,7 @@ app:
   FrontEnd: "http://stagefront.ptflp.ru"
 
 db:
-  dbname: "infoblog_dev"
+  dbname: "infoblog_stage"
   host: "100.71.80.123"
   timeout: 10
 
