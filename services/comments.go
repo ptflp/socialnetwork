@@ -48,6 +48,9 @@ func (c *Comments) CreatePostComment(ctx context.Context, commentReq request.Com
 func (c *Comments) GetPostComments(ctx context.Context, commentReq request.PostUUIDReq) ([]request.CommentData, error) {
 	condition := infoblog.Condition{
 		Equal: &sq.Eq{"type": types.TypePost, "foreign_uuid": types.NewNullUUID(commentReq.UUID), "active": true},
+		Order: &infoblog.Order{
+			Field: "created_at",
+		},
 	}
 	comments, err := c.commentsRep.Listx(ctx, condition)
 	if err != nil {
