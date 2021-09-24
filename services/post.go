@@ -562,7 +562,7 @@ func (p *Post) FeedByUser(ctx context.Context, req request.PostsFeedUserReq) (re
 		postsFileData := make([]request.FileData, 0, req.Limit)
 		for j := range posts[i].Files {
 			var fileData request.FileData
-			err = p.MapStructs(&fileData, &posts[i].Files[j])
+			_ = p.MapStructs(&fileData, &posts[i].Files[j])
 			fileData.Link = utils.Link(posts[i].Files[j])
 			postsFileData = append(postsFileData, fileData)
 		}

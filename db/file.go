@@ -44,39 +44,14 @@ func (f *filesRepository) Create(ctx context.Context, p *infoblog.File) (int64, 
 }
 
 func (f *filesRepository) Update(ctx context.Context, file infoblog.File) error {
-	if !file.UUID.Valid {
-		return errors.New("wrong file uuid on update")
-	}
-
-	updateFields, err := infoblog.GetUpdateFields("files")
-	if err != nil {
-		return err
-	}
-	updateFieldsPointers := infoblog.GetFieldsPointers(&file, "update")
-
-	queryRaw := sq.Update("files").Where(sq.Eq{"uuid": file.UUID})
-	for i := range updateFields {
-		queryRaw = queryRaw.Set(updateFields[i], updateFieldsPointers[i])
-	}
-
-	query, args, err := queryRaw.ToSql()
-	if err != nil {
-		return err
-	}
-	res, err := f.db.ExecContext(ctx, query, args...)
-	if err != nil {
-		return err
-	}
-	_, err = res.RowsAffected()
-
-	return err
+	return f.update(ctx, &file)
 }
 
 func (f *filesRepository) UpdateFileType(ctx context.Context, file infoblog.File, uuids ...types.NullUUID) error {
 	rawQuery := sq.Update("files").Set("foreign_uuid", file.ForeignUUID)
-	rawQuery.Set("private", file.Private)
+	rawQuery = rawQuery.Set("private", file.Private)
 	if file.Type != 0 {
-		rawQuery.Set("type", file.Type)
+		rawQuery = rawQuery.Set("type", file.Type)
 	}
 
 	query, args, err := rawQuery.ToSql()
