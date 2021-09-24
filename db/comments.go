@@ -50,6 +50,10 @@ func (c *CommentsRepository) Listx(ctx context.Context, condition infoblog.Condi
 	return comments, nil
 }
 
+func (c *CommentsRepository) GetCount(ctx context.Context, condition infoblog.Condition) (uint64, error) {
+	return c.crud.getCount(ctx, infoblog.Comment{}, condition)
+}
+
 func NewCommentsRepository(db *sqlx.DB) infoblog.CommentsRepository {
 	cr := crud{db: db}
 	return &CommentsRepository{db: db, crud: cr}

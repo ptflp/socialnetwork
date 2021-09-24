@@ -31,6 +31,7 @@ type CommentsRepository interface {
 	Create(ctx context.Context, comments Comment) error
 	Find(ctx context.Context, comments Comment) (Comment, error)
 	Update(ctx context.Context, comments Comment) error
+	GetCount(ctx context.Context, condition Condition) (uint64, error)
 	Delete(ctx context.Context, comments Comment) error
 	List(ctx context.Context, limit, offset uint64) ([]Comment, error)
 	Listx(ctx context.Context, condition Condition) ([]Comment, error)

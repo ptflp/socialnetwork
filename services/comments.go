@@ -27,7 +27,6 @@ func (c *Comments) CreatePostComment(ctx context.Context, commentReq request.Com
 	if err != nil {
 		return err
 	}
-
 	comment := infoblog.Comment{
 		UUID:        types.NewNullUUID(),
 		Type:        types.TypePost,
@@ -41,6 +40,7 @@ func (c *Comments) CreatePostComment(ctx context.Context, commentReq request.Com
 	if err != nil {
 		return err
 	}
+	go c.Services.Post.UpdateCounters(ctx, commentReq.ForeignUUID)
 
 	return nil
 }

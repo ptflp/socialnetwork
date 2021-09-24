@@ -14,8 +14,9 @@ type PostEntity struct {
 	UserUUID  types.NullUUID    `json:"user_id" db:"user_uuid" orm_type:"binary(16)" orm_default:"null" orm_index:"index" ops:"create"`
 	Active    types.NullBool    `json:"active" db:"active" orm_type:"boolean" orm_default:"null" ops:"create"`
 	Price     types.NullFloat64 `json:"price" db:"price" orm_type:"decimal(13,4)" orm_default:"null" orm_index:"index" ops:"create"`
-	Likes     types.NullUint64  `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
-	Views     types.NullUint64  `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Likes     types.NullUint64  `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count,update"`
+	Views     types.NullUint64  `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count,update"`
+	Comments  types.NullUint64  `json:"comments_count" db:"comments" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count,update"`
 	CreatedAt time.Time         `json:"created_at" db:"created_at" orm_type:"timestamp" orm_default:"default (now()) not null" orm_index:"index"`
 	UpdatedAt time.Time         `json:"updated_at" db:"updated_at" orm_type:"timestamp" orm_default:"default (now()) null on update CURRENT_TIMESTAMP" orm_index:"index"`
 	DeletedAt types.NullTime    `json:"deleted_at" db:"deleted_at" orm_type:"timestamp" orm_default:"null" orm_index:"index"`
