@@ -30,6 +30,14 @@ func NewNullInt64(n int64) NullInt64 {
 	}
 }
 
+func NewNullUint64(n uint64) NullUint64 {
+	tn := NullUint64{}
+	tn.Valid = true
+	tn.Uint64.Uint64 = n
+
+	return tn
+}
+
 func NewNullFloat64(n float64) NullFloat64 {
 	if n == 0 {
 		return NullFloat64{}

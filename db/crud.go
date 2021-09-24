@@ -111,7 +111,17 @@ func (c *crud) getCount(ctx context.Context, entity infoblog.Tabler, condition i
 	ent := entity
 	var whereState bool
 
-	queryRaw := sq.Select("COUNT(uuid)").From(ent.TableName())
+	queryRaw := sq.Select("COUNT(*)").From(ent.TableName())
+
+	if condition.Equal != nil {
+		queryRaw = queryRaw.Where(condition.Equal)
+		whereState = true
+	}
+
+	if condition.Other != nil {
+		queryRaw = queryRaw.Where(condition.Other.Condition, condition.Other.Args...)
+		whereState = true
+	}
 
 	query, args, err := queryRaw.ToSql()
 	if err != nil {

@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"strings"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	sq "github.com/Masterminds/squirrel"
 
 	"github.com/jmoiron/sqlx"
@@ -67,18 +69,18 @@ func (lr *likesRepository) CountByUser(ctx context.Context, user infoblog.User) 
 	return count.Int64, err
 }
 
-func (lr *likesRepository) CountByPost(ctx context.Context, like infoblog.Like) (int64, error) {
+func (lr *likesRepository) CountByPost(ctx context.Context, postUUID string) (uint64, error) {
 
-	var count sql.NullInt64
+	var count types.NullUint64
 
-	query, args, err := sq.Select("COUNT(type)").From("likes").Where(sq.Eq{"type": 1, "foreign_uuid": like.ForeignUUID, "active": 1}).ToSql()
+	query, args, err := sq.Select("COUNT(type)").From("likes").Where(sq.Eq{"type": 1, "foreign_uuid": types.NewNullUUID(postUUID), "active": 1}).ToSql()
 	if err != nil {
-		return count.Int64, err
+		return count.Uint64.Uint64, err
 	}
 
 	err = lr.db.QueryRowContext(ctx, query, args...).Scan(&count)
 
-	return count.Int64, err
+	return count.Uint64.Uint64, err
 }
 
 func (l *likesRepository) Listx(ctx context.Context, condition infoblog.Condition) ([]infoblog.Like, error) {

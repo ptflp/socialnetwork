@@ -28,6 +28,7 @@ type Post struct {
 	subscribes infoblog.SubscriberRepository
 	post       infoblog.PostRepository
 	like       infoblog.LikeRepository
+	comment    infoblog.CommentsRepository
 	*decoder.Decoder
 }
 
@@ -275,11 +276,6 @@ func (p *Post) FeedRecent(ctx context.Context, req request.LimitOffsetReq) (requ
 		}
 
 		err = p.MapStructs(&pdr, &posts[i].PostEntity)
-		if err != nil {
-			return request.PostsFeedData{}, err
-		}
-
-		pdr.Counts.Likes, err = p.like.CountByPost(ctx, infoblog.Like{Type: 1, ForeignUUID: pdr.UUID})
 		if err != nil {
 			return request.PostsFeedData{}, err
 		}
@@ -591,10 +587,7 @@ func (p *Post) Like(ctx context.Context, req request.LikeReq) (request.PostDataR
 		ops = "incr"
 	}
 
-	post, err = p.post.Count(ctx, post, "likes", ops)
-	if err != nil {
-		return request.PostDataResponse{}, err
-	}
+	go p.UpdateCounters(ctx, post.UUID.String)
 
 	user, err := p.services.User.Count(ctx, infoblog.User{UUID: post.UserUUID}, "likes", ops)
 	if err != nil {
@@ -692,4 +685,34 @@ func (p *Post) CheckFilePermission(ctx context.Context, file infoblog.File) bool
 	user.UUID = post.UserUUID
 
 	return p.subscribes.CheckSubscribed(ctx, user, subscriber)
+}
+
+func (p *Post) UpdateCounters(ctx context.Context, postUUID string) {
+	post := infoblog.Post{}
+	post.UUID = types.NewNullUUID(postUUID)
+	post, err := p.post.Find(ctx, post)
+	if err != nil {
+		return
+	}
+	likesCount, err := p.like.CountByPost(ctx, postUUID)
+	if err != nil {
+		return
+	}
+	post.Likes = types.NewNullUint64(likesCount)
+
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"active": true, "type": types.TypePost, "foreign_uuid": types.NewNullUUID(postUUID)},
+	}
+
+	commentsCount, err := p.comment.GetCount(ctx, condition)
+	if err != nil {
+		return
+	}
+
+	post.Comments = types.NewNullUint64(commentsCount)
+
+	err = p.post.Update(ctx, post)
+	if err != nil {
+		return
+	}
 }

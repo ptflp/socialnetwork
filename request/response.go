@@ -77,6 +77,7 @@ type PostDataResponse struct {
 	IsOpen   bool             `json:"is_open"`
 	Likes    types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 	Views    types.NullUint64 `json:"views_count" db:"views" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
+	Comments types.NullUint64 `json:"comments_count" db:"comments" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
 }
 
 type FileData struct {
