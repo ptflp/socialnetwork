@@ -267,6 +267,23 @@ type CommentCreateParams struct {
 	Body request.CommentCreateReq
 }
 
+// swagger:route POST /posts/comments/reply posts CommentReplyRequest
+// Создание комментария к посту.
+// responses:
+//   200: CommentReplyResponse
+
+// swagger:response CommentReplyResponse
+type CommentReplyResponse struct {
+	// in:body
+	Body request.Response
+}
+
+// swagger:parameters CommentReplyRequest
+type CommentReplyParams struct {
+	// in:body
+	Body request.CommentReplyReq
+}
+
 // swagger:route POST /posts/comments/get posts GetCommentsRequest
 // Получение комментариев поста.
 // responses:
