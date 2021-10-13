@@ -118,9 +118,12 @@ type RecoverCheckPhoneData struct {
 }
 
 type CommentData struct {
-	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
-	Body     types.NullString `json:"body"`
-	User     UserData         `json:"user"`
+	UUID        types.NullUUID   `json:"comment_id" db:"uuid" orm_type:"binary(16)" orm_default:"not null primary key" ops:"create"`
+	ForeignUUID types.NullUUID   `json:"foreign_id" db:"foreign_uuid" ops:"update,create" orm_type:"binary(16)" orm_default:"null" orm_index:"index"`
+	UserUUID    types.NullUUID   `json:"user_id" db:"user_uuid" ops:"create" orm_type:"binary(16)" orm_default:"not null" orm_index:"index"`
+	Body        types.NullString `json:"body"`
+	User        UserData         `json:"user"`
+	Replies     []*CommentData   `json:"replies"`
 }
 
 type ModerateData struct {

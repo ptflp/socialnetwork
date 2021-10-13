@@ -19,6 +19,7 @@ const (
 	TypePost = iota + 1
 	TypeAvatar
 	TypeUserModerate
+	TypeCommentReply
 )
 
 //NullString is a wrapper around sql.NullString

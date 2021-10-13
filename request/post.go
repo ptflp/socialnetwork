@@ -43,3 +43,8 @@ type CommentCreateReq struct {
 	Body        string `json:"body"`
 	ForeignUUID string `json:"post_id"`
 }
+
+type CommentReplyReq struct {
+	Body        string `json:"body"`
+	ForeignUUID string `json:"comment_id"`
+}
