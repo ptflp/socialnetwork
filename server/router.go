@@ -137,8 +137,9 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 
 		r.Route("/comments", func(r chi.Router) {
-			r.Post("/create", posts.CreateComment())
+			r.Post("/create", posts.CommentCreate())
 			r.Post("/get", posts.GetComments())
+			r.Post("/reply", posts.CommentReply())
 		})
 
 		r.Post("/file/upload", posts.UploadFile())

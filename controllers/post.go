@@ -339,7 +339,7 @@ func (a *postsController) Like() http.HandlerFunc {
 	}
 }
 
-func (a *postsController) CreateComment() http.HandlerFunc {
+func (a *postsController) CommentCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var commentCreateReq request.CommentCreateReq
 		err := Decode(r, &commentCreateReq)
@@ -348,7 +348,28 @@ func (a *postsController) CreateComment() http.HandlerFunc {
 			return
 		}
 
-		err = a.comments.CreatePostComment(r.Context(), commentCreateReq)
+		err = a.comments.CommentPostCreate(r.Context(), commentCreateReq)
+		if err != nil {
+			a.ErrorInternal(w, err)
+			return
+		}
+
+		a.SendJSON(w, request.Response{
+			Success: true,
+		})
+	}
+}
+
+func (a *postsController) CommentReply() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var commentCreateReq request.CommentCreateReq
+		err := Decode(r, &commentCreateReq)
+		if err != nil {
+			a.ErrorBadRequest(w, err)
+			return
+		}
+
+		err = a.comments.CommentPostCreate(r.Context(), commentCreateReq)
 		if err != nil {
 			a.ErrorInternal(w, err)
 			return
