@@ -300,6 +300,89 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 	return nil
 }
 
+func (c *crud) updatex(ctx context.Context, entity infoblog.Tabler, condition infoblog.Condition) error {
+	ent := entity
+	updateFields, err := infoblog.GetFields(ent, "update")
+	if err != nil {
+		return err
+	}
+	var whereState bool
+
+	updateFieldsPointers := infoblog.GetFieldsPointers(entity, "update")
+
+	updateRaw := sq.Update(ent.TableName())
+
+	if condition.Equal != nil {
+		updateRaw = updateRaw.Where(condition.Equal)
+		whereState = true
+	}
+
+	if condition.Other != nil {
+		updateRaw = updateRaw.Where(condition.Other.Condition, condition.Other.Args...)
+		whereState = true
+	}
+
+	for i := range updateFields {
+		updateRaw = updateRaw.Set(updateFields[i], updateFieldsPointers[i])
+	}
+
+	query, args, err := updateRaw.ToSql()
+	if err != nil {
+		return err
+	}
+
+	if condition.In != nil {
+		queryIn := fmt.Sprintf("SELECT * FROM files WHERE %s IN (?)", condition.In.Field)
+
+		queryIn, inArgs, err := sqlx.In(queryIn, condition.In.Args)
+		if err != nil {
+			return err
+		}
+
+		s := strings.Split(queryIn, "WHERE")
+		sep := " WHERE"
+
+		if whereState {
+			sep = " AND"
+		}
+
+		query = strings.Join([]string{query, sep, s[1]}, "")
+
+		args = append(args, inArgs...)
+		whereState = true
+	}
+
+	if condition.NotIn != nil {
+		queryNotIn := fmt.Sprintf("SELECT * FROM files WHERE %s IN (?)", condition.NotIn.Field)
+
+		queryNotIn, inArgs, err := sqlx.In(queryNotIn, condition.NotIn.Args)
+		if err != nil {
+			return err
+		}
+
+		queryNotIn = strings.Replace(queryNotIn, "IN (", "NOT IN (", 1)
+
+		s := strings.Split(queryNotIn, "WHERE")
+		sep := " WHERE"
+
+		if whereState {
+			sep = " AND"
+		}
+
+		query = strings.Join([]string{query, sep, s[1]}, "")
+
+		args = append(args, inArgs...)
+	}
+
+	res, err := c.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	_, err = res.RowsAffected()
+
+	return err
+}
+
 func (c *crud) count(ctx context.Context, entity infoblog.Tabler, field, ops string) error {
 	switch ops {
 	case "decr":

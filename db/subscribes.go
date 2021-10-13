@@ -83,7 +83,11 @@ func (sb *subsRepository) Listx(ctx context.Context, condition infoblog.Conditio
 }
 
 func (sb *subsRepository) Update(ctx context.Context, sub infoblog.Subscriber) error {
-	return sb.crud.update(ctx, sub)
+	return sb.crud.update(ctx, &sub)
+}
+
+func (sb *subsRepository) Updatex(ctx context.Context, sub infoblog.Subscriber, condition infoblog.Condition) error {
+	return sb.crud.updatex(ctx, &sub, condition)
 }
 
 func NewSubscribeRepository(db *sqlx.DB) infoblog.SubscriberRepository {

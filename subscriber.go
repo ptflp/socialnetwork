@@ -30,6 +30,7 @@ func (s Subscriber) TableName() string {
 type SubscriberRepository interface {
 	Create(ctx context.Context, sub Subscriber) (int64, error)
 	Update(ctx context.Context, sub Subscriber) error
+	Updatex(ctx context.Context, sub Subscriber, condition Condition) error
 	FindByUser(ctx context.Context, user User) ([]Subscriber, error)
 	Delete(ctx context.Context, sub Subscriber) error
 	CountByUser(ctx context.Context, user User) (int64, error)
