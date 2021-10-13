@@ -818,6 +818,29 @@
         }
       }
     },
+    "/posts/comments/reply": {
+      "post": {
+        "tags": [
+          "posts"
+        ],
+        "summary": "Создание комментария к посту.",
+        "operationId": "CommentReplyRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CommentReplyReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/CommentReplyResponse"
+          }
+        }
+      }
+    },
     "/posts/create": {
       "post": {
         "security": [
@@ -1519,6 +1542,20 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
+    "CommentReplyReq": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string",
+          "x-go-name": "Body"
+        },
+        "comment_id": {
+          "type": "string",
+          "x-go-name": "ForeignUUID"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
     "Config": {
       "type": "object",
       "properties": {
@@ -1648,6 +1685,9 @@
           "type": "string",
           "x-go-name": "UUID"
         },
+        "file_type": {
+          "$ref": "#/definitions/NullInt64"
+        },
         "foreign_uuid": {
           "$ref": "#/definitions/NullUUID"
         },
@@ -1661,6 +1701,9 @@
         },
         "private": {
           "$ref": "#/definitions/NullBool"
+        },
+        "status": {
+          "$ref": "#/definitions/NullInt64"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -1787,6 +1830,19 @@
         "Float64": {
           "type": "number",
           "format": "double"
+        },
+        "Valid": {
+          "type": "boolean"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/types"
+    },
+    "NullInt64": {
+      "type": "object",
+      "properties": {
+        "Int64": {
+          "type": "integer",
+          "format": "int64"
         },
         "Valid": {
           "type": "boolean"
@@ -1923,6 +1979,9 @@
     "PostDataResponse": {
       "type": "object",
       "properties": {
+        "comments_count": {
+          "$ref": "#/definitions/NullUint64"
+        },
         "counts": {
           "$ref": "#/definitions/PostCountData"
         },
@@ -2358,7 +2417,7 @@
     "UserIDRequest": {
       "type": "object",
       "properties": {
-        "uuid": {
+        "user_id": {
           "type": "string",
           "x-go-name": "UUID"
         }
@@ -2378,6 +2437,12 @@
   },
   "responses": {
     "CommentCreateResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "CommentReplyResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"
