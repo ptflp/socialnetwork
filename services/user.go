@@ -366,7 +366,6 @@ func (u *User) GetUsersByCondition(ctx context.Context, condition infoblog.Condi
 }
 
 func (u *User) GetUserSubscribesUUIDs(ctx context.Context, user infoblog.User, subscribesCondition infoblog.Condition) ([]interface{}, error) {
-	subscribesCondition.Equal = &sq.Eq{"subscriber_uuid": user.UUID}
 	mySubs, err := u.subsRepository.Listx(ctx, subscribesCondition)
 	if err != nil {
 		return nil, err
@@ -386,7 +385,7 @@ func (u *User) Subscribes(ctx context.Context, req request.LimitOffsetReq) ([]re
 		return nil, err
 	}
 	subscribesCondition := infoblog.Condition{
-		Equal: &sq.Eq{"active": true},
+		Equal: &sq.Eq{"active": true, "subscriber_uuid": user.UUID},
 		LimitOffset: &infoblog.LimitOffset{
 			Limit:  req.Limit,
 			Offset: req.Offset,
