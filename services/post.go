@@ -452,6 +452,7 @@ func (p *Post) FeedGetUsers(ctx context.Context, postDataMap map[string]*request
 					Field: "user_uuid",
 					Args:  userUUIDs,
 				},
+				Equal: &sq.Eq{"active": true},
 			})
 			if err != nil {
 				return nil, err
