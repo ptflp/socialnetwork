@@ -44,11 +44,12 @@ type User struct {
 	likesRepository infoblog.LikeRepository
 	post            *Post
 	file            *File
+	event           *Event
 	components.Componenter
 }
 
-func NewUserService(rs infoblog.Repositories, post *Post, cmps components.Componenter, file *File) *User {
-	return &User{userRepository: rs.Users, subsRepository: rs.Subscribers, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes, Componenter: cmps, file: file}
+func NewUserService(rs infoblog.Repositories, post *Post, cmps components.Componenter, file *File, services *Services) *User {
+	return &User{userRepository: rs.Users, subsRepository: rs.Subscribers, Decoder: decoder.NewDecoder(), post: post, likesRepository: rs.Likes, Componenter: cmps, file: file, event: services.Event}
 }
 
 func (u *User) CheckEmailPass(ctx context.Context, user infoblog.User) bool {
@@ -226,6 +227,7 @@ func (u *User) Subscribe(ctx context.Context, subscribeRequest request.UserIDReq
 		return err
 	}
 
+	_, _ = u.event.CreateEvent(ctx, ActionNotifySubscribe, user.UUID, user.UUID, sub.UUID)
 	user, err = u.userRepository.Count(ctx, user, "subscribes", "incr")
 	if err != nil {
 		return err
