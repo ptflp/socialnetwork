@@ -1,6 +1,6 @@
 app:
   dev: true
-  FrontEnd: "http://frontend.ptflp.ru"
+  FrontEnd: "https://fanam.org"
 
 db:
   net: "tcp"
