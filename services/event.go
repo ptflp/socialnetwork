@@ -42,7 +42,9 @@ func (e *Event) CreateEvent(ctx context.Context, eventType int, foreignUUID, use
 		Active:      types.NewNullBool(true),
 	}
 
-	return event, nil
+	err := e.eventRep.Create(ctx, event)
+
+	return event, err
 }
 
 func (e *Event) WorkerPool() {
