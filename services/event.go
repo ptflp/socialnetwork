@@ -57,7 +57,9 @@ func (e *Event) WorkerPool() {
 			Offset: 0,
 			Limit:  NumJobs,
 		},
+		ForUpdate: true,
 	}
+
 	for w := 0; w < NumJobs; w++ {
 		go e.Worker()
 	}
