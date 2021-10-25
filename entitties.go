@@ -67,6 +67,7 @@ func init() {
 		Friend{},
 		Moderate{},
 		HashTag{},
+		Event{},
 	)
 }
 

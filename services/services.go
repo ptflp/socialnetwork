@@ -18,17 +18,21 @@ type Services struct {
 	Moderates *Moderates
 	Chats     *Chats
 	Video     *Video
+	Event     *Event
 }
 
 func NewServices(ctx context.Context, cmps components.Componenter, reps infoblog.Repositories) *Services {
 	var services Services
+	event := NewEventService(ctx, cmps, reps)
+	services.Event = event
+
 	comments := NewCommentsService(reps.Comments, &services)
 	services.Comments = comments
 	file := NewFileService(reps.Files)
 	services.File = file
 	post := NewPostService(reps, file, cmps.Decoder(), &services)
 	services.Post = post
-	user := NewUserService(reps, post, cmps, file)
+	user := NewUserService(reps, post, cmps, file, &services)
 	services.User = user
 	moderates := NewModeratesService(reps, &services)
 	services.Moderates = moderates

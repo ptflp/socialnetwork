@@ -20,6 +20,8 @@ const (
 	TypeAvatar
 	TypeUserModerate
 	TypeCommentReply
+	TypeChatMessages
+	TypeSubscribe
 )
 
 //NullString is a wrapper around sql.NullString

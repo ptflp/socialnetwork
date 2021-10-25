@@ -18,6 +18,7 @@ type signalController struct {
 	*decoder.Decoder
 	respond.Responder
 	chat   *services.Chats
+	event  *services.Event
 	logger *zap.Logger
 }
 
@@ -26,6 +27,7 @@ func NewSignalController(responder respond.Responder, services *services.Service
 		Decoder:   decoder.NewDecoder(),
 		Responder: responder,
 		chat:      services.Chats,
+		event:     services.Event,
 		logger:    logger,
 	}
 }
@@ -50,7 +52,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 
 		switch wssReq.Action {
 		case ActionSendChatMessage:
-			_, err = a.chat.SendMessage(ctx, request.SendMessageReq{
+			messageData, err := a.chat.SendMessage(ctx, request.SendMessageReq{
 				Message:  wssReq.Message,
 				ChatUUID: wssReq.UUID,
 			})
@@ -77,6 +79,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 					if chat.Participants[i].UUID.String != user.UUID.String {
 						toUserData.ToUserID = chat.Participants[i].UUID.String
 						_ = a.sendSignalMessage(toUserData)
+						_, _ = a.event.CreateEvent(r.Context(), services.ActionNotifyChatMessages, messageData.UUID, user.UUID, chat.Participants[i].UUID)
 					}
 				}
 			}
