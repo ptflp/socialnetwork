@@ -304,4 +304,5 @@ type Condition struct {
 	Other       *Other
 	Order       *Order
 	LimitOffset *LimitOffset
+	ForUpdate   bool
 }

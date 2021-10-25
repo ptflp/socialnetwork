@@ -33,7 +33,7 @@ func (c *crud) create(ctx context.Context, entity infoblog.Tabler) error {
 		return err
 	}
 
-	_, err = c.db.MustExecContext(ctx, query, args...).RowsAffected()
+	_, err = c.db.ExecContext(ctx, query, args...)
 
 	return err
 }
@@ -291,6 +291,10 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 		limitOffset := fmt.Sprintf(" LIMIT %d OFFSET %d", condition.LimitOffset.Limit, condition.LimitOffset.Offset)
 
 		query = strings.Join([]string{query, limitOffset}, "")
+	}
+
+	if condition.ForUpdate {
+		query = query + " FOR UPDATE"
 	}
 
 	if err = c.db.SelectContext(ctx, dest, query, args...); err != nil {
