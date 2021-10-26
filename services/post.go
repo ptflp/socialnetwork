@@ -33,7 +33,7 @@ type Post struct {
 }
 
 func NewPostService(reps infoblog.Repositories, file *File, d *decoder.Decoder, services *Services) *Post {
-	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes, services: services, subscribes: reps.Subscribers}
+	return &Post{post: reps.Posts, file: file, Decoder: d, like: reps.Likes, services: services, subscribes: reps.Subscribers, comment: reps.Comments}
 }
 
 func (p *Post) SaveFile(ctx context.Context, formFile FormFile) (request.FileData, error) {
@@ -588,7 +588,7 @@ func (p *Post) Like(ctx context.Context, req request.LikeReq) (request.PostDataR
 		ops = "incr"
 	}
 
-	go p.UpdateCounters(ctx, post.UUID.String)
+	go p.UpdateCounters(post.UUID.String)
 
 	user, err := p.services.User.Count(ctx, infoblog.User{UUID: post.UserUUID}, "likes", ops)
 	if err != nil {
@@ -688,7 +688,8 @@ func (p *Post) CheckFilePermission(ctx context.Context, file infoblog.File) bool
 	return p.subscribes.CheckSubscribed(ctx, user, subscriber)
 }
 
-func (p *Post) UpdateCounters(ctx context.Context, postUUID string) {
+func (p *Post) UpdateCounters(postUUID string) {
+	ctx := context.Background()
 	post := infoblog.Post{}
 	post.UUID = types.NewNullUUID(postUUID)
 	post, err := p.post.Find(ctx, post)

@@ -14,7 +14,6 @@ import (
 
 const (
 	createPost     = "INSERT INTO posts (body, user_uuid, uuid, type, price, active) VALUES (?, ?, ?, ?, ?, ?)"
-	updatePost     = "UPDATE posts SET body = ?, active = ?, price = ? WHERE uuid = ?"
 	deletePost     = "UPDATE posts SET active = ? WHERE uuid = ?"
 	countAllRecent = "SELECT COUNT(p.uuid) FROM posts p WHERE p.active = 1"
 )
@@ -34,12 +33,7 @@ func (pr *postsRepository) Create(ctx context.Context, p infoblog.Post) (int64, 
 }
 
 func (pr *postsRepository) Update(ctx context.Context, p infoblog.Post) error {
-	if !p.UUID.Valid {
-		return errors.New("repository wrong post id")
-	}
-	_, err := pr.db.MustExecContext(ctx, updatePost, p.Body, p.Active, p.Price, p.UUID).RowsAffected()
-
-	return err
+	return pr.update(ctx, &p.PostEntity)
 }
 
 func (pr *postsRepository) Delete(ctx context.Context, p infoblog.Post) error {

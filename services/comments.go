@@ -40,7 +40,7 @@ func (c *Comments) CommentPostCreate(ctx context.Context, commentReq request.Com
 	if err != nil {
 		return err
 	}
-	go c.Services.Post.UpdateCounters(ctx, commentReq.ForeignUUID)
+	go c.Services.Post.UpdateCounters(commentReq.ForeignUUID)
 
 	return nil
 }
@@ -63,7 +63,7 @@ func (c *Comments) CommentPostReply(ctx context.Context, commentReq request.Comm
 	if err != nil {
 		return err
 	}
-	go c.Services.Post.UpdateCounters(ctx, commentReq.ForeignUUID)
+	go c.Services.Post.UpdateCounters(commentReq.ForeignUUID)
 
 	return nil
 }
