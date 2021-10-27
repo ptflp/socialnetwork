@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"gitlab.com/InfoBlogFriends/server/request"
+
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
 	"gitlab.com/InfoBlogFriends/server/components"
@@ -20,14 +22,15 @@ import (
 
 type Event struct {
 	eventRep infoblog.EventRepository
+	user     *User
 	ctx      context.Context
 	logger   *zap.Logger
 	ch       chan infoblog.Event
 	*decoder.Decoder
 }
 
-func NewEventService(ctx context.Context, cmps components.Componenter, reps infoblog.Repositories) *Event {
-	v := &Event{Decoder: decoder.NewDecoder(), eventRep: reps.Events, ctx: ctx, logger: cmps.Logger(), ch: make(chan infoblog.Event, NumJobs)}
+func NewEventService(ctx context.Context, cmps components.Componenter, reps infoblog.Repositories, services *Services) *Event {
+	v := &Event{Decoder: decoder.NewDecoder(), eventRep: reps.Events, ctx: ctx, logger: cmps.Logger(), ch: make(chan infoblog.Event, NumJobs), user: services.User}
 	go v.WorkerPool()
 	return v
 }
@@ -39,6 +42,7 @@ func (e *Event) CreateEvent(ctx context.Context, eventType int, foreignUUID, use
 		ForeignUUID: foreignUUID,
 		UserUUID:    userUUID,
 		ToUser:      toUserUUID,
+		Notified:    types.NewNullBool(false),
 		Active:      types.NewNullBool(true),
 	}
 
@@ -75,11 +79,17 @@ func (e *Event) WorkerPool() {
 				e.logger.Error("retrieve events error", zap.Error(err))
 				continue
 			}
+			_ = events
 			for i := range events {
 				e.ch <- events[i]
 			}
 		}
 	}
+}
+
+type Response struct {
+	User  request.UserData
+	Event interface{}
 }
 
 func (e *Event) Worker() {
@@ -90,11 +100,16 @@ func (e *Event) Worker() {
 		case <-e.ctx.Done():
 			return
 		case event = <-e.ch:
+			var res Response
+			res.User, _ = e.user.Get(context.Background(), request.UserIDNickRequest{
+				UUID: &event.UserUUID.String,
+			})
+			res.Event = event
 			data := Payload{
 				Action:   event.Type.Int64,
 				ToUserID: event.ToUser.String,
 				Data: Data{
-					Res:    event,
+					Res:    res,
 					Action: event.Type.Int64,
 				},
 			}

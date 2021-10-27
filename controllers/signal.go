@@ -17,9 +17,10 @@ import (
 type signalController struct {
 	*decoder.Decoder
 	respond.Responder
-	chat   *services.Chats
-	event  *services.Event
-	logger *zap.Logger
+	chat     *services.Chats
+	event    *services.Event
+	logger   *zap.Logger
+	services *services.Services
 }
 
 func NewSignalController(responder respond.Responder, services *services.Services, logger *zap.Logger) *signalController {
@@ -29,6 +30,7 @@ func NewSignalController(responder respond.Responder, services *services.Service
 		chat:      services.Chats,
 		event:     services.Event,
 		logger:    logger,
+		services:  services,
 	}
 }
 
@@ -79,7 +81,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 					if chat.Participants[i].UUID.String != user.UUID.String {
 						toUserData.ToUserID = chat.Participants[i].UUID.String
 						_ = a.sendSignalMessage(toUserData)
-						_, _ = a.event.CreateEvent(r.Context(), services.ActionNotifyChatMessages, messageData.UUID, user.UUID, chat.Participants[i].UUID)
+						_, _ = a.services.Event.CreateEvent(r.Context(), services.ActionNotifyChatMessages, messageData.UUID, user.UUID, chat.Participants[i].UUID)
 					}
 				}
 			}
