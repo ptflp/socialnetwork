@@ -72,7 +72,6 @@ type PostDataResponse struct {
 	UserUUID types.NullUUID   `json:"user_id" db:"user_uuid" orm_type:"binary(16)" orm_default:"null" orm_index:"index" ops:"create"`
 	User     UserData         `json:"user"`
 	Price    float64          `json:"price"`
-	Counts   PostCountData    `json:"counts"`
 	IsLiked  bool             `json:"is_liked"`
 	IsOpen   bool             `json:"is_open"`
 	Likes    types.NullUint64 `json:"likes_count" db:"likes" orm_type:"bigint unsigned" orm_default:"null" orm_index:"index" ops:"count"`
@@ -89,11 +88,6 @@ type FileData struct {
 	Dir         string          `json:"dir" db:"dir" ops:"create,update" orm_type:"varchar(100)" orm_default:"not null"`
 	Name        string          `json:"name" db:"name" ops:"create" orm_type:"varchar(50)" orm_default:"not null"`
 	Private     types.NullBool  `json:"private"`
-}
-
-type PostCountData struct {
-	Likes    int64 `json:"likes"`
-	Comments int64 `json:"comments"`
 }
 
 type PostsFeedData struct {
