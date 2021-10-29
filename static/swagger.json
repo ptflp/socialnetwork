@@ -541,6 +541,55 @@
         }
       }
     },
+    "/notification/my": {
+      "post": {
+        "tags": [
+          "notification"
+        ],
+        "summary": "Получение всех своих нотификаций.",
+        "operationId": "notificationRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LimitOffsetReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/notificationResponse"
+          }
+        }
+      }
+    },
+    "/notification/shown": {
+      "post": {
+        "tags": [
+          "notification"
+        ],
+        "summary": "Установка флага просмотренно по id нотификации/эвента.",
+        "operationId": "notificationShownRequest",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UUIDReq"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/notificationShownResponse"
+          }
+        }
+      }
+    },
     "/people/autocomplete": {
       "post": {
         "security": [
@@ -1933,22 +1982,6 @@
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
     },
-    "PostCountData": {
-      "type": "object",
-      "properties": {
-        "comments": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Comments"
-        },
-        "likes": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Likes"
-        }
-      },
-      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
-    },
     "PostCreateReq": {
       "type": "object",
       "properties": {
@@ -1981,9 +2014,6 @@
       "properties": {
         "comments_count": {
           "$ref": "#/definitions/NullUint64"
-        },
-        "counts": {
-          "$ref": "#/definitions/PostCountData"
         },
         "description": {
           "type": "string",
@@ -2277,6 +2307,16 @@
         "state": {
           "type": "string",
           "x-go-name": "State"
+        }
+      },
+      "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
+    },
+    "UUIDReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "x-go-name": "UUID"
         }
       },
       "x-go-package": "gitlab.com/InfoBlogFriends/server/request"
@@ -2581,6 +2621,18 @@
       }
     },
     "moderateUpdateResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "notificationResponse": {
+      "description": "",
+      "schema": {
+        "$ref": "#/definitions/Response"
+      }
+    },
+    "notificationShownResponse": {
       "description": "",
       "schema": {
         "$ref": "#/definitions/Response"

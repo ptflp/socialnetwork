@@ -304,15 +304,15 @@ func (c *crud) listx(ctx context.Context, dest interface{}, entity infoblog.Tabl
 	return nil
 }
 
-func (c *crud) updatex(ctx context.Context, entity infoblog.Tabler, condition infoblog.Condition) error {
+func (c *crud) updatex(ctx context.Context, entity infoblog.Tabler, condition infoblog.Condition, operation string) error {
 	ent := entity
-	updateFields, err := infoblog.GetFields(ent, "update")
+	updateFields, err := infoblog.GetFields(ent, operation)
 	if err != nil {
 		return err
 	}
 	var whereState bool
 
-	updateFieldsPointers := infoblog.GetFieldsPointers(entity, "update")
+	updateFieldsPointers := infoblog.GetFieldsPointers(entity, operation)
 
 	updateRaw := sq.Update(ent.TableName())
 

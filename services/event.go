@@ -51,6 +51,89 @@ func (e *Event) CreateEvent(ctx context.Context, eventType int, foreignUUID, use
 	return event, err
 }
 
+func (e *Event) Shown(ctx context.Context, req []request.UUIDReq) error {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
+	uuids := make([]interface{}, 0, len(req))
+	for i := range req {
+		uuids = append(uuids, types.NewNullUUID(req[i].UUID))
+	}
+
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"to_user": user.UUID},
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  uuids,
+		},
+	}
+
+	return e.eventRep.Updatex(ctx, condition, "shown", infoblog.Event{Shown: types.NewNullBool(true)})
+}
+
+func (e *Event) GetMy(ctx context.Context, req request.LimitOffsetReq) ([]request.NotificationResponse, error) {
+	user, err := extractUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	condition := infoblog.Condition{
+		Equal: &sq.Eq{"notified": true, "to_user": user.UUID},
+		Order: &infoblog.Order{
+			Field: "created_at",
+			Asc:   false,
+		},
+		LimitOffset: &infoblog.LimitOffset{
+			Offset: req.Offset,
+			Limit:  req.Limit,
+		},
+	}
+
+	events, err := e.eventRep.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+
+	eventsData := make([]request.EventData, 0, len(events))
+	err = e.MapStructs(&eventsData, &events)
+	if err != nil {
+		return nil, err
+	}
+
+	notificationRes := make([]request.NotificationResponse, len(events))
+	userUUIDs := make([]interface{}, 0, len(events))
+	for i := range events {
+		userUUIDs = append(userUUIDs, events[i].UserUUID)
+		notificationRes[i].Event = eventsData[i]
+	}
+	condition = infoblog.Condition{
+		In: &infoblog.In{
+			Field: "uuid",
+			Args:  userUUIDs,
+		},
+	}
+
+	users, err := e.user.userRepository.Listx(ctx, condition)
+	if err != nil {
+		return nil, err
+	}
+	var usersData []request.UserData
+	err = e.MapStructs(&usersData, &users)
+	if err != nil {
+		return nil, err
+	}
+	usersMap := make(map[string]*request.UserData, len(usersData))
+	for i := range usersData {
+		usersMap[usersData[i].UUID.String] = &usersData[i]
+	}
+
+	for i := range notificationRes {
+		notificationRes[i].User = *usersMap[notificationRes[i].Event.UserUUID.String]
+	}
+
+	return notificationRes, nil
+}
+
 func (e *Event) WorkerPool() {
 	var err error
 
