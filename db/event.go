@@ -26,6 +26,10 @@ func (e *EventRepository) Update(ctx context.Context, event infoblog.Event) erro
 	return e.update(ctx, &event)
 }
 
+func (e *EventRepository) Updatex(ctx context.Context, condition infoblog.Condition, ops string, event infoblog.Event) error {
+	return e.crud.updatex(ctx, &event, condition, ops)
+}
+
 func (e *EventRepository) List(ctx context.Context, limit, offset uint64) ([]infoblog.Event, error) {
 	var events []infoblog.Event
 	err := e.list(ctx, &events, &infoblog.Event{}, limit, offset)

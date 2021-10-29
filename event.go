@@ -12,7 +12,7 @@ type Event struct {
 	Type        types.NullInt64   `json:"event_type" db:"type" orm_type:"int" orm_default:"default 1 not null" ops:"create"`
 	ForeignUUID types.NullUUID    `json:"foreign_id" db:"foreign_uuid" ops:"update,create" orm_type:"binary(16)"`
 	Notified    types.NullBool    `json:"notified" db:"notified" orm_type:"boolean" orm_default:"null" ops:"update"`
-	Shown       types.NullBool    `json:"shown" db:"shown" orm_type:"boolean" orm_default:"null" ops:"update"`
+	Shown       types.NullBool    `json:"shown" db:"shown" orm_type:"boolean" orm_default:"null" ops:"update,shown"`
 	Pushed      types.NullBool    `json:"pushed" db:"pushed" orm_type:"boolean" orm_default:"null" ops:"update"`
 	UserUUID    types.NullUUID    `json:"user_id" db:"user_uuid" orm_type:"binary(16)" orm_default:"null" orm_index:"index" ops:"create"`
 	ToUser      types.NullUUID    `json:"to_user" db:"to_user" orm_type:"binary(16)" orm_default:"null" orm_index:"index" ops:"create"`
@@ -34,6 +34,7 @@ type EventRepository interface {
 	Create(ctx context.Context, event Event) error
 	Find(ctx context.Context, event Event) (Event, error)
 	Update(ctx context.Context, event Event) error
+	Updatex(ctx context.Context, condition Condition, ops string, event Event) error
 	List(ctx context.Context, limit, offset uint64) ([]Event, error)
 	Listx(ctx context.Context, condition Condition) ([]Event, error)
 }

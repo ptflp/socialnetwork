@@ -186,6 +186,13 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 	})
 
+	notification := controllers.NewNotificationController(cmps, services)
+	r.Route("/notification", func(r chi.Router) {
+		r.Use(token.CheckStrict)
+		r.Post("/my", notification.GetMy())
+		r.Post("/shown", notification.Shown())
+	})
+
 	r.Route("/recover", func(r chi.Router) {
 		r.Post("/password", users.RecoverPassword())
 		r.Post("/check/phone", users.CheckPhoneCode())
