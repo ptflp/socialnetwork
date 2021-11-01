@@ -265,6 +265,7 @@ const (
 	ActionGetChatInfo
 	ActionNotifyChatMessages
 	ActionNotifySubscribe
+	ActionNotifyLike
 )
 
 type WssRequest struct {
