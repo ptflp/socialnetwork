@@ -29,6 +29,7 @@ type Post struct {
 	post       infoblog.PostRepository
 	like       infoblog.LikeRepository
 	comment    infoblog.CommentsRepository
+
 	*decoder.Decoder
 }
 
@@ -561,12 +562,16 @@ func (p *Post) Like(ctx context.Context, req request.LikeReq) (request.PostDataR
 	post, err := p.post.Find(ctx, infoblog.Post{
 		PostEntity: infoblog.PostEntity{UUID: types.NewNullUUID(req.UUID)},
 	})
-
 	if err != nil {
 		return request.PostDataResponse{}, err
 	}
+
+	likeUUID := types.NewNullUUID()
+
+	_, _ = p.services.Event.CreateEvent(ctx, ActionNotifyLike, likeUUID, u.UUID, post.UserUUID)
+
 	like := infoblog.Like{
-		UUID:        types.NewNullUUID(),
+		UUID:        likeUUID,
 		Active:      types.NewNullBool(req.Active),
 		Type:        1,
 		ForeignUUID: post.UUID,
