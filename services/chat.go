@@ -413,3 +413,7 @@ func (m *Chats) AddParticipant(ctx context.Context, chat infoblog.Chat, users ..
 
 	return nil
 }
+
+func (m *Chats) GetParticipants(ctx context.Context, condition infoblog.Condition) ([]infoblog.ChatParticipant, error) {
+	return m.chatParticipantRep.Listx(ctx, condition)
+}
