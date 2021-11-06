@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"net/http"
 
+	sq "github.com/Masterminds/squirrel"
+	infoblog "gitlab.com/InfoBlogFriends/server"
 	"gitlab.com/InfoBlogFriends/server/decoder"
 
 	"gitlab.com/InfoBlogFriends/server/request"
@@ -76,10 +78,14 @@ func (a *signalController) Signal() http.HandlerFunc {
 				ChatUUID: &wssReq.UUID,
 			})
 			if err == nil {
+				condition := infoblog.Condition{
+					Equal: &sq.Eq{"chat_uuid": chat.UUID},
+				}
+				cpr, _ := a.chat.GetParticipants(ctx, condition)
 				toUserData := data
-				for i := range chat.Participants {
-					if chat.Participants[i].UUID.String != user.UUID.String {
-						toUserData.ToUserID = chat.Participants[i].UUID.String
+				for i := range cpr {
+					if cpr[i].UserUUID.String != user.UUID.String {
+						toUserData.ToUserID = cpr[i].UserUUID.String
 						_ = a.sendSignalMessage(toUserData)
 						_, _ = a.services.Event.CreateEvent(r.Context(), services.ActionNotifyChatMessages, messageData.UUID, user.UUID, chat.Participants[i].UUID)
 					}
