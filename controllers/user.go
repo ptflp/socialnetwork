@@ -58,22 +58,17 @@ func (u *usersController) Subscribe() http.HandlerFunc {
 
 func (u *usersController) Unsubscribe() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := extractUser(r)
-		if err != nil {
-			u.ErrorBadRequest(w, err)
-			return
-		}
 
 		var usersSubscribeReq request.UserIDRequest
 
-		err = u.Decode(r.Body, &usersSubscribeReq)
+		err := u.Decode(r.Body, &usersSubscribeReq)
 
 		if err != nil {
 			u.ErrorBadRequest(w, err)
 			return
 		}
 
-		err = u.user.Unsubscribe(r.Context(), user, usersSubscribeReq)
+		err = u.user.Unsubscribe(r.Context(), usersSubscribeReq)
 
 		if err != nil {
 			u.ErrorBadRequest(w, err)

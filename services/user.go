@@ -244,7 +244,8 @@ func (u *User) Subscribe(ctx context.Context, subscribeRequest request.UserIDReq
 	return err
 }
 
-func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeRequest request.UserIDRequest) error {
+func (u *User) Unsubscribe(ctx context.Context, subscribeRequest request.UserIDRequest) error {
+	user, err := extractUser(ctx)
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: types.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
@@ -258,16 +259,7 @@ func (u *User) Unsubscribe(ctx context.Context, user infoblog.User, subscribeReq
 		SubscriberUUID: user.UUID,
 		Active:         types.NewNullBool(false),
 	})
-	if err != nil {
-		return err
-	}
 
-	user, err = u.userRepository.Count(ctx, user, "subscribes", "decr")
-	if err != nil {
-		return err
-	}
-
-	sub, err = u.userRepository.Count(ctx, sub, "subscribers", "decr")
 	if err != nil {
 		return err
 	}
