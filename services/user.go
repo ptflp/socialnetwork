@@ -232,14 +232,6 @@ func (u *User) Subscribe(ctx context.Context, subscribeRequest request.UserIDReq
 	if err != nil {
 		u.Logger().Error("create event on subscribe", zap.Error(err))
 	}
-	user, err = u.userRepository.Count(ctx, user, "subscribes", "incr")
-	if err != nil {
-		return err
-	}
-	sub, err = u.userRepository.Count(ctx, sub, "subscribers", "incr")
-	if err != nil {
-		return err
-	}
 
 	return err
 }

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"net/http"
 
+	"gitlab.com/InfoBlogFriends/server/types"
+
 	sq "github.com/Masterminds/squirrel"
 	infoblog "gitlab.com/InfoBlogFriends/server"
 	"gitlab.com/InfoBlogFriends/server/decoder"
@@ -79,7 +81,7 @@ func (a *signalController) Signal() http.HandlerFunc {
 			})
 			if err == nil {
 				condition := infoblog.Condition{
-					Equal: &sq.Eq{"chat_uuid": chat.UUID},
+					Equal: &sq.Eq{"chat_uuid": types.NewNullUUID(wssReq.UUID)},
 				}
 				cpr, _ := a.chat.GetParticipants(ctx, condition)
 				toUserData := data
