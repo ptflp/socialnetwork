@@ -238,6 +238,9 @@ func (u *User) Subscribe(ctx context.Context, subscribeRequest request.UserIDReq
 
 func (u *User) Unsubscribe(ctx context.Context, subscribeRequest request.UserIDRequest) error {
 	user, err := extractUser(ctx)
+	if err != nil {
+		return err
+	}
 	sub, err := u.userRepository.Find(ctx, infoblog.User{UUID: types.NewNullUUID(subscribeRequest.UUID)})
 	if err != nil {
 		return err
