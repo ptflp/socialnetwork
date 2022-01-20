@@ -13,7 +13,7 @@ import (
 	"gitlab.com/InfoBlogFriends/server/components"
 	"gitlab.com/InfoBlogFriends/server/services"
 
-	"gitlab.com/InfoBlogFriends/server/controllers"
+	"gitlab.com/InfoBlogFriends/server/handlers"
 
 	"gitlab.com/InfoBlogFriends/server/middlewares"
 
@@ -46,7 +46,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 	r.Use(middleware.RealIP)
 	r.Use(middleware.RequestID)
 
-	authController := controllers.NewAuth(cmps.Responder(), services.AuthService, cmps.Logger())
+	authController := handlers.NewAuth(cmps.Responder(), services.AuthService, cmps.Logger())
 
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 
@@ -77,7 +77,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		http.StripPrefix("/public/", http.FileServer(http.Dir("./public"))).ServeHTTP(w, r)
 	})
 
-	fileController := controllers.NewFileController(cmps.Responder(), services, cmps.Logger())
+	fileController := handlers.NewFileController(cmps.Responder(), services, cmps.Logger())
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/email/registration", authController.EmailActivation())
@@ -114,7 +114,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Get("/{fileID}", fileController.GetFile())
 	})
 
-	profileController := controllers.NewProfileController(cmps.Responder(), services.User, cmps.Logger())
+	profileController := handlers.NewProfileController(cmps.Responder(), services.User, cmps.Logger())
 	r.Route("/profile", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Post("/update", profileController.Update())
@@ -128,7 +128,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/upload/background", profileController.Update())
 	})
 
-	posts := controllers.NewPostsController(cmps.Responder(), services, cmps.Logger())
+	posts := handlers.NewPostsController(cmps.Responder(), services, cmps.Logger())
 	r.Route("/posts", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Post("/like", posts.Like())
@@ -165,7 +165,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Get("/test", posts.TestIncrement())
 	})
 
-	users := controllers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
+	users := handlers.NewUsersController(cmps.Responder(), services.User, cmps.Logger())
 	// ./docs/user.go
 	r.Route("/people", func(r chi.Router) {
 		r.Use(token.CheckStrict)
@@ -185,7 +185,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 	})
 
-	notification := controllers.NewNotificationController(cmps, services)
+	notification := handlers.NewNotificationController(cmps, services)
 	r.Route("/notification", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Post("/my", notification.GetMy())
@@ -211,7 +211,7 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		})
 	})
 
-	moderate := controllers.NewModerateController(cmps.Responder(), services, cmps.Logger())
+	moderate := handlers.NewModerateController(cmps.Responder(), services, cmps.Logger())
 
 	r.Route("/moderate", func(r chi.Router) {
 		r.Use(token.CheckStrict)
@@ -222,13 +222,13 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 		r.Post("/get/all", moderate.GetModerates())
 	})
 
-	signal := controllers.NewSignalController(cmps.Responder(), services, cmps.Logger())
+	signal := handlers.NewSignalController(cmps.Responder(), services, cmps.Logger())
 	r.Route("/restricted", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Post("/signal", signal.Signal())
 	})
 
-	chat := controllers.NewChatController(cmps, services)
+	chat := handlers.NewChatController(cmps, services)
 	r.Route("/chat", func(r chi.Router) {
 		r.Use(token.CheckStrict)
 		r.Route("/message", func(r chi.Router) {
