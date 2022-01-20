@@ -182,7 +182,6 @@ func NewRouter(services *services.Services, cmps components.Componenter) (*chi.M
 			r.Post("/subscribes", users.Subscribes())
 			r.Post("/subscribers", users.TempList())
 			r.Post("/recommends", users.Recommends())
-
 		})
 	})
 

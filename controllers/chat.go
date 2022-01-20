@@ -49,7 +49,6 @@ func (a *chatController) SendMessage() http.HandlerFunc {
 			a.ErrorInternal(w, err)
 			return
 		}
-
 		a.SendJSON(w, request.Response{
 			Success: true,
 			Data:    chatData,
