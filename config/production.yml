@@ -1,0 +1,44 @@
+app:
+  dev: true
+  FrontEnd: "https://test.ptflp.ru"
+
+db:
+  net: "tcp"
+  driver: "mysql"
+  dbname: "testdb"
+  username: "root"
+  password: "superSonicPassword"
+  host: "testdb"
+  timeout: 10
+
+Email:
+  ServerAddress: "smtp.mail.ru"
+  Port: "465"
+  From: ""
+  Login: ""
+  Password: ""
+  SendGrid: ""
+
+SMSC:
+  login: ""
+  pwd: ""
+  cost: "3"
+  fmt: "3"
+  dev: false
+
+redis:
+  host: "someredis"
+  port: 6379
+
+server:
+  port: 8138
+
+oauth2:
+  google:
+    clientID: ""
+    clientSecret: ""
+    redirectUrl: "https://test.ptflp.ru/auth/oauth2/google/callback"
+  facebook:
+    clientID: ""
+    clientSecret: ""
+    redirectUrl: "https://test.ptflp.ru/auth/oauth2/facebook/callback"
